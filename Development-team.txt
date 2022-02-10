@@ -1,5 +1,5 @@
 
-Our development team:
+The triangulator development team:
 
 Marko Vojinovic
 Nenad Korolija
