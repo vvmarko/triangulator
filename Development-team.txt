@@ -3,4 +3,4 @@ The triangulator development team:
 
 Marko Vojinovic
 Nenad Korolija
-
+Jaroslav Blagojevic
