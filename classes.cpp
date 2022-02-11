@@ -5,38 +5,28 @@
 #include "classes.hpp"
 
 void log_report(int type, string message){
-    if (type <= loglevel){
-        if (type==1) cerr << "ERROR:   " << message << endl;
-        if (type==2) cerr << "WARNING: " << message << endl;
-        if (type==3) cerr << "INFO:    " << message << endl;
-        if (type==4) cerr << "DEBUG:   " << message << endl;
+    if(type <= logLevel){
+        if(type == LOG_ERROR) cerr << "ERROR:   " << message << endl;
+        if(type == LOG_WARN) cerr << "WARNING: " << message << endl;
+        if(type == LOG_INFO) cerr << "INFO:    " << message << endl;
+        if(type == LOG_DEBUG) cerr << "DEBUG:   " << message << endl;
     }
 };
 
 KSimplex::KSimplex(){
     k = 0;
-    name = "p";
     neighbors = new SimpComp(0);
 }
 
-KSimplex::KSimplex(int k, int D, string name){
+KSimplex::KSimplex(int k, int D){
     this->k = k;
     this->D = D;
-    this->name = name;
     neighbors = new SimpComp(D);
 }
 
-KSimplex::KSimplex(KSimplex *v1, KSimplex *v2){
-    if((v1) && (v2)){
-        name = v1->name + "-" + v2->name;
-        this->D = v1->D;
-        neighbors = new SimpComp(D);
-        add_neighbor(v1);
-        add_neighbor(v2);
-    }
-}
-
 KSimplex::~KSimplex(){
+    for(auto pColor : colors)
+        delete pColor;
     delete neighbors;
 }
 
@@ -48,7 +38,7 @@ void KSimplex::add_neighbor(KSimplex *k1){
 }
 
 void KSimplex::print(string space){
-    cout << space << "Printing KSimplex " << name << ", k = " << k << ", D = " << D << endl;
+    cout << space << "Printing KSimplex: " << " k = " << k << ", D = " << D << endl;
 //        cout << space << "Printing colors:" << endl;
     for(auto &c : colors){
         c->print(space + "  ");
@@ -58,6 +48,46 @@ void KSimplex::print(string space){
 //        neighbors->print(space + "    ");
 }
 
+void KSimplex::print_compact(){
+    bool hasUniqueColor = false;
+    for(auto pColor : colors){
+        if(pColor->type == TYPE_UNIQUE_ID){
+            hasUniqueColor = true;
+            pColor->print_compact();
+            if( k && (neighbors->elements[0].size()) ){
+                // empty ordered set container
+                set<int> s;
+                int nNotUniqueID = 0;
+                for(auto &it : neighbors->elements[0]){
+                    for(auto pC : it->colors){
+                        if(pC->type == TYPE_UNIQUE_ID){
+                            nNotUniqueID++;
+                            s.insert( static_cast<UniqueIDColor*>(pC)->id );
+                        }
+                    }
+                }
+                if(s.size()){
+                    cout << " (";
+                    bool first = true;
+                    for(auto itr = s.begin(); itr != s.end(); itr++){
+                        if(!first)
+                            cout << "-";
+                        first = false;
+                        cout << *itr;
+                    }
+                    if(k == 2)
+                        nNotUniqueID /= 2;
+                    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++) //TODO:FIX
+                        cout << "-simplex";
+                    cout << ")";
+                }
+                nNotUniqueID = 0;
+            }
+        }
+    }
+    if(!hasUniqueColor)
+        cout << "Simplex";
+}
 
 SimpComp::SimpComp(int dim):
         name {""}, D{dim}{
@@ -103,13 +133,27 @@ void SimpComp::print(string space){
     }
 }
 
-// Adding new KSimplex at level k:
-KSimplex* SimpComp::add_ksimplex(int k, string name){
-    if(loglevel >= LOG_INFO){
-        cout << "Adding KSimplex at level :" << k << endl;
+void SimpComp::print_compact(){
+    cout << "Printing SimpComp " << name << ", D = " << D << endl;
+    for(int k = 0; k < elements.size(); k++){
+        cout << "Simplices k = " << k << ":" << endl;
+        if(!elements[k].empty()){
+            elements[k][0]->print_compact();
+            for(int i = 1; i < elements[k].size(); i++){
+                cout << ", ";
+                elements[k][i]->print_compact();
+            }
+            cout << endl;
+        }
     }
+}
+
+// Creating new KSimplex at level k:
+KSimplex* SimpComp::create_ksimplex(int k){
+    string s = "Creating KSimplex at level: " + k;
+    log_report(LOG_INFO, s);
     if ( (k >= 0) && (k <= D) ){
-        KSimplex *newKSimplex = new KSimplex(k, D, name);
+        KSimplex *newKSimplex = new KSimplex(k, D);
         elements[k].push_back(newKSimplex);
         return newKSimplex;
     }else{
@@ -117,24 +161,6 @@ KSimplex* SimpComp::add_ksimplex(int k, string name){
         return nullptr;
     }
 }
-
-// Adding new KSimplex at level k:
-KSimplex* SimpComp::add_ksimplex(KSimplex *newKSimplex){
-    if(!newKSimplex)
-        return nullptr;
-    int k = newKSimplex->k;
-    D = newKSimplex->D;
-    if(loglevel >= LOG_INFO){
-        cout << "Adding KSimplex at level :" << k << endl;
-    }
-    if ( (k >= 0) && (k <= D) ){
-        elements[k].push_back(newKSimplex);
-        return newKSimplex;
-    }else{
-        log_report(LOG_ERROR, "Adding KSimplex failed...");
-        return nullptr;
-    }
-}    
 
 void SimpComp::print_sizes(){
     cout << endl << " --- Number of elements in " << name << " for each dimension ---" << endl;

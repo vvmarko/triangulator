@@ -5,16 +5,16 @@
 #include <string>
 
 int main(){
-    ScreenCoordinateColor c1(0, 0), c2(1, 1), c3(2, 0);
-    //BoundaryColor c1(true), c2(true), c3(true);
-
     cout << endl << "Edge example:" << endl << endl;
-    SimpComp *edge = seed_edge("First edge", c1, c2);
+    SimpComp *edge = seed_single_edge("First edge");
     edge->print();
  
     cout << endl << "Triangle example:" << endl << endl;
-    SimpComp *triangle = seed_triangle("First triangle", c1, c2, c3);
+    SimpComp *triangle = seed_single_triangle("First triangle");
     triangle->print();
+
+    cout << endl << "Triangle example, compact printing:" << endl << endl;
+    triangle->print_compact();
 
     return 0;
 }

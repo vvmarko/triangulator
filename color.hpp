@@ -5,6 +5,7 @@
 class Color{
 public:
     virtual void print(string space = "");
+    virtual void print_compact();
 
     int type;
 };
@@ -15,6 +16,16 @@ public:
     void print(string space = "");
 
     bool boundary; // whether the KSimplex of this color represents a boundary
+};
+
+class UniqueIDColor : public Color{
+public:
+    UniqueIDColor();
+    void print(string space = "");
+    void print_compact();
+
+    static unsigned long next_free_uid_number;
+    unsigned long id; // whether the KSimplex of this color represents a boundary
 };
 
 class ScreenCoordinateColor : public Color{
