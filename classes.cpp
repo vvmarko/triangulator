@@ -57,11 +57,11 @@ void KSimplex::print_compact(){
             if( k && (neighbors->elements[0].size()) ){
                 // empty ordered set container
                 set<int> s;
-                int nNotUniqueID = 0;
+                int nNotUniqueID = neighbors->elements[0].size();
                 for(auto &it : neighbors->elements[0]){
                     for(auto pC : it->colors){
                         if(pC->type == TYPE_UNIQUE_ID){
-                            nNotUniqueID++;
+                            nNotUniqueID--;
                             s.insert( static_cast<UniqueIDColor*>(pC)->id );
                         }
                     }
@@ -75,18 +75,15 @@ void KSimplex::print_compact(){
                         first = false;
                         cout << *itr;
                     }
-                    if(k == 2)
-                        nNotUniqueID /= 2;
-                    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++) //TODO:FIX
+                    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++) //TODO:FIX // MV: Fixed... :-)
                         cout << "-simplex";
                     cout << ")";
                 }
-                nNotUniqueID = 0;
             }
         }
     }
     if(!hasUniqueColor)
-        cout << "Simplex";
+        cout << "simplex";
 }
 
 SimpComp::SimpComp(int dim):
