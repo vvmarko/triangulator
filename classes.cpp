@@ -30,11 +30,24 @@ KSimplex::~KSimplex(){
     delete neighbors;
 }
 
+bool KSimplex::find_neighbor(KSimplex *k1){
+    if(!k1)
+        return false;
+    int k = k1->k;
+    for(auto &it : neighbors->elements[k])
+        if(it == k1)
+            return true;
+    return false;
+}
+
 void KSimplex::add_neighbor(KSimplex *k1){
     if(!k1)
         return;
-    int k = k1->k;
-    neighbors->elements[k].push_back(k1);
+    int kK1 = k1->k;
+    if(!find_neighbor(k1))
+        neighbors->elements[kK1].push_back(k1);
+    if(!k1->find_neighbor(this))
+        k1->neighbors->elements[k].push_back(this);
 }
 
 void KSimplex::print(string space){
@@ -76,7 +89,7 @@ void KSimplex::print_compact(){
                         cout << *itr;
                     }
                     for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++) //TODO:FIX // MV: Fixed... :-)
-                        cout << "-simplex";
+                        cout << "-Simplex";
                     cout << ")";
                 }
             }

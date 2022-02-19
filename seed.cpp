@@ -28,11 +28,7 @@ SimpComp* seed_single_edge(string name){
 
     // Connect KSimplex-es:
 
-    // Edge has both vertices as neighbors at level 0:
-    e1->add_neighbor(v1);
-    e1->add_neighbor(v2);
-
-    // Both vertices have edge as neighbors at level 1:
+    // Edge has both vertices as neighbors and the opposite:
     v1->add_neighbor(e1);
     v2->add_neighbor(e1);
 
@@ -65,24 +61,15 @@ SimpComp* seed_single_triangle(string name){
     // Create KSimplex (k=2) for the triangle:
     KSimplex *t1 = triangle->create_ksimplex(2);
 
-    // Connect edge e1 with vertices as neighbors at level 0:
-    e1->add_neighbor(v1);
-    e1->add_neighbor(v2);
-    // Both vertices have edge e1 as neighbors at level 1:
+    // Both vertices have edge e1 as neighbors and the opposite:
     v1->add_neighbor(e1);
     v2->add_neighbor(e1);
 
-    // Connect edge e2 with vertices as neighbors at level 0:
-    e2->add_neighbor(v2);
-    e2->add_neighbor(v3);
-    // Both vertices have edge e2 as neighbors at level 1:
+    // Both vertices have edge e2 as neighbors and the opposite:
     v2->add_neighbor(e2);
     v3->add_neighbor(e2);
 
-    // Connect edge e3 with vertices as neighbors at level 0:
-    e3->add_neighbor(v1);
-    e3->add_neighbor(v3);
-    // Both vertices have edge e3 as neighbors at level 1:
+    // Both vertices have edge e3 as neighbors and the opposite:
     v1->add_neighbor(e3);
     v3->add_neighbor(e3);
 
@@ -90,17 +77,11 @@ SimpComp* seed_single_triangle(string name){
     v1->add_neighbor(t1);
     v2->add_neighbor(t1);
     v3->add_neighbor(t1);
-    t1->add_neighbor(v1);
-    t1->add_neighbor(v2);
-    t1->add_neighbor(v3);
 
     // Connect triangle t1 with edges:
     e1->add_neighbor(t1);
     e2->add_neighbor(t1);
     e3->add_neighbor(t1);
-    t1->add_neighbor(e1);
-    t1->add_neighbor(e2);
-    t1->add_neighbor(e3);
 
     // Create and apply boundary colors:
     Color *c1 = new BoundaryColor(true);
@@ -169,66 +150,32 @@ SimpComp* seed_single_tetrahedron(string name)
     // Add tetrahedron (k-simplex, k=3)
     tetrahedron1 = tetrahedron->create_ksimplex(3);
 
-    // Edges have vertices as neighbors
-    e1->add_neighbor(v1);
-    e1->add_neighbor(v2);
-
-    // Vertices have edges as neighbors
+    // Vertices have edges as neighbors and the opposite:
     v1->add_neighbor(e1);
     v2->add_neighbor(e1);
-
-    e2->add_neighbor(v1);
-    e2->add_neighbor(v3);
 
     v1->add_neighbor(e2);
     v3->add_neighbor(e2);
 
-    e3->add_neighbor(v1);
-    e3->add_neighbor(v4);
-
     v1->add_neighbor(e3);
     v4->add_neighbor(e3);
-
-    e4->add_neighbor(v2);
-    e4->add_neighbor(v4);
 
     v2->add_neighbor(e4);
     v4->add_neighbor(e4);
 
-    e5->add_neighbor(v2);
-    e5->add_neighbor(v3);
-
     v2->add_neighbor(e5);
     v3->add_neighbor(e5);
-
-    e6->add_neighbor(v3);
-    e6->add_neighbor(v4);
 
     v3->add_neighbor(e6);
     v4->add_neighbor(e6);
 
-    // Triangle has vertices and edges as neighbors
-    trianglev1v2v3->add_neighbor(v1);
-    trianglev1v2v3->add_neighbor(v2);
-    trianglev1v2v3->add_neighbor(v3);
-    trianglev1v2v3->add_neighbor(e1);
-    trianglev1v2v3->add_neighbor(e2);
-    trianglev1v2v3->add_neighbor(e5);
-
-    // Vertices and edges have triangles as neighbors
+    // Vertices and edges have triangles as neighbors and the opposite
     v1->add_neighbor(trianglev1v2v3);
     v2->add_neighbor(trianglev1v2v3);
     v3->add_neighbor(trianglev1v2v3);
     e1->add_neighbor(trianglev1v2v3);
     e2->add_neighbor(trianglev1v2v3);
     e5->add_neighbor(trianglev1v2v3);
-
-    trianglev1v3v4->add_neighbor(v1);
-    trianglev1v3v4->add_neighbor(v3);
-    trianglev1v3v4->add_neighbor(v4);
-    trianglev1v3v4->add_neighbor(e2);
-    trianglev1v3v4->add_neighbor(e3);
-    trianglev1v3v4->add_neighbor(e6);
 
     v1->add_neighbor(trianglev1v3v4);
     v3->add_neighbor(trianglev1v3v4);
@@ -237,26 +184,12 @@ SimpComp* seed_single_tetrahedron(string name)
     e3->add_neighbor(trianglev1v3v4);
     e6->add_neighbor(trianglev1v3v4);
 
-    trianglev1v2v4->add_neighbor(v1);
-    trianglev1v2v4->add_neighbor(v2);
-    trianglev1v2v4->add_neighbor(v4);
-    trianglev1v2v4->add_neighbor(e1);
-    trianglev1v2v4->add_neighbor(e3);
-    trianglev1v2v4->add_neighbor(e4);
-
     v1->add_neighbor(trianglev1v2v4);
     v2->add_neighbor(trianglev1v2v4);
     v4->add_neighbor(trianglev1v2v4);
     e1->add_neighbor(trianglev1v2v4);
     e3->add_neighbor(trianglev1v2v4);
     e4->add_neighbor(trianglev1v2v4);
-
-    trianglev2v4v3->add_neighbor(v2);
-    trianglev2v4v3->add_neighbor(v4);
-    trianglev2v4v3->add_neighbor(v3);
-    trianglev2v4v3->add_neighbor(e4);
-    trianglev2v4v3->add_neighbor(e6);
-    trianglev2v4v3->add_neighbor(e5);
 
     v2->add_neighbor(trianglev2v4v3);
     v4->add_neighbor(trianglev2v4v3);
@@ -265,11 +198,23 @@ SimpComp* seed_single_tetrahedron(string name)
     e6->add_neighbor(trianglev2v4v3);
     e5->add_neighbor(trianglev2v4v3);
 
-    // Tetrahedron has triangles as neighbors
-    tetrahedron1->add_neighbor(trianglev1v2v3);
-    tetrahedron1->add_neighbor(trianglev1v3v4);
-    tetrahedron1->add_neighbor(trianglev1v2v4);
-    tetrahedron1->add_neighbor(trianglev2v4v3);
+    // All have tetrahedron as neighbors and the opposite
+    v1->add_neighbor(tetrahedron1);
+    v2->add_neighbor(tetrahedron1);
+    v3->add_neighbor(tetrahedron1);
+    v4->add_neighbor(tetrahedron1);
+
+    e1->add_neighbor(tetrahedron1);
+    e2->add_neighbor(tetrahedron1);
+    e3->add_neighbor(tetrahedron1);
+    e4->add_neighbor(tetrahedron1);
+    e5->add_neighbor(tetrahedron1);
+    e6->add_neighbor(tetrahedron1);
+
+    trianglev1v2v3->add_neighbor(tetrahedron1);
+    trianglev1v3v4->add_neighbor(tetrahedron1);
+    trianglev1v2v4->add_neighbor(tetrahedron1);
+    trianglev2v4v3->add_neighbor(tetrahedron1);
 
     // Triangles have boundary color
     Color *c1 = new BoundaryColor(true);

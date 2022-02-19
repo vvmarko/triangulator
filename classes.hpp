@@ -34,6 +34,7 @@ public:
     KSimplex();
     KSimplex(int k, int D);
     ~KSimplex();
+    bool find_neighbor(KSimplex *k1); // Searches for k1 in neighbor elements.
     void add_neighbor(KSimplex *k1);    
     void print(string space = "");
     void print_compact();
