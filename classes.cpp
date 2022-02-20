@@ -152,7 +152,7 @@ int SimpComp::count_number_of_simplexes(int level){
 
 void SimpComp::print(string space){
     cout << space << "Printing SimpComp " << name << ", D = " << D << endl;
-    for(int i = 0; i < elements.size(); i++){
+    for(size_t i = 0; i < elements.size(); i++){
         if(!elements[i].empty()){
             cout << space << "  Printing SimpComp " << name << " elements, level = " << i << ":" << endl;
             for(auto kSimplex : elements[i]){
@@ -164,11 +164,11 @@ void SimpComp::print(string space){
 
 void SimpComp::print_compact(){
     cout << "Printing SimpComp " << name << ", D = " << D << endl;
-    for(int k = 0; k < elements.size(); k++){
+    for(size_t k = 0; k < elements.size(); k++){
         cout << "Simplices k = " << k << ":" << endl;
         if(!elements[k].empty()){
             elements[k][0]->print_compact();
-            for(int i = 1; i < elements[k].size(); i++){
+            for(size_t i = 1; i < elements[k].size(); i++){
                 cout << ", ";
                 elements[k][i]->print_compact();
             }

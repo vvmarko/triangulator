@@ -230,8 +230,8 @@ cout << "+addV+" << endl;
     // Once nRemove new KSimplices from level 0 are parsed,
     // and nAdded edges added,
     // remove nRemove of them, and consider as new only nAdded ones:
-    int nRemove = 1;
-    int nAdded = 0;
+    size_t nRemove = 1;
+    size_t nAdded = 0;
 
     for(int kTemp = 1; kTemp <= k; kTemp++){ // for each level
 cout << "kTemp = " << kTemp << endl;
@@ -253,7 +253,7 @@ cout << "kTemp = " << kTemp << endl;
             oldKSimplices.push_back(oldKSimplex);
 
         // Initially, first kTemp newKSimplices will be used:
-        std::vector<int> includeNewKSimplices;
+        std::vector<size_t> includeNewKSimplices;
         for(int i = 0; i < kTemp; i++)
             includeNewKSimplices.push_back(i);
         
@@ -275,7 +275,7 @@ cout << "^";
                 newKSimplex->add_neighbor(oldKSimplex);
             }
 
-for(int m = 0; m < includeNewKSimplices.size(); m++)
+for(size_t m = 0; m < includeNewKSimplices.size(); m++)
     cout << "m" << includeNewKSimplices[m] << " ";
 cout << " // newKSimplices.size()-nAdded = " << newKSimplices.size()-nAdded << endl;
             // Find last index that can be incremented and increment it
@@ -291,7 +291,7 @@ cout << " // newKSimplices.size()-nAdded = " << newKSimplices.size()-nAdded << e
                     includeNewKSimplices[i]++;
                     // Set later indices right after:
                     int tempI = includeNewKSimplices[i] + 1;
-                    for(int j = i+1; j < includeNewKSimplices.size(); j++)
+                    for(size_t j = i+1; j < includeNewKSimplices.size(); j++)
                         includeNewKSimplices[j] = tempI++;
                 }
             }
