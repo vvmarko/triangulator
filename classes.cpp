@@ -40,7 +40,7 @@ bool KSimplex::find_neighbor(KSimplex *k1){
     return false;
 }
 
-void KSimplex::add_neighbor(KSimplex *k1){
+void KSimplex::add_neighbor_couple(KSimplex *k1){
     if(!k1)
         return;
     int kK1 = k1->k;
@@ -48,6 +48,20 @@ void KSimplex::add_neighbor(KSimplex *k1){
         neighbors->elements[kK1].push_back(k1);
     if(!k1->find_neighbor(this))
         k1->neighbors->elements[k].push_back(this);
+}
+
+void KSimplex::add_neighbor(KSimplex *k1){
+    if(!k1)
+        return;
+    int kK1 = k1->k;
+    if(kK1 < 0)
+        return;
+    if(!kK1){
+        add_neighbor_couple(k1);
+    }else{
+        for(auto &it : k1->neighbors->elements[kK1 - 1])
+            add_neighbor(it);
+    }
 }
 
 void KSimplex::print(string space){
