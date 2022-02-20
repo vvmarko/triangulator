@@ -80,14 +80,14 @@ SimpComp* seed_single_triangle(string name){
     Color *c3 = new BoundaryColor(true);
     e1->colors.push_back(c1);
     e2->colors.push_back(c2);
-//    e3->colors.push_back(c3);
+    e3->colors.push_back(c3);
 
     // Create and apply unique ID colors:
     c1 = new UniqueIDColor();
     c2 = new UniqueIDColor();
     c3 = new UniqueIDColor();
     v1->colors.push_back(c1);
-//    v2->colors.push_back(c2);
+    v2->colors.push_back(c2);
     v3->colors.push_back(c3);
     c1 = new UniqueIDColor();
     c2 = new UniqueIDColor();
@@ -190,4 +190,138 @@ SimpComp* seed_single_tetrahedron(string name)
     trianglev2v4v3->colors.push_back(c4);
 
     return tetrahedron;
+}
+
+// Function seed_KSimplices for level k does:
+// Seed a KSimplex of level k-1
+// Add edges between 1 new vertex and each of old vertices
+// Add triangles between each 2 new edges and each of old edges
+// Add tethraeder between each 3 new triangles and each of old triangles
+// ...
+// Add k-aeder between each k-1 new k-1-eders and each of old k-1-eders
+void seed_KSimplices(SimpComp* simpComp, int k){
+    if(!k){
+        // If k == 0, create a KSimplex(0):
+        KSimplex *v = simpComp->create_ksimplex(0);
+Color *c = new UniqueIDColor();
+v->colors.push_back(c);
+cout << "+addV0+" << endl;
+        return;
+    }
+
+    // Seed a KSimplex of level k-1:
+cout << "++++ Seeding seed_KSimplices " << k-1 << " starting" << endl;
+    seed_KSimplices(simpComp, k-1);
+cout << "---- Seeding seed_KSimplices " << k-1 << " finished" << endl;
+    
+    // Make a copy of old simpComp, 
+    // so that old vertices, edges, triangles,... can be found:
+    SimpComp *original = new SimpComp(*simpComp);
+
+    // Adding vertex:
+    KSimplex *v = simpComp->create_ksimplex(0);
+Color *c = new UniqueIDColor();
+v->colors.push_back(c);
+cout << "+addV+" << endl;
+
+    // new k-1-eders:
+    std::vector<KSimplex*> newKSimplices;
+    newKSimplices.push_back(v); // adds
+    // Once nRemove new KSimplices from level 0 are parsed,
+    // and nAdded edges added,
+    // remove nRemove of them, and consider as new only nAdded ones:
+    int nRemove = 1;
+    int nAdded = 0;
+
+    for(int kTemp = 1; kTemp <= k; kTemp++){ // for each level
+cout << "kTemp = " << kTemp << endl;
+        // Find each set of kTemp simplices from all newKSimplices
+        // Initially, first kTemp newKSimplices will be used.
+        // Inidces will hold their kTemp positions.
+        // Example for kTemp = 3, where used newKSimplices are marked with k:
+        // kNewKSimplices:       k k k - - - - ... - - - -
+        // includeNewKSimplices: 0 1 2
+        // Indices will vary 
+        // (by increasing last index that can be increased
+        // and updating later ones to follow) until the end:
+        // kNewKSimplices:       - - - - ... - - - - k   k  k
+        // includeNewKSimplices:                    n-2 n-1 n
+
+        // Initiate old k-1-eders to existing ones:
+        std::vector<KSimplex*> oldKSimplices;
+        for(auto &oldKSimplex : original->elements[kTemp-1])
+            oldKSimplices.push_back(oldKSimplex);
+
+        // Initially, first kTemp newKSimplices will be used:
+        std::vector<int> includeNewKSimplices;
+        for(int i = 0; i < kTemp; i++)
+            includeNewKSimplices.push_back(i);
+        
+        // Indices will vary until the end:
+        do{
+            for(auto &oldKSimplex : oldKSimplices){
+                // Add k-aeder:
+                KSimplex *newKSimplex = simpComp->create_ksimplex(kTemp);
+cout << "+add+" << endl;
+Color *c = new UniqueIDColor();
+newKSimplex->colors.push_back(c);
+                newKSimplices.push_back(newKSimplex);
+                nAdded++;
+                for(auto &it : includeNewKSimplices){
+                    newKSimplex->add_neighbor(newKSimplices[it]); //TODO: ADD ONLY COMMON NEIGHBOR
+cout << "^";
+                }
+//                KSimplex *oldSimplex = find_common(oldKSimplices, newKSimplices, includeNewKSimplices);
+                newKSimplex->add_neighbor(oldKSimplex);
+            }
+
+for(int m = 0; m < includeNewKSimplices.size(); m++)
+    cout << "m" << includeNewKSimplices[m] << " ";
+cout << " // newKSimplices.size()-nAdded = " << newKSimplices.size()-nAdded << endl;
+            // Find last index that can be incremented and increment it
+            // (do not count recently added ones, i.e. reduce by nAdded):
+            if(includeNewKSimplices[ includeNewKSimplices.size() - 1 ] < newKSimplices.size() - nAdded - 1){
+                includeNewKSimplices[ includeNewKSimplices.size() - 1 ]++;
+            }else{
+                int i = includeNewKSimplices.size() - 2;
+                while( (i >= 0) && (includeNewKSimplices[i] + 1 == includeNewKSimplices[i+1]) )
+                    i--;
+                if(i >= 0){
+                    // Increment the last index that can be incremented:
+                    includeNewKSimplices[i]++;
+                    // Set later indices right after:
+                    int tempI = includeNewKSimplices[i] + 1;
+                    for(int j = i+1; j < includeNewKSimplices.size(); j++)
+                        includeNewKSimplices[j] = tempI++;
+                }
+            }
+        }while(includeNewKSimplices[0] != newKSimplices.size() -nAdded - kTemp);
+        newKSimplices.erase( newKSimplices.begin(), newKSimplices.begin() + nRemove );
+        nRemove = nAdded;
+        nAdded = 0;
+    }
+/*    // Delete vector of pointers,
+    // but not KSimplex-es they point to:
+    original->elements.clear();
+    delete original; // save to delete the rest
+*/
+}
+
+SimpComp* seed_single_SimpComp(string name, int d){
+    string s = "Creating general simplicial complex " + name 
+            + ", d = " + to_string(d) + "...";
+    log_report(LOG_INFO, s);
+
+    if(d < 0){
+        log_report(LOG_ERROR, "Not possible to seed simplicial"
+          "complex of dimension lower than 0");
+        return nullptr;
+    }
+    
+    // Initilize KComplex of dimension d:
+    SimpComp *simpComp = new SimpComp(d);
+
+    seed_KSimplices(simpComp, d);
+
+    return simpComp;
 }

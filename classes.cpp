@@ -54,11 +54,8 @@ void KSimplex::add_neighbor(KSimplex *k1){
     if(!k1)
         return;
     int kK1 = k1->k;
-    if(kK1 < 0)
-        return;
-    if(!kK1){
-        add_neighbor_couple(k1);
-    }else{
+    add_neighbor_couple(k1);
+    if(kK1){
         for(auto &it : k1->neighbors->elements[kK1 - 1])
             add_neighbor(it);
     }
@@ -133,6 +130,21 @@ SimpComp::SimpComp(string s, int dim):
     log_report(LOG_INFO, "initialize: Setting up everything for a new graph.");
 }
 
+/*
+// Shallow copy, keeping original KSimplex pointers,
+// without creating new KSimplex-es by copying existing ones:
+SimpComp::SimpComp(const SimpComp& s){
+    name = s.name;
+    D = s.D;
+    for(auto &pointers : elements){
+        vector<KSimplex*> listaKSimpleksa;
+        for(auto &kSimplex : pointers)
+            listaKSimpleksa.push_back(kSimplex);
+        elements.push_back(listaKSimpleksa);
+    }
+    vector< vector<KSimplex *> > elements;
+}
+*/
 SimpComp::~SimpComp(){
     for(int i = 0; i <= D; i++){
         for(auto pKSimplex : elements[i])

@@ -12,6 +12,7 @@ class SimpComp{
 public:
     SimpComp(int dim);
     SimpComp(string s, int dim);
+//    SimpComp(const SimpComp& s);
     ~SimpComp();
     int count_number_of_simplexes(int level);
     void print(string space = "");
