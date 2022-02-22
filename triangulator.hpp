@@ -8,6 +8,8 @@ using namespace std;
 #include <list>
 
 
+class KSimplex;
+class SimpComp;
 #include "color.hpp"
 #include "classes.hpp"
 #include "seed.hpp"

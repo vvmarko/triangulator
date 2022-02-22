@@ -18,6 +18,14 @@ int main(){
 
     cout << endl << "Tetrahedron example, compact printing:" << endl << endl;
     tetrahedron->print_compact();
+
+    cout << endl << "Tetrahedron example, coloring level 0:" << endl << endl;
+    UniqueIDColor::colorize_all_simplices(tetrahedron, 0);
+    tetrahedron->print_compact();
+
+    cout << endl << "Tetrahedron example, coloring everyithing:" << endl << endl;
+    UniqueIDColor::colorize_entire_complex(tetrahedron);
+    tetrahedron->print_compact();
     
 //    cout << endl << "General seed example, compact printing:" << endl << endl;
 //    SimpComp *simpComp = seed_single_SimpComp("1. general SimpComp", 3);
