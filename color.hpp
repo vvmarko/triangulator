@@ -50,7 +50,7 @@ public:
     void print(string space = "");
     void print_compact();
 
-    static bool colorize_all_simplices(SimpComp* G, int level);
+    static bool colorize_simplices_at_level(SimpComp* G, int level);
     static bool colorize_entire_complex(SimpComp* G);
 
     static unsigned long next_free_uid_number;

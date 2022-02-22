@@ -20,7 +20,7 @@ int main(){
     tetrahedron->print_compact();
 
     cout << endl << "Tetrahedron example, coloring level 0:" << endl << endl;
-    UniqueIDColor::colorize_all_simplices(tetrahedron, 0);
+    UniqueIDColor::colorize_simplices_at_level(tetrahedron, 0);
     tetrahedron->print_compact();
 
     cout << endl << "Tetrahedron example, coloring everyithing:" << endl << endl;
