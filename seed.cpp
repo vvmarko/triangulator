@@ -1,16 +1,9 @@
 
-#include <iostream>
-#include <vector>
-#include <list>
+#include "triangulator.hpp"
 
-//############################################
-//############################################
-//
-//  Creation and deletion functions for
-//  edge and triangle
-//
-//############################################
-//############################################
+// ####################################
+// Seed functions for various manifolds
+// ####################################
 
 SimpComp* seed_single_edge(string name){
     string s = "Creating simplicial complex - single edge: " + name + "...";

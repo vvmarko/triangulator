@@ -3,7 +3,7 @@ A library of routines and a GUI for studying simplicial complexes in physics and
 
 Triangulator is a project that aims to develop a library of routines (mostly C++) that can be used by 3rd party applications aimed at numerical studies involving triangulations of manifolds (of various dimension and topology) and simplicial complex structures in general, in physics and math research. The target audience are mostly researchers in quantum gravity and algebraic topology, interested in numerical work with these structures.
 
-One of the aims of the library is to support HPC environments, as much as possible. The main intended functionality of the library is the following:
+The main intended functionality of the library is the following:
 
  - instantiate simplicial complex structures in memory
  - manipulate the combinatorial (maybe also topological) structure of the complex

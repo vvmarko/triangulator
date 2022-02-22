@@ -1,11 +1,8 @@
 
-#include <iostream>
-#include <set>
-#include <vector>
-#include <list>
+// ######################
+// Main class definitions
+// ######################
 
-#include "constants.hpp"
-#include "color.cpp"
 
 class KSimplex;
 class SimpComp{
@@ -47,3 +44,4 @@ public:
     SimpComp *neighbors;
     vector<Color *> colors; // colors of this KSimplex
 };
+

@@ -2,16 +2,7 @@
 //TODO:
 // - check arguments against graph levels, invalid values, null pointers, etc.
 
-#include "classes.hpp"
-
-void log_report(int type, string message){
-    if(type <= logLevel){
-        if(type == LOG_ERROR) cerr << "ERROR:   " << message << endl;
-        if(type == LOG_WARN) cerr << "WARNING: " << message << endl;
-        if(type == LOG_INFO) cerr << "INFO:    " << message << endl;
-        if(type == LOG_DEBUG) cerr << "DEBUG:   " << message << endl;
-    }
-};
+#include "triangulator.hpp"
 
 KSimplex::KSimplex(){
     k = 0;
@@ -92,7 +83,7 @@ void KSimplex::print_compact(){
                         first = false;
                         cout << *itr;
                     }
-                    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++) //TODO:FIX // MV: Fixed... :-)
+                    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
                         cout << "-Simplex";
                     cout << ")";
                 }
@@ -203,3 +194,4 @@ void SimpComp::print_sizes(){
     }
     cout << endl;
 }
+
