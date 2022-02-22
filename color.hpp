@@ -22,6 +22,12 @@
 
 #endif
 
+// ######################
+// Forward declarations of neccesary classes
+// ######################
+
+class Ksimplex;
+class SimpComp;
 
 // #######################
 // Color class definitions

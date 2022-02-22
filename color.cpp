@@ -34,33 +34,18 @@ void UniqueIDColor::print_compact(){
 
 bool UniqueIDColor::colorize_simplices_at_level(SimpComp* G, int level)
 {
-    bool colorization_successful = false, already_has_unique_id;
-
     for (auto simplex : G->elements[level]) {
-        already_has_unique_id = false;
-        for (auto cl : simplex->colors)
-            if (cl->type == TYPE_UNIQUE_ID) {
-                already_has_unique_id = true;
-                break;
-            }
-
-        if (!already_has_unique_id) {
-            simplex->colors.push_back(new UniqueIDColor());
-            colorization_successful = true;
-        }
+        simplex->colors.push_back(new UniqueIDColor());
     }
-    return colorization_successful;
+    return true;
 }
 
 bool UniqueIDColor::colorize_entire_complex(SimpComp* G)
 {
-    bool colorization_successful = false, current_colorization_successful = false;
     for (int level = 0; level <= G->D; level++) {
-        current_colorization_successful = UniqueIDColor::colorize_simplices_at_level(G, level);
-        if (!colorization_successful)
-            colorization_successful = current_colorization_successful;
+        UniqueIDColor::colorize_simplices_at_level(G, level);
     }
-    return colorization_successful;
+    return true;
 }
 
 ScreenCoordinateColor::ScreenCoordinateColor(){

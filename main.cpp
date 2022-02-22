@@ -9,10 +9,10 @@ int main(){
     cout << endl << "Triangle example:" << endl << endl;
     SimpComp *triangle = seed_single_triangle("First triangle");
     triangle->print();
-
+    
     cout << endl << "Tetrahedron example." << endl << endl;
     SimpComp *tetrahedron = seed_single_tetrahedron("First tetrahedron");
-
+    
     cout << endl << "Triangle example, compact printing:" << endl << endl;
     triangle->print_compact();
 

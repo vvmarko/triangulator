@@ -7,9 +7,6 @@ using namespace std;
 #include <vector>
 #include <list>
 
-
-class KSimplex;
-class SimpComp;
 #include "color.hpp"
 #include "classes.hpp"
 #include "seed.hpp"

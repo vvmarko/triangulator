@@ -75,24 +75,6 @@ SimpComp* seed_single_triangle(string name){
     e2->colors.push_back(c2);
     e3->colors.push_back(c3);
 
-    /*
-    // Create and apply unique ID colors:
-    c1 = new UniqueIDColor();
-    c2 = new UniqueIDColor();
-    c3 = new UniqueIDColor();
-    v1->colors.push_back(c1);
-    v2->colors.push_back(c2);
-    v3->colors.push_back(c3);
-    c1 = new UniqueIDColor();
-    c2 = new UniqueIDColor();
-    c3 = new UniqueIDColor();
-    e1->colors.push_back(c1);
-    e2->colors.push_back(c2);
-    e3->colors.push_back(c3);
-    c1 = new UniqueIDColor();
-    t1->colors.push_back(c1);
-    */
-
     return triangle;
 }
 
