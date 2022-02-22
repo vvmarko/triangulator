@@ -58,10 +58,14 @@ void KSimplex::print(string space){
 
 void KSimplex::print_compact(){
     bool hasUniqueColor = false;
+    bool multipleColors = false;
     for(auto pColor : colors){
         if(pColor->type == TYPE_UNIQUE_ID){
             hasUniqueColor = true;
+            if(multipleColors)
+                cout << "&";
             pColor->print_compact();
+            multipleColors = true;
             if( k && (neighbors->elements[0].size()) ){
                 // empty ordered set container
                 set<int> s;
