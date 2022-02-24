@@ -13,10 +13,14 @@ public:
     ~SimpComp();
     int count_number_of_simplexes(int level);
     void print(string space = "");
+    // All KSimplex-es at level colored with UniqueIDColor:
+    bool all_uniqueID(int level);
     void print_compact();
     // Creating new KSimplex at level k:
     KSimplex* create_ksimplex(int k);
     void print_sizes();
+    // Collects all vertices into a set<int>:
+    void collect_vertices(set<int> &s);
 
     string name;
     int D;
@@ -37,8 +41,10 @@ public:
     // Adds k1 and its lower level neigbors as neighbors and the opposite:
     void add_neighbor(KSimplex *k1);    
     void print(string space = "");
-    void print_compact();
     UniqueIDColor* get_uniqueID();
+    void print_compact();
+    // Collects neighboring vertices into a set<int>:
+    void collect_vertices(set<int> &s);
 
     int k; // level
     int D; // dimension

@@ -97,6 +97,20 @@ void KSimplex::print_compact(){
     }
 }
 
+// Collects neighboring vertices into a set<int>:
+void KSimplex::collect_vertices(set<int> &s){
+    UniqueIDColor* pColor = get_uniqueID();
+    if(pColor)
+        s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+    if(!k)
+        return;
+    for(auto &it : neighbors->elements[0]){
+        pColor = it->get_uniqueID();
+        if(pColor)
+            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+    }
+}
+
 SimpComp::SimpComp(int dim):
         name {""}, D{dim}{
     for(int i = 0; i <= D; i++){
@@ -156,21 +170,97 @@ void SimpComp::print(string space){
     }
 }
 
+bool SimpComp::all_uniqueID(int level){
+    size_t i = 0;
+    if(level > D)
+        return false;
+    while( (i < elements[level].size()) && (elements[level][i]->get_uniqueID()) )
+        i++;
+    return i == elements[level].size();
+}
+
 void SimpComp::print_compact(){
     cout << "Printing SimpComp " << name << ", D = " << D << endl;
     if(elements.empty())
         return;
     
-//    for(size_t k = 0; k < elements.size(); k++){
-        
+    // vAll - all vertices are colored with UniqueIDColor:
+    bool vAll = all_uniqueID(0);
 
-    for(size_t k = 0; k < elements.size(); k++){
-        cout << "Simplices k = " << k << ":" << endl;
-        if(!elements[k].empty()){
-            elements[k][0]->print_compact();
+    // sAll - all simplices at levels above zero are colored with UniqueIDColor:
+    bool sAll = true;
+    size_t level = 1;
+    while( sAll && (level < elements.size()) )
+        sAll &= all_uniqueID(level++);
+
+    if(vAll){
+        if(sAll){
+            // vAll and sAll:
+            // 14 (2-4-8), 15 (3-5-9), ...
+            for(size_t k = 0; k < elements.size(); k++){
+                cout << "Simplices k = " << k << ":" << endl;
+                if(!elements[k].empty()){
+                    elements[k][0]->print_compact();
+                    for(size_t i = 1; i < elements[k].size(); i++){
+                        cout << ", ";
+                        elements[k][i]->print_compact();
+                    }
+                    cout << endl;
+                }
+            }
+        }else{
+            // vAll and not sAll:
+            for(size_t k = 0; k < elements.size(); k++){
+                cout << "Simplices k = " << k << ":" << endl;
+                if(!elements[k].empty()){
+                    if(!k){ // print vertices:
+                        // 14, 15, 18, ...
+                        elements[k][0]->print_compact();
+                        for(size_t i = 1; i < elements[k].size(); i++){
+                            cout << ", ";
+                            elements[k][i]->print_compact();
+                        }
+                        cout << endl;
+                    }else{ // print simplices of level higher than zero:
+                        // (2-4-8), (3-5-9), ...
+                        bool first = true;
+                        for(size_t i = 0; i < elements[k].size(); i++){
+                            if(!first)
+                                cout << ", ";
+                            first = false;
+                            set<int> s;
+                            elements[k][i]->collect_vertices(s);
+                            cout << "(";
+                            bool first = true;
+                            for(auto itr = s.begin(); itr != s.end(); itr++){
+                                if(!first)
+                                    cout << "-";
+                                first = false;
+                                cout << *itr;
+                            }
+                            cout << ")";
+                        }
+                        cout << endl;
+                    }
+                }
+            }
+        }
+    }else{
+        // not vAll:
+        // 8, 4, Simplex, 15, ...
+        for(size_t k = 0; k < elements.size(); k++){
+            cout << "Simplices k = " << k << ":" << endl;
+            bool first = true;
             for(size_t i = 1; i < elements[k].size(); i++){
-                cout << ", ";
-                elements[k][i]->print_compact();
+                if(!first)
+                    cout << ", ";
+                first = false;
+                UniqueIDColor* pColor = elements[k][i]->get_uniqueID();
+                if(pColor){
+                    cout << static_cast<UniqueIDColor*>(pColor)->id;
+                }else{
+                    cout << "Simplex";
+                }
             }
             cout << endl;
         }
