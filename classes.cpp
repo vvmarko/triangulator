@@ -56,44 +56,45 @@ void KSimplex::print(string space){
 //        neighbors->print(space + "    ");
 }
 
+UniqueIDColor* KSimplex::get_uniqueID(){
+    for(auto pColor : colors)
+        if(pColor->type == TYPE_UNIQUE_ID)
+            return static_cast<UniqueIDColor*>(pColor);
+    return nullptr;
+}
+
 void KSimplex::print_compact(){
-    bool hasUniqueColor = false;
-    for(auto pColor : colors){
-        if((!hasUniqueColor) && (pColor->type == TYPE_UNIQUE_ID)){
-            hasUniqueColor = true;
-            pColor->print_compact();
-            if( k && (neighbors->elements[0].size()) ){
-                // empty ordered set container
-                set<int> s;
-                int nNotUniqueID = neighbors->elements[0].size();
-                for(auto &it : neighbors->elements[0]){
-                    bool foundUnique = false;
-                    for(auto pC : it->colors){
-                        if((!foundUnique) && (pC->type == TYPE_UNIQUE_ID)){
-                            foundUnique = true;
-                            nNotUniqueID--;
-                            s.insert( static_cast<UniqueIDColor*>(pC)->id );
-                        }
-                    }
+    UniqueIDColor* pColor = get_uniqueID();
+    if(!pColor){
+        cout << "simplex";
+    }else{
+        pColor->print_compact();
+        if( k && (neighbors->elements[0].size()) ){
+            // empty ordered set container
+            set<int> s;
+            int nNotUniqueID = neighbors->elements[0].size();
+            for(auto &it : neighbors->elements[0]){
+                pColor = it->get_uniqueID();
+                if(pColor){
+                    nNotUniqueID--;
+                    s.insert( static_cast<UniqueIDColor*>(pColor)->id );
                 }
-                if(s.size()){
-                    cout << " (";
-                    bool first = true;
-                    for(auto itr = s.begin(); itr != s.end(); itr++){
-                        if(!first)
-                            cout << "-";
-                        first = false;
-                        cout << *itr;
-                    }
-                    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
-                        cout << "-Simplex";
-                    cout << ")";
+            }
+            if(s.size()){
+                cout << " (";
+                bool first = true;
+                for(auto itr = s.begin(); itr != s.end(); itr++){
+                    if(!first)
+                        cout << "-";
+                    first = false;
+                    cout << *itr;
                 }
+                for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
+                    cout << "-Simplex";
+                cout << ")";
             }
         }
     }
-    if(!hasUniqueColor)
-        cout << "simplex";
 }
 
 SimpComp::SimpComp(int dim):
@@ -157,6 +158,12 @@ void SimpComp::print(string space){
 
 void SimpComp::print_compact(){
     cout << "Printing SimpComp " << name << ", D = " << D << endl;
+    if(elements.empty())
+        return;
+    
+//    for(size_t k = 0; k < elements.size(); k++){
+        
+
     for(size_t k = 0; k < elements.size(); k++){
         cout << "Simplices k = " << k << ":" << endl;
         if(!elements[k].empty()){

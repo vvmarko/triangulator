@@ -38,6 +38,7 @@ public:
     void add_neighbor(KSimplex *k1);    
     void print(string space = "");
     void print_compact();
+    UniqueIDColor* get_uniqueID();
 
     int k; // level
     int D; // dimension
