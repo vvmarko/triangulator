@@ -2,6 +2,7 @@
 #include "triangulator.hpp"
 
 int main(){
+
     cout << endl << "Edge example:" << endl << endl;
     SimpComp *edge = seed_single_edge("First edge");
     edge->print();
@@ -26,11 +27,12 @@ int main(){
     cout << endl << "Tetrahedron example, coloring everyithing:" << endl << endl;
     UniqueIDColor::colorize_entire_complex(tetrahedron);
     tetrahedron->print_compact();
-    
-//    cout << endl << "General seed example, compact printing:" << endl << endl;
-//    SimpComp *simpComp = seed_single_SimpComp("1. general SimpComp", 3);
-//    simpComp->print_compact();
-
+/*  
+    cout << endl << "---------------------------------------------------"
+            << endl << "General seed example, compact printing:" << endl << endl;
+    SimpComp *simpComp = seed_single_SimpComp("1. general SimpComp", 3);
+    simpComp->print_compact();
+*/
     return 0;
 }
 

@@ -58,21 +58,19 @@ void KSimplex::print(string space){
 
 void KSimplex::print_compact(){
     bool hasUniqueColor = false;
-    bool multipleColors = false;
     for(auto pColor : colors){
-        if(pColor->type == TYPE_UNIQUE_ID){
+        if((!hasUniqueColor) && (pColor->type == TYPE_UNIQUE_ID)){
             hasUniqueColor = true;
-            if(multipleColors)
-                cout << "&";
             pColor->print_compact();
-            multipleColors = true;
             if( k && (neighbors->elements[0].size()) ){
                 // empty ordered set container
                 set<int> s;
                 int nNotUniqueID = neighbors->elements[0].size();
                 for(auto &it : neighbors->elements[0]){
+                    bool foundUnique = false;
                     for(auto pC : it->colors){
-                        if(pC->type == TYPE_UNIQUE_ID){
+                        if((!foundUnique) && (pC->type == TYPE_UNIQUE_ID)){
+                            foundUnique = true;
                             nNotUniqueID--;
                             s.insert( static_cast<UniqueIDColor*>(pC)->id );
                         }
