@@ -15,12 +15,14 @@ public:
     void print(string space = "");
     // All KSimplex-es at level colored with UniqueIDColor:
     bool all_uniqueID(int level);
+    // Collects all vertices into a set<int>:
+    void collect_vertices(set<int> &s);
+    void print_set(set<int> &s);
+    void print_vertices_in_parentheses(set<int> &s);
     void print_compact();
     // Creating new KSimplex at level k:
     KSimplex* create_ksimplex(int k);
     void print_sizes();
-    // Collects all vertices into a set<int>:
-    void collect_vertices(set<int> &s);
 
     string name;
     int D;
@@ -41,10 +43,9 @@ public:
     // Adds k1 and its lower level neigbors as neighbors and the opposite:
     void add_neighbor(KSimplex *k1);    
     void print(string space = "");
+    // Searches for the first unique ID color:
     UniqueIDColor* get_uniqueID();
     void print_compact();
-    // Collects neighboring vertices into a set<int>:
-    void collect_vertices(set<int> &s);
 
     int k; // level
     int D; // dimension

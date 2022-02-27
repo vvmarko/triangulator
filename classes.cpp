@@ -72,42 +72,8 @@ void KSimplex::print_compact(){
         if( k && (neighbors->elements[0].size()) ){
             // empty ordered set container
             set<int> s;
-            int nNotUniqueID = neighbors->elements[0].size();
-            for(auto &it : neighbors->elements[0]){
-                pColor = it->get_uniqueID();
-                if(pColor){
-                    nNotUniqueID--;
-                    s.insert( static_cast<UniqueIDColor*>(pColor)->id );
-                }
-            }
-            if(s.size()){
-                cout << " (";
-                bool first = true;
-                for(auto itr = s.begin(); itr != s.end(); itr++){
-                    if(!first)
-                        cout << "-";
-                    first = false;
-                    cout << *itr;
-                }
-                for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
-                    cout << "-Simplex";
-                cout << ")";
-            }
+            neighbors->print_vertices_in_parentheses(s);
         }
-    }
-}
-
-// Collects neighboring vertices into a set<int>:
-void KSimplex::collect_vertices(set<int> &s){
-    UniqueIDColor* pColor = get_uniqueID();
-    if(pColor)
-        s.insert( static_cast<UniqueIDColor*>(pColor)->id );
-    if(!k)
-        return;
-    for(auto &it : neighbors->elements[0]){
-        pColor = it->get_uniqueID();
-        if(pColor)
-            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
     }
 }
 
@@ -179,6 +145,36 @@ bool SimpComp::all_uniqueID(int level){
     return i == elements[level].size();
 }
 
+// Collects neighboring vertices into a set<int>:
+void SimpComp::collect_vertices(set<int> &s){
+    for(auto &it : elements[0]){
+        Color *pColor = it->get_uniqueID();
+        if(pColor)
+            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+    }
+}
+
+void SimpComp::print_set(set<int> &s){
+    int nNotUniqueID = elements[0].size() - s.size();
+    cout << "(";
+    bool first = true;
+    for(auto itr = s.begin(); itr != s.end(); itr++){
+        if(!first)
+            cout << "-";
+        first = false;
+        cout << *itr;
+    }
+    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
+        cout << "-Simplex";
+    cout << ")";
+}
+
+void SimpComp::print_vertices_in_parentheses(set<int> &s){
+    collect_vertices(s);
+    if(s.size())
+        print_set(s);
+}
+
 void SimpComp::print_compact(){
     cout << "Printing SimpComp " << name << ", D = " << D << endl;
     if(elements.empty())
@@ -228,17 +224,12 @@ void SimpComp::print_compact(){
                             if(!first)
                                 cout << ", ";
                             first = false;
-                            set<int> s;
-                            elements[k][i]->collect_vertices(s);
-                            cout << "(";
-                            bool first = true;
-                            for(auto itr = s.begin(); itr != s.end(); itr++){
-                                if(!first)
-                                    cout << "-";
-                                first = false;
-                                cout << *itr;
-                            }
-                            cout << ")";
+
+                            set<int> s; // empty ordered set container
+                            UniqueIDColor* pColor = elements[k][i]->get_uniqueID();
+                            if(pColor)
+                                s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+                            elements[k][i]->neighbors->print_vertices_in_parentheses(s);
                         }
                         cout << endl;
                     }
@@ -251,7 +242,7 @@ void SimpComp::print_compact(){
         for(size_t k = 0; k < elements.size(); k++){
             cout << "Simplices k = " << k << ":" << endl;
             bool first = true;
-            for(size_t i = 1; i < elements[k].size(); i++){
+            for(size_t i = 0; i < elements[k].size(); i++){
                 if(!first)
                     cout << ", ";
                 first = false;
