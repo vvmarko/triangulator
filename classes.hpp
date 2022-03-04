@@ -24,6 +24,9 @@ public:
     KSimplex* create_ksimplex(int k);
     void print_sizes();
 
+    void save_complex_to_xml_file(const string& filename);
+    vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(rapidxml::memory_pool<>& mp);
+
     string name;
     int D;
     // An element at each level

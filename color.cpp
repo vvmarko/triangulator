@@ -10,6 +10,21 @@ void Color::print(string space){
 void Color::print_compact(){
 }
 
+string Color::get_color_value_as_str() const
+{
+    return "";
+}
+
+bool Color::set_color_value_from_str(const string& source)
+{
+    return false;
+}
+
+bool Color::set_color_value_as_str(const string& value_string)
+{
+    return true;
+}
+
 BoundaryColor::BoundaryColor(bool boundary){
     type = TYPE_BOUNDARY;
     this->boundary = boundary;
@@ -17,6 +32,12 @@ BoundaryColor::BoundaryColor(bool boundary){
 void BoundaryColor::print(string space){
     Color::print(space);
     cout << space << "Boundary = " << (boundary?"true":"false") << endl;
+}
+
+string BoundaryColor::get_color_value_as_str() const
+{
+    if (this->boundary) return "1";
+    return "0";
 }
 
 UniqueIDColor::UniqueIDColor(){
@@ -48,6 +69,11 @@ bool UniqueIDColor::colorize_entire_complex(SimpComp* G)
     return true;
 }
 
+string UniqueIDColor::get_color_value_as_str() const
+{
+    return to_string(this->id);
+}
+
 ScreenCoordinateColor::ScreenCoordinateColor(){
     type = TYPE_SCREEN_COORDINATE;
 }
@@ -61,4 +87,9 @@ ScreenCoordinateColor::ScreenCoordinateColor(int x, int y){
 void ScreenCoordinateColor::print(string space){
     Color::print(space);
     cout << space << "coordinate(" << x << ", " << y << ")" << endl;
+}
+
+string ScreenCoordinateColor::get_color_value_as_str() const
+{
+    return "(" + to_string(this->x) + "," + to_string(y) + ")";
 }

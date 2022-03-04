@@ -27,6 +27,9 @@ int main(){
     cout << endl << "Tetrahedron example, coloring everything:" << endl << endl;
     UniqueIDColor::colorize_entire_complex(tetrahedron);
     tetrahedron->print_compact();
+
+    triangle->save_complex_to_xml_file("triangle.xml");
+    tetrahedron->save_complex_to_xml_file("tetrahedron.xml");
 /*  
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;

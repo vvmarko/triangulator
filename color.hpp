@@ -39,6 +39,10 @@ public:
     virtual void print(string space = "");
     virtual void print_compact();
 
+    virtual string get_color_value_as_str() const;
+    virtual bool set_color_value_from_str(const string& source);
+    virtual bool set_color_value_as_str(const string& value_string);
+
     int type;
 };
 
@@ -46,6 +50,8 @@ class BoundaryColor : public Color{
 public:
     BoundaryColor(bool boundary);
     void print(string space = "");
+
+    string get_color_value_as_str() const;;
 
     bool boundary; // whether the KSimplex of this color represents a boundary
 };
@@ -59,6 +65,8 @@ public:
     static bool colorize_simplices_at_level(SimpComp* G, int level);
     static bool colorize_entire_complex(SimpComp* G);
 
+    string get_color_value_as_str() const;
+
     static unsigned long next_free_uid_number;
     unsigned long id; // whether the KSimplex of this color represents a boundary
 };
@@ -68,6 +76,8 @@ public:
     ScreenCoordinateColor();
     ScreenCoordinateColor(int x, int y);
     void print(string space = "");
+
+    string get_color_value_as_str() const;
 
     int x, y; // screen coordinates
 };
