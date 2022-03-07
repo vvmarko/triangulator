@@ -28,8 +28,8 @@ int main(){
     UniqueIDColor::colorize_entire_complex(tetrahedron);
     tetrahedron->print_compact();
 
-    triangle->save_complex_to_xml_file("triangle.xml");
-    tetrahedron->save_complex_to_xml_file("tetrahedron.xml");
+    save_complex_to_xml_file(triangle, "triangle.xml");
+    save_complex_to_xml_file(tetrahedron, "tetrahedron.xml");
 /*  
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;

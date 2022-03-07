@@ -20,11 +20,6 @@ bool Color::set_color_value_from_str(const string& source)
     return false;
 }
 
-bool Color::set_color_value_as_str(const string& value_string)
-{
-    return true;
-}
-
 BoundaryColor::BoundaryColor(bool boundary){
     type = TYPE_BOUNDARY;
     this->boundary = boundary;

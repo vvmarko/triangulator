@@ -9,8 +9,9 @@ using namespace std;
 #include <vector>
 #include <list>
 
-#include "rapidxml/rapidxml.hpp"
-#include "rapidxml//rapidxml_print.hpp"
+#include "third-party-software/rapidxml/rapidxml.hpp"
+#include "rapidxml-patch.hpp"
+#include "third-party-software/rapidxml/rapidxml_print.hpp"
 
 #include "color.hpp"
 #include "classes.hpp"

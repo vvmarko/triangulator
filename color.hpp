@@ -41,7 +41,6 @@ public:
 
     virtual string get_color_value_as_str() const;
     virtual bool set_color_value_from_str(const string& source);
-    virtual bool set_color_value_as_str(const string& value_string);
 
     int type;
 };
@@ -51,7 +50,7 @@ public:
     BoundaryColor(bool boundary);
     void print(string space = "");
 
-    string get_color_value_as_str() const;;
+    string get_color_value_as_str() const;
 
     bool boundary; // whether the KSimplex of this color represents a boundary
 };
