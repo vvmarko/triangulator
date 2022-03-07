@@ -75,7 +75,7 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
             delete toBeDeleted;
         }
     }
-
+    UniqueIDColor::next_free_uid_number = currentMaxid;
 
     ofstream outputFile;
     outputFile.open(filename);
