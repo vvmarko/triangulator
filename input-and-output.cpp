@@ -25,12 +25,14 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
     xml_node<>* base = treeXml.allocate_node(node_element, simpComp->name.c_str());
     treeXml.append_node(base);
 
-    char* nameCString = "name";
+    string nameString = "name";
+    char* nameCString = treeXml.allocate_string(nameString.c_str(), nameString.length() + 1);
     xml_node<>* nameNode = treeXml.allocate_node(node_element, nameCString, simpComp->name.c_str());
     base->append_node(nameNode);
 
-    char* dimensionCString = "dimension";
-    const char* DCString = treeXml.allocate_string(to_string(simpComp->D).c_str(), to_string(simpComp->D).length() + 1);
+    string dimensionString = "dimension";
+    char* dimensionCString = treeXml.allocate_string(dimensionString.c_str(), dimensionString.length() + 1);
+    char* DCString = treeXml.allocate_string(to_string(simpComp->D).c_str(), to_string(simpComp->D).length() + 1);
     xml_node<>* dimensionNode = treeXml.allocate_node(node_element, dimensionCString, DCString);
     base->append_node(dimensionNode);
 
@@ -40,7 +42,8 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
     string ndStr;
     string colorTypeStr;
     string colorValStr;
-    char* levelCStr = "level";
+    string levelString = "level";
+    char* levelCStr = treeXml.allocate_string(levelString.c_str(), levelString.length() + 1);;
     for (unsigned int lvl = 0; lvl < simpComp->elements.size(); lvl++) {
         for (auto ks : simpComp->elements[lvl]) {
             ndStr = "ksimplex " + ks->colors.back()->get_color_value_as_str();
