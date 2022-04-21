@@ -1,10 +1,14 @@
 #include "MainWindow.h"
-#include "PrintComplex.h"
+//#include "PrintComplex.h"
+#include "SeedComplex.h"
 
 void MainWindow::newFile() {
-	PrintComplex* printDialog = new PrintComplex();
+	//PrintComplex* printDialog = new PrintComplex();
 
-	printDialog->show();
+	//printDialog->show();
+	SeedComplex* seedDialog = new SeedComplex();
+
+	seedDialog->show();
 }
 
 MainWindow::MainWindow(QWidget *parent)
