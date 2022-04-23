@@ -31,15 +31,19 @@ bool KSimplex::find_neighbor(KSimplex *k1){
     return false;
 }
 
+// By adding neighbor k1, function add_neighbor
+// also adds all simplices of k1.
+// Whenever a neighbor is added to current one,
+// the opposite is also done.
 void KSimplex::add_neighbor(KSimplex *k1){
     if(!k1)
         return;
-    int kK1 = k1->k;
-    if(!find_neighbor(k1))
-        neighbors->elements[kK1].push_back(k1);
-    if(!k1->find_neighbor(this))
+    int kK1 = k1->k; // extract dimension
+    if(!find_neighbor(k1)) // if doesnt exist already
+        neighbors->elements[kK1].push_back(k1); // add it as a neighbor
+    if(!k1->find_neighbor(this)) // add me as a neigbhor to it as well
         k1->neighbors->elements[k].push_back(this);
-    if(kK1){
+    if(kK1){ // recursivelly add neighbors at k-1,..0:
         for(auto &it : k1->neighbors->elements[kK1 - 1])
             add_neighbor(it);
     }

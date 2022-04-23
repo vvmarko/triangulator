@@ -1,6 +1,6 @@
 
 #include "triangulator.hpp"
-int logLevel = 2; // default logLevel
+int logLevel = LOG_WARN; // default logLevel
 
 void log_report(int type, string message){
     if(type <= logLevel){

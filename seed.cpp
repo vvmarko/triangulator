@@ -169,8 +169,9 @@ SimpComp* seed_single_tetrahedron(string name)
     return tetrahedron;
 }
 
-// Function seed_KSimplices for level k does:
-// Seed a KSimplex of level k-1
+/*
+// For a given level k, function seed_KSimplices:
+// Seeds a KSimplex of level k-1
 // Add edges between 1 new vertex and each of old vertices
 // Add triangles between each 2 new edges and each of old edges
 // Add tethraeder between each 3 new triangles and each of old triangles
@@ -199,7 +200,7 @@ cout << "---- Seeding seed_KSimplices " << k-1 << " finished" << endl;
     KSimplex *v = simpComp->create_ksimplex(0);
 Color *c = new UniqueIDColor();
 v->colors.push_back(c);
-cout << "+addV+" << endl;
+cout << "+addV" << k << "+" << endl;
 
     // new k-1-eders:
     std::vector<KSimplex*> newKSimplices;
@@ -277,28 +278,143 @@ cout << " // newKSimplices.size()-nAdded = " << newKSimplices.size()-nAdded << e
         nRemove = nAdded;
         nAdded = 0;
     }
-/*    // Delete vector of pointers,
+    // Delete vector of pointers,
     // but not KSimplex-es they point to:
-    original->elements.clear();
-    delete original; // save to delete the rest
+//    original->elements.clear();
+//    delete original; // save to delete the rest
+}*/
+
+
+
+
+/*
+    e2 = tetrahedron->create_ksimplex(1);
+    e3 = tetrahedron->create_ksimplex(1);
+  ...
+    // Add triangles (k-simplices, k=2)
+    trianglev1v2v3 = tetrahedron->create_ksimplex(2);
+    trianglev1v3v4 = tetrahedron->create_ksimplex(2);
+...
+    // Add tetrahedron (k-simplex, k=3)
+    tetrahedron1 = tetrahedron->create_ksimplex(3);
+
+    // Edges have vertices as neighbors and the opposite:
+    e1->add_neighbor(v1);
+    e1->add_neighbor(v2);
+    e2->add_neighbor(v1);
+    e2->add_neighbor(v3);
+...
+    // Triangles have edges (and vertices) as neighbors and the opposite:
+    trianglev1v2v3->add_neighbor(e1);
+...
+    trianglev1v2v4->add_neighbor(e4);
+
+    tetrahedron1->add_neighbor(trianglev1v2v3);
+    tetrahedron1->add_neighbor(trianglev1v3v4);
+...
 */
+
+// Function add_tuple adds vertex to old KSimplex
+// kTemp - new tuple dimension.
+// old - existing tuple of dimension-1 (has dimension-1 vertices)
+// vertex - the vertex to append tuple with
+void add_tuple(SimpComp* simpComp, int kTemp, KSimplex *old, KSimplex *vertex){
+    // Create new KSimplex at level kTemp:
+    KSimplex *newKSimplex = new KSimplex(kTemp, simpComp->D);
+
+    // Adding new vertex as a neibhor of new tuple:
+    newKSimplex->add_neighbor(vertex);
+
+    if(kTemp == 1){
+        // If old is a single vertex add it as a neibhor of new tuple as well:
+        newKSimplex->add_neighbor(old);
+    }else{
+        // Add neighbors of newKSimplex:
+
+        // Add neighboring vertices:
+        for(auto &it : old->neighbors->elements[0]){
+            newKSimplex->add_neighbor(it);
+cout << "adding "; it->colors[0]->print_compact(); cout << endl;
+
+
+
+//TODO for all except vertices
+
+
+
+        }
+    }
+    // Push new KSimplex to simpComp:
+    simpComp->elements[kTemp].push_back(newKSimplex);
 }
 
-SimpComp* seed_single_SimpComp(string name, int d){
+// Function seed_single_simplex_advance_vertex
+// connects new vertex v with k-simplices of up to dimension k:
+// At each level k, old and new k-simplices are delimited using / sign:
+// k=0: 1, 2, 3, / 4.
+// k=1: 1-2, 1-3, 2-3, / 1-4, 2-4, 3-4.
+// k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
+// k=3: / 1-2-3-4.
+void seed_single_simplex_advance_vertex(SimpComp* simpComp, int k, KSimplex *v){
+    // Create simplices at level k by adding new vertex v to old k-1 vertices.
+    // Store the size of old k-1 vertices,
+    // ignoring the newly added vertex v (-1 in the following):
+    int oldSize = simpComp->elements[0].size() - 1;
+cout << "seed_single_simplex_KSimplices_add_vertex, k=" << k << endl;
+
+    // As vertex V is already added, continue from level 1 to k:
+    for(int kTemp = 1; kTemp <= k; kTemp++){ // for each level
+cout << "kTemp = " << kTemp << endl;
+        // Before adding k-simplices at level kTemp,
+        // store the number of old k-simplices at level kTemp:
+        int nextOldSize = simpComp->elements[kTemp].size();
+        // Initiate new kTemp-eders based on
+        // old kTemp-1-eders and the new vertex v:
+        for(int iKSimplex = 0; iKSimplex < oldSize; iKSimplex++){
+
+cout << "iKSimplex = " << iKSimplex << ", add_tuple with vertex "; v->colors[0]->print_compact(); cout << endl;
+add_tuple(simpComp, kTemp, simpComp->elements[kTemp-1][iKSimplex], v);
+
+
+        }
+        // For next kTemp, use initial number of k-simplices at level kTemp:
+        oldSize = nextOldSize;
+    }
+}
+
+// Seed a single simplex of dimension d:
+SimpComp* seed_single_simplex(string name, int d){
     string s = "Creating general simplicial complex " + name 
             + ", d = " + to_string(d) + "...";
     log_report(LOG_INFO, s);
-
+cout << s << endl;
     if(d < 0){
         log_report(LOG_ERROR, "Not possible to seed simplicial"
           "complex of dimension lower than 0");
         return nullptr;
     }
-    
     // Initilize KComplex of dimension d:
     SimpComp *simpComp = new SimpComp(d);
 
-    seed_KSimplices(simpComp, d);
+    // Create a vertex, i.e. KSimplex(0):
+    KSimplex *v = simpComp->create_ksimplex(0);
+    Color *c = new UniqueIDColor();
+    v->colors.push_back(c);
+cout << "=addV "; c->print_compact(); cout << endl;
 
+    // Progress to further dimensions by adding new vertex and conntecting it:
+    for(int k = 1; k <= d; k++){
+        // Seed a KSimplex of level k based on KSimplex of level k-1:
+cout << "++++ Seeding at " << k << " starting" << endl;
+        // Create a new vertex, i.e. KSimplex(0):
+        KSimplex *v = simpComp->create_ksimplex(0);
+        Color *c = new UniqueIDColor();
+        v->colors.push_back(c);
+cout << "+addV "; c->print_compact(); cout << endl;
+
+        // Connect new vertex v with k-simplices of up to dimension k:
+        seed_single_simplex_advance_vertex(simpComp, k, v);
+        cout << "---- Seeding at " << k << " finished" << endl;
+    }
     return simpComp;
 }

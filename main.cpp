@@ -2,7 +2,7 @@
 #include "triangulator.hpp"
 
 int main(){
-
+/*
     cout << endl << "Edge example:" << endl << endl;
     SimpComp *edge = seed_single_edge("First edge");
     edge->print();
@@ -30,12 +30,14 @@ int main(){
 
     save_complex_to_xml_file(triangle, "triangle.xml");
     save_complex_to_xml_file(tetrahedron, "tetrahedron.xml");
-/*  
+//*/
+
+//*  
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;
-    SimpComp *simpComp = seed_single_SimpComp("1. general SimpComp", 3);
+    SimpComp *simpComp = seed_single_simplex("1. general Simplex", 7);
     simpComp->print_compact();
-*/
+//*/
     return 0;
 }
 
