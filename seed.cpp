@@ -415,5 +415,9 @@ SimpComp* seed_single_simplex(string name, int d){
         small = seed_single_simplex_advance_vertex(simpComp, k, small, vertex);
 //cout << "---- Seeding at " << k << " finished" << endl;
     }
+    
+    for(auto &it : simpCom->elements[D-1])
+    	it->push_back(new UniqueIDColor(true));
+    
     return simpComp;
 }

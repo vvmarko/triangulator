@@ -35,7 +35,7 @@ int main(){
 //*  
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;
-    SimpComp *simpComp = seed_single_simplex("1. general Simplex", 4);
+    SimpComp *simpComp = seed_single_simplex("1. general Simplex", 3);
     simpComp->print_compact();
 //*/
     return 0;
