@@ -51,7 +51,8 @@ public:
     // Searches for the first unique ID color:
     UniqueIDColor* get_uniqueID();
     void print_compact();
-
+	static bool reconstruct_neighbors_from_vertices(SimpComp *simpComp);
+     
     int k; // level
     int D; // dimension
     SimpComp *neighbors;

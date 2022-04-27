@@ -36,8 +36,33 @@ int main(){
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;
     // seed_single_simplex seeds a simplex or a sphere (last argument == 1):
-    SimpComp *simpComp = seed_single_simplex("1. general Simplex", 2, 1);
+    SimpComp *simpComp = seed_single_simplex("1. general Simplex", 3, 0);
     simpComp->print_compact();
+
+	cout << endl;
+    simpComp->elements[1][0]->print("");
+	cout << endl;
+
+	for(int k = 1; k <= simpComp->D; k++)
+		for(auto &kSimplex : simpComp->elements[k])
+			for(int tempK = 1; tempK <= simpComp->D; tempK++)
+				kSimplex->neighbors->elements[tempK].clear();
+
+	cout << endl;
+    simpComp->elements[1][0]->print("");
+	cout << endl;
+
+
+	KSimplex::reconstruct_neighbors_from_vertices(simpComp);
+
+	cout << endl;
+    simpComp->elements[1][0]->print("");
+	cout << endl;
+
+	cout << endl;
+    simpComp->print_compact();
+
+
 //*/
     return 0;
 }

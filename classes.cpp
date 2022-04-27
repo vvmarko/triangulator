@@ -82,13 +82,13 @@ void KSimplex::collect_vertices(set<int> &s){
 
 void KSimplex::print(string space){
     cout << space << "Printing KSimplex: " << " k = " << k << ", D = " << D << endl;
-//        cout << space << "Printing colors:" << endl;
+    cout << space << "Printing colors:" << endl;
     for(auto &c : colors){
         c->print(space + "  ");
     }
-// Recursively prints neighbors:
-//        cout << space << "  Printing neighbors:" << endl;
-//        neighbors->print(space + "    ");
+	// Recursively prints neighbors:
+    cout << space << "  Printing neighbors:" << endl;
+    neighbors->print_compact();
 }
 
 UniqueIDColor* KSimplex::get_uniqueID(){
@@ -110,6 +110,34 @@ void KSimplex::print_compact(){
             neighbors->print_vertices_in_parentheses(s);
         }
     }
+}
+
+bool subset(set<int> &s1, set<int> &s2){
+	for(int x : s1){
+		auto search = s2.find(x);
+		if(search == s2.end())
+        	return false;
+	}
+	return true;
+}
+
+bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp *simpComp){
+	for(int k = 1; k <= simpComp->D; k++){
+		for(auto &kSimplex : simpComp->elements[k]){
+			set<int> s;
+			kSimplex->collect_vertices(s);
+			for(int tempK = 0; tempK < k; tempK++){
+				for(auto &tempKSimplex : simpComp->elements[tempK]){
+					set<int> tempS;
+					tempKSimplex->collect_vertices(tempS);
+					if(subset(tempS, s)){
+						kSimplex->add_neighbor(tempKSimplex);
+					}
+				}
+			}
+		}
+	}
+	return true;
 }
 
 SimpComp::SimpComp(int dim):
