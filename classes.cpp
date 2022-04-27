@@ -4,6 +4,19 @@
 
 #include "triangulator.hpp"
 
+std::ostream &operator<<(std::ostream &os, set<int> &s) { 
+	os << "(";
+	bool first = true;
+	for(auto &it : s){
+		if(!first)
+			os << ",";
+		first = false;
+		os << it;
+	}
+	os << ")";
+    return os;
+}
+
 KSimplex::KSimplex(){
     k = 0;
     neighbors = new SimpComp(0);
@@ -34,7 +47,7 @@ bool KSimplex::find_neighbor(KSimplex *k1){
 // By adding neighbor k1, function add_neighbor
 // also adds all simplices of k1.
 // Whenever a neighbor is added to current one,
-// the opposite is also done.
+// current one is also added to neighbor.
 void KSimplex::add_neighbor(KSimplex *k1){
     if(!k1)
         return;
@@ -46,6 +59,24 @@ void KSimplex::add_neighbor(KSimplex *k1){
     if(kK1){ // recursivelly add neighbors at k-1,..0:
         for(auto &it : k1->neighbors->elements[kK1 - 1])
             add_neighbor(it);
+    }
+}
+
+// Collects neighboring vertices into a set<int>:
+void KSimplex::collect_vertices(set<int> &s){
+	// If this k-simplex is a vertex, return its ID:
+    if(k == 0){
+        Color *pColor = get_uniqueID();
+        if(pColor)
+            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+		return;
+	}
+    
+	// Otherwise, collect IDs of neighboring vertices:
+    for(auto &it : neighbors->elements[0]){
+        Color *pColor = it->get_uniqueID();
+        if(pColor)
+            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
     }
 }
 
@@ -156,6 +187,20 @@ void SimpComp::collect_vertices(set<int> &s){
         if(pColor)
             s.insert( static_cast<UniqueIDColor*>(pColor)->id );
     }
+}
+
+// Finds a k-simplex with given vertices, if exists:
+KSimplex* SimpComp::find_vertices(set<int> &s){
+	int kFind = s.size();
+	if(kFind > D)
+		return nullptr;
+    for(auto &it : elements[kFind-1]){
+		set<int> sTemp;
+        it->collect_vertices(sTemp);
+        if(sTemp == s)
+        	return it;
+    }
+    return nullptr;
 }
 
 void SimpComp::print_set(set<int> &s){
