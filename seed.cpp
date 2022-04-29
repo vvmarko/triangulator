@@ -327,12 +327,9 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
 // k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
 // k=3: / 1-2-3-4.
 KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSimplex* small, KSimplex *vertex, int &sphere){
-	set<int> s;
+	set<KSimplex*> s;
 	small->collect_vertices(s);
-
-    Color *pColor = vertex->get_uniqueID();
-    if(pColor)
-        s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+    s.insert(vertex);
 
 	KSimplex *find = simpComp->find_vertices(s);
 	if(find)

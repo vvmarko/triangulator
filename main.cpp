@@ -36,13 +36,13 @@ int main(){
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;
 
-    SimpComp *simpComp = seed_single_simplex(3);
-    simpComp->print_compact();
+    //SimpComp *simpComp = seed_single_simplex(3);
+    //simpComp->print_compact();
 
     //SimpComp *simpComp = seed_sphere(3);
     //simpComp->print_compact();
 
-	/*
+	//*
 	//Function reconstruct_neighbors_from_vertices demonstration:
 	
     SimpComp *simpComp = seed_single_simplex(3);
