@@ -1,28 +1,8 @@
 #include "SeedComplex.h"
 #include "PrintComplex.h"
 
-void SeedComplex::handleNewLine() {
-	ui.leType->setText("Line");
-}
-
-void SeedComplex::handleNewTriangle() {
-	ui.leType->setText("Triangle");
-}
-
-void SeedComplex::handleNewTetrahedron() {
-	ui.leType->setText("Tetrahedron");
-}
-
-void SeedComplex::handleNewDSimplex() {
-	ui.leType->setText("D-Simplex");
-}
-
-void SeedComplex::handleNewDSphere() {
-	ui.leType->setText("D-Sphere");
-}
-
-void SeedComplex::handleAccepted() {
-	PrintComplex* print = new PrintComplex();
+void SeedComplex::handleAccepted() {		
+	PrintComplex* print = new PrintComplex(ui.cbType->currentText());
 
 	print->show();
 	this->close();
@@ -36,11 +16,13 @@ SeedComplex::SeedComplex(QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
-	connect(ui.btnTetrahedron, &QPushButton::released, this, &SeedComplex::handleNewTetrahedron);
-	connect(ui.btnLine, &QPushButton::released, this, &SeedComplex::handleNewLine);
-	connect(ui.btnTriangle, &QPushButton::released, this, &SeedComplex::handleNewTriangle);
-	connect(ui.btnDSimplex, &QPushButton::released, this, &SeedComplex::handleNewDSimplex);
-	connect(ui.btnDSphere, &QPushButton::released, this, &SeedComplex::handleNewDSphere);
+	ui.cbType->addItem("");
+	ui.cbType->addItem("Line");
+	ui.cbType->addItem("Triangle");
+	ui.cbType->addItem("Tetrahedron");
+	ui.cbType->addItem("D-Simplex");
+	ui.cbType->addItem("D-Sphere");
+	
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &SeedComplex::handleAccepted);
 	connect(ui.buttonBox, &QDialogButtonBox::rejected, this, &SeedComplex::handleRejected);
 }

@@ -7,33 +7,17 @@
     <x>0</x>
     <y>0</y>
     <width>396</width>
-    <height>311</height>
+    <height>214</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>SeedComplex</string>
   </property>
-  <widget class="QPushButton" name="btnTetrahedron">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>40</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Tetrahedron</string>
-   </property>
-   <property name="flat">
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
      <x>200</x>
-     <y>250</y>
+     <y>150</y>
      <width>156</width>
      <height>24</height>
     </rect>
@@ -42,24 +26,11 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnDSphere">
-   <property name="geometry">
-    <rect>
-     <x>220</x>
-     <y>40</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>D-Sphere</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>170</y>
+     <y>70</y>
      <width>71</width>
      <height>16</height>
     </rect>
@@ -72,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>170</y>
+     <y>70</y>
      <width>51</width>
      <height>22</height>
     </rect>
@@ -82,7 +53,7 @@
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>200</y>
+     <y>100</y>
      <width>191</width>
      <height>22</height>
     </rect>
@@ -92,7 +63,7 @@
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>200</y>
+     <y>100</y>
      <width>71</width>
      <height>16</height>
     </rect>
@@ -101,50 +72,11 @@
     <string>Name:</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnLine">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>40</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Line</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnTriangle">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>80</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Triangle</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnDSimplex">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>80</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>D-Simplex</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>140</y>
+     <y>40</y>
      <width>49</width>
      <height>16</height>
     </rect>
@@ -153,12 +85,12 @@
     <string>Type:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="leType">
+  <widget class="QComboBox" name="cbType">
    <property name="geometry">
     <rect>
      <x>110</x>
-     <y>140</y>
-     <width>113</width>
+     <y>40</y>
+     <width>111</width>
      <height>22</height>
     </rect>
    </property>

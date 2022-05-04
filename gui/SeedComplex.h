@@ -13,12 +13,7 @@ public:
 
 private:
 	Ui::SeedComplex ui;
-	
-	void handleNewLine();
-	void handleNewTriangle();
-	void handleNewTetrahedron();	
-	void handleNewDSimplex();
-	void handleNewDSphere();
+		
 	void handleAccepted();
 	void handleRejected();
 };

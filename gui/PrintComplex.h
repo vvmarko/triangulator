@@ -2,13 +2,14 @@
 
 #include <QWidget>
 #include "ui_PrintComplex.h"
+using namespace std;
 
 class PrintComplex : public QWidget
 {
 	Q_OBJECT
 
 public:
-	PrintComplex(QWidget *parent = Q_NULLPTR);
+	PrintComplex(QString complexType, QWidget *parent = Q_NULLPTR);
 	~PrintComplex();
 
 private:
