@@ -63,20 +63,16 @@ void KSimplex::add_neighbor(KSimplex *k1){
 }
 
 // Collects neighboring vertices into a set<int>:
-void KSimplex::collect_vertices(set<int> &s){
-	// If this k-simplex is a vertex, return its ID:
+void KSimplex::collect_vertices(set<KSimplex*> &s){
+	// If this k-simplex is a vertex, return it:
     if(k == 0){
-        Color *pColor = get_uniqueID();
-        if(pColor)
-            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+        s.insert(this);
 		return;
 	}
     
 	// Otherwise, collect IDs of neighboring vertices:
-    for(auto &it : neighbors->elements[0]){
-        Color *pColor = it->get_uniqueID();
-        if(pColor)
-            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+    for(auto &kSimplex : neighbors->elements[0]){
+        s.insert(kSimplex);
     }
 }
 
@@ -107,13 +103,13 @@ void KSimplex::print_compact(){
         if( k && (neighbors->elements[0].size()) ){
             // empty ordered set container
             set<int> s;
-            neighbors->print_vertices_in_parentheses(s);
+            neighbors->print_vertices_IDs_in_parentheses(s);
         }
     }
 }
 
-bool subset(set<int> &s1, set<int> &s2){
-	for(int x : s1){
+bool subset(set<KSimplex*> &s1, set<KSimplex*> &s2){
+	for(auto x : s1){
 		auto search = s2.find(x);
 		if(search == s2.end())
         	return false;
@@ -124,15 +120,14 @@ bool subset(set<int> &s1, set<int> &s2){
 bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp *simpComp){
 	for(int k = 1; k <= simpComp->D; k++){
 		for(auto &kSimplex : simpComp->elements[k]){
-			set<int> s;
+			set<KSimplex*> s;
 			kSimplex->collect_vertices(s);
 			for(int tempK = 0; tempK < k; tempK++){
 				for(auto &tempKSimplex : simpComp->elements[tempK]){
-					set<int> tempS;
+					set<KSimplex*> tempS;
 					tempKSimplex->collect_vertices(tempS);
-					if(subset(tempS, s)){
+					if(subset(tempS, s))
 						kSimplex->add_neighbor(tempKSimplex);
-					}
 				}
 			}
 		}
@@ -143,7 +138,7 @@ bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp *simpComp){
 SimpComp::SimpComp(int dim):
         name {""}, D{dim}{
     for(int i = 0; i <= D; i++){
-//            list<KSimplex*> listaKSimpleksa;
+//        list<KSimplex*> listaKSimpleksa;
         vector<KSimplex*> listaKSimpleksa;
         elements.push_back(listaKSimpleksa);
     }
@@ -153,7 +148,7 @@ SimpComp::SimpComp(int dim):
 SimpComp::SimpComp(string s, int dim):
         name {s}, D{dim}{
     for(int i = 0; i <= D; i++){
-//            list<KSimplex*> listaKSimpleksa;
+//        list<KSimplex*> listaKSimpleksa;
         vector<KSimplex*> listaKSimpleksa;
         elements.push_back(listaKSimpleksa);
     }
@@ -209,7 +204,14 @@ bool SimpComp::all_uniqueID(int level){
 }
 
 // Collects neighboring vertices into a set<int>:
-void SimpComp::collect_vertices(set<int> &s){
+void SimpComp::collect_vertices(set<KSimplex*> &s){
+    for(auto &kSimplex : elements[0]){
+        s.insert(kSimplex);
+    }
+}
+
+// Collects neighboring vertices IDs into a set<int>:
+void SimpComp::collect_vertices_IDs(set<int> &s){
     for(auto &it : elements[0]){
         Color *pColor = it->get_uniqueID();
         if(pColor)
@@ -218,12 +220,12 @@ void SimpComp::collect_vertices(set<int> &s){
 }
 
 // Finds a k-simplex with given vertices, if exists:
-KSimplex* SimpComp::find_vertices(set<int> &s){
+KSimplex* SimpComp::find_vertices(set<KSimplex*> &s){
 	int kFind = s.size();
 	if(kFind > D)
 		return nullptr;
     for(auto &it : elements[kFind-1]){
-		set<int> sTemp;
+		set<KSimplex*> sTemp;
         it->collect_vertices(sTemp);
         if(sTemp == s)
         	return it;
@@ -246,8 +248,8 @@ void SimpComp::print_set(set<int> &s){
     cout << ")";
 }
 
-void SimpComp::print_vertices_in_parentheses(set<int> &s){
-    collect_vertices(s);
+void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
+    collect_vertices_IDs(s);
     if(s.size())
         print_set(s);
 }
@@ -306,7 +308,7 @@ void SimpComp::print_compact(){
                             UniqueIDColor* pColor = elements[k][i]->get_uniqueID();
                             if(pColor)
                                 s.insert( static_cast<UniqueIDColor*>(pColor)->id );
-                            elements[k][i]->neighbors->print_vertices_in_parentheses(s);
+                            elements[k][i]->neighbors->print_vertices_IDs_in_parentheses(s);
                         }
                         cout << endl;
                     }

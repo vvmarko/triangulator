@@ -326,23 +326,11 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
 // k=1: 1-2, 1-3, 2-3, / 1-4, 2-4, 3-4.
 // k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
 // k=3: / 1-2-3-4.
-KSimplex* seed_single_simplex_advance_vertex(SimpComp* simpComp, int k, KSimplex* small, KSimplex *vertex, int &sphere){
-
-//cout << "seed_single_simplex_advance_vertex, k=" << k << endl;
-//simpComp->print_compact();
-
-
-	set<int> s;
+KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSimplex* small, KSimplex *vertex, int &sphere){
+	set<KSimplex*> s;
 	small->collect_vertices(s);
+    s.insert(vertex);
 
-//cout << "\n### Small:" << endl;
-//small->print_compact();
-//cout << endl;
-	
-//cout << "\n### Collected: " << s << endl;
-    Color *pColor = vertex->get_uniqueID();
-    if(pColor)
-        s.insert( static_cast<UniqueIDColor*>(pColor)->id );
 	KSimplex *find = simpComp->find_vertices(s);
 	if(find)
 		return find;
@@ -365,16 +353,14 @@ KSimplex* seed_single_simplex_advance_vertex(SimpComp* simpComp, int k, KSimplex
 
     // As vertex V is already added, continue from level 1 to k:
     for(int kTemp = 1; kTemp <= k; kTemp++){ // for each level
-//cout << "kTemp = " << kTemp << endl;
         // Before adding k-simplices at level kTemp,
         // store the number of old k-simplices at level kTemp:
         int nextOldSize = small->neighbors->elements[kTemp].size();
         // Initiate new kTemp-eders based on
         // old kTemp-1-eders and the new vertex v:
         for(int iKSimplex = 0; iKSimplex < oldSize; iKSimplex++){
-//cout << "iKSimplex = " << iKSimplex << ", seed_single_simplex " << *small->neighbors->elements[kTemp-1][iKSimplex] << " advance_vertex "; vertex->colors[0]->print_compact(); cout << endl;
             // Create temporary KSimplex by appending vertex to one of old k-simplices at level kTemp-1
-            KSimplex* newKSimplex = seed_single_simplex_advance_vertex(simpComp, kTemp, small->neighbors->elements[kTemp-1][iKSimplex], vertex, sphere);
+            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, kTemp, small->neighbors->elements[kTemp-1][iKSimplex], vertex, sphere);
 			if(k <= simpComp->D)
 	        	big->add_neighbor(newKSimplex);
         }
@@ -385,45 +371,52 @@ KSimplex* seed_single_simplex_advance_vertex(SimpComp* simpComp, int k, KSimplex
     return big;
 }
 
-// Seed a single simplex of dimension d:
-SimpComp* seed_single_simplex(string name, int d, int sphere){
-    string s = "Creating general simplicial complex " + name 
-            + ", d = " + to_string(d) + "...";
-//todo: adjust outputs for sphere
+KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small, int &sphere){
+    // Seed a KSimplex of level k based on KSimplex of level k-1:
+    // Create a new vertex, i.e. KSimplex(0):
+    KSimplex *vertex = simpComp->create_ksimplex(0);
+    Color *c = new UniqueIDColor();
+    vertex->colors.push_back(c);
+    if(k == 0)
+        return vertex;
+
+    // Connect new vertex with k-simplex small:
+    return build_simplex_one_level_up_with_vertex(simpComp, k, small, vertex, sphere);
+}
+
+// Seed a single simplex or sphere of dimension d:
+SimpComp* seed_single_simplex_or_sphere(int D, int sphere){
+    string s = "Creating general ";
+    s += (sphere ? "sphere" : "simplicial complex");
+    s += ", D = " + to_string(D) + "...";
     log_report(LOG_INFO, s);
-//cout << s << endl;
-    if(d < 0){
-        log_report(LOG_ERROR, "Not possible to seed simplicial"
-          "complex of dimension lower than 0");
+    if(D < 0){
+        log_report(LOG_ERROR, "Not possible to seed for dimension lower than 0");
         return nullptr;
     }
-    // Initilize Simplicial complex of dimension d:
-    SimpComp *simpComp = new SimpComp(d);
-
-    // Create a vertex, i.e. KSimplex(0):
-    KSimplex *small = simpComp->create_ksimplex(0);
-    Color *c = new UniqueIDColor();
-    small->colors.push_back(c);
-//cout << "=addV "; c->print_compact(); cout << endl;
+    // Initilize simplicial complex of dimension D, and an empty k-simplex:
+    SimpComp *simpComp = new SimpComp(D);
+    KSimplex *small = nullptr;
 
     // Progress to further dimensions by adding new vertex and conntecting it:
-    for(int k = 1; k <= d+sphere; k++){
+    for(int k = 0; k <= D+sphere; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
-//cout << "++++ Seeding at " << k << " starting" << endl;
-        // Create a new vertex, i.e. KSimplex(0):
-        KSimplex *vertex = simpComp->create_ksimplex(0);
-        Color *c = new UniqueIDColor();
-        vertex->colors.push_back(c);
-//cout << "+addV "; c->print_compact(); cout << endl;
-
-        // Connect new vertex with k-simplex small:
-        small = seed_single_simplex_advance_vertex(simpComp, k, small, vertex, sphere);
-//cout << "---- Seeding at " << k << " finished" << endl;
+        small = build_simplex_one_level_up(simpComp, k, small, sphere);
     }
 
+    // If seeding simplicial complex, add boundary color:
 	if(!sphere)
-		for(auto &it : simpComp->elements[simpComp->D-1])
-			it->colors.push_back(new BoundaryColor(true));
+		for(auto &kSimplex : simpComp->elements[simpComp->D-1])
+			kSimplex->colors.push_back(new BoundaryColor(true));
     
     return simpComp;
 }
+
+SimpComp* seed_single_simplex(int D){
+    return seed_single_simplex_or_sphere(D, 0);
+}
+
+SimpComp* seed_sphere(int D){
+    return seed_single_simplex_or_sphere(D, 1);
+}
+
