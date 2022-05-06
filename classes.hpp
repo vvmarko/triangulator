@@ -27,6 +27,8 @@ public:
     void print_compact();
     // Creating new KSimplex at level k:
     KSimplex* create_ksimplex(int k);
+    // Remove given simplex after disconnecting neighbors:
+    void remove_simplex(KSimplex* kSimplex);
     void print_sizes();
 
     string name;
@@ -54,7 +56,12 @@ public:
     UniqueIDColor* get_uniqueID();
     void print_compact();
 	static bool reconstruct_neighbors_from_vertices(SimpComp *simpComp);
-     
+    // Delete given kSimplex from the list of neighbors of this k-simplex:
+    void delete_my_neighbor(KSimplex* kSimplex);
+    // Delete given kSimplex as neighbor, and delete this as kSimplex's neighbor:
+    void delete_neighbor(KSimplex* kSimplex);
+    void delete_all_neighbors();
+    
     int k; // level
     int D; // dimension
     SimpComp *neighbors;

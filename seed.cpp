@@ -162,7 +162,7 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
 // k=1: 1-2, 1-3, 2-3, / 1-4, 2-4, 3-4.
 // k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
 // k=3: / 1-2-3-4.
-KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSimplex* small, KSimplex *vertex, int &sphere){
+KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSimplex* small, KSimplex *vertex){
 	set<KSimplex*> s;
 	small->collect_vertices(s);
     s.insert(vertex);
@@ -196,7 +196,7 @@ KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSim
         // old kTemp-1-eders and the new vertex v:
         for(int iKSimplex = 0; iKSimplex < oldSize; iKSimplex++){
             // Create temporary KSimplex by appending vertex to one of old k-simplices at level kTemp-1
-            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, kTemp, small->neighbors->elements[kTemp-1][iKSimplex], vertex, sphere);
+            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, kTemp, small->neighbors->elements[kTemp-1][iKSimplex], vertex);
 			if(k <= simpComp->D)
 	        	big->add_neighbor(newKSimplex);
         }
@@ -207,7 +207,7 @@ KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSim
     return big;
 }
 
-KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small, int &sphere){
+KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small){
     // Seed a KSimplex of level k based on KSimplex of level k-1:
     // Create a new vertex, i.e. KSimplex(0):
     KSimplex *vertex = simpComp->create_ksimplex(0);
@@ -217,7 +217,7 @@ KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small,
         return vertex;
 
     // Connect new vertex with k-simplex small:
-    return build_simplex_one_level_up_with_vertex(simpComp, k, small, vertex, sphere);
+    return build_simplex_one_level_up_with_vertex(simpComp, k, small, vertex);
 }
 
 // Seed a single simplex or sphere of dimension d:
@@ -237,7 +237,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere){
     // Progress to further dimensions by adding new vertex and conntecting it:
     for(int k = 0; k <= D+sphere; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
-        small = build_simplex_one_level_up(simpComp, k, small, sphere);
+        small = build_simplex_one_level_up(simpComp, k, small);
     }
 
     // If seeding simplicial complex, add boundary color:
@@ -256,3 +256,45 @@ SimpComp* seed_sphere(int D){
     return seed_single_simplex_or_sphere(D, 1);
 }
 
+// Seed a single sphere of dimension d
+// by seeding a simplex of dimension d+1, and deleting only it:
+SimpComp* seed_sphere_intuitively(int D){
+    string s = "Creating general sphere, D = " + to_string(D) + "...";
+    log_report(LOG_INFO, s);
+    if(D < 0){
+        log_report(LOG_ERROR, "Not possible to seed for dimension lower than 0");
+        return nullptr;
+    }
+    // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
+    SimpComp *simpComp = new SimpComp(D+1);
+    KSimplex *small = nullptr;
+
+    // Progress to further dimensions by adding new vertex and conntecting it:
+    for(int k = 0; k <= D+1; k++){
+        // Seed a KSimplex of level k based on KSimplex of level k-1:
+        small = build_simplex_one_level_up(simpComp, k, small);
+    }
+
+    // Delete the last created k-simplex after disconnecting neighbors:
+    simpComp->remove_simplex(simpComp->elements[D+1][0]);
+
+    // For each k-simplex from elements:
+    for(unsigned i = 0; i < simpComp->elements.size()-1; i++){
+        for(auto &kSimplex : simpComp->elements[i]){
+            // Decrease the length of matrix kSimplex->neighbors->elements:
+            //kSimplex->neighbors->elements[D+1].empty(); // already disconnected
+            kSimplex->neighbors->elements.pop_back();
+
+            // Decrease the dimension of kSimplex:
+            kSimplex->D--;
+        }
+    }
+
+    // Decrease the length of matrix elements:
+    simpComp->elements.pop_back();
+
+    // Decrease the dimension of simpComp:
+    simpComp->D--;
+
+    return simpComp;
+}

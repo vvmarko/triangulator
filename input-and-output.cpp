@@ -11,6 +11,11 @@ void log_report(int type, string message){
     }
 };
 
+void error(string message){
+    cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nERROR:   " << message
+            << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+    exit(1); //TODO: Free all resources
+};
 
 void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
 {

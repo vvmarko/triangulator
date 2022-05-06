@@ -135,6 +135,39 @@ bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp *simpComp){
 	return true;
 }
 
+// Delete given kSimplex from the list of neighbors of this k-simplex:
+void KSimplex::delete_my_neighbor(KSimplex* kSimplex){
+    int k = kSimplex->k;
+    // Find the position of kSimplex in neighbors->elements[k]:
+    unsigned int i = 0;
+    while( (i < neighbors->elements[k].size()) && (neighbors->elements[k][i] != kSimplex) )
+        i++;
+    if(i == neighbors->elements[k].size())
+        error("delete_neighbor: kSimplex not found on level "+to_string(k));
+    // If not last:
+    if(i < neighbors->elements[k].size() - 1){
+        // Copy the pointer of the last kSimplex onto position i:
+        neighbors->elements[k][i] =
+                neighbors->elements[k][ neighbors->elements[k].size() - 1 ];
+    }
+    // Remove the last element:
+    neighbors->elements[k].pop_back();
+}
+
+// Delete given kSimplex as neighbor, and delete this as kSimplex's neighbor:
+void KSimplex::delete_neighbor(KSimplex* kSimplex){
+    delete_my_neighbor(kSimplex);
+    kSimplex->delete_my_neighbor(this);
+}
+
+void KSimplex::delete_all_neighbors(){
+    for(int i = 0; i < neighbors->elements.size(); i++){
+        for(auto &it : neighbors->elements[i]){
+            delete_neighbor(it);
+        }
+    }
+}
+
 SimpComp::SimpComp(int dim):
         name {""}, D{dim}{
     for(int i = 0; i <= D; i++){
@@ -342,13 +375,46 @@ KSimplex* SimpComp::create_ksimplex(int k){
     string s = "Creating KSimplex at level: " + k;
     log_report(LOG_INFO, s);
     if ( (k >= 0) && (k <= D) ){
+        // Creating new KSimplex at level k:
         KSimplex *newKSimplex = new KSimplex(k, D);
+        // Add newly created k-simplex to the this simplicial complex elements:
         elements[k].push_back(newKSimplex);
         return newKSimplex;
     }else{
         log_report(LOG_ERROR, "Adding KSimplex failed...");
         return nullptr;
     }
+}
+
+// Remove given simplex after disconnecting neighbors:
+void SimpComp::remove_simplex(KSimplex *kSimplex){
+    if(!kSimplex)
+        error("remove_simplex: nullptr given.");
+    int k = kSimplex->k;
+    if(k > D)
+        error("remove_simplex: k("+to_string(k)+")>D("+to_string(D)+")");
+
+    // Find the position of kSimplex in neighbors->elements[k]:
+    unsigned int i = 0;
+    while( (i < elements[k].size()) && (elements[k][i] != kSimplex) )
+        i++;
+    if(i == elements[k].size())
+        error("remove_simplex: kSimplex not found on level "+to_string(k));
+
+    // If not last:
+    if(i < elements[k].size() - 1){
+        // Copy the pointer of the last kSimplex onto position i:
+        elements[k][i] = elements[k][ elements[k].size() - 1 ];
+    }
+
+    // Remove the last element:
+    elements[k].pop_back();
+
+    // Delete all neigbhors from kSimplex:
+    kSimplex->delete_all_neighbors();
+
+    // Free the memory reserved by kSimplex:
+    delete kSimplex;
 }
 
 void SimpComp::print_sizes(){
