@@ -29,9 +29,9 @@ KSimplex::KSimplex(int k, int D){
 }
 
 KSimplex::~KSimplex(){
+	//cout << "Deleting KSimplex... ";
     for(auto pColor : colors)
         delete pColor;
-    delete neighbors;
 }
 
 bool KSimplex::find_neighbor(KSimplex *k1){
@@ -188,27 +188,25 @@ SimpComp::SimpComp(string s, int dim):
     log_report(LOG_INFO, "initialize: Setting up everything for a new graph.");
 }
 
-/*
-// Shallow copy, keeping original KSimplex pointers,
-// without creating new KSimplex-es by copying existing ones:
-SimpComp::SimpComp(const SimpComp& s){
-    name = s.name;
-    D = s.D;
-    for(auto &pointers : elements){
-        vector<KSimplex*> listaKSimpleksa;
-        for(auto &kSimplex : pointers)
-            listaKSimpleksa.push_back(kSimplex);
-        elements.push_back(listaKSimpleksa);
+// Copy constructor - creating new SimpComp by copying existing one:
+SimpComp::SimpComp(const SimpComp& simpComp){
+	name = simpComp.name;
+    D = simpComp.D;
+    for(auto &row : simpComp.elements){
+        vector<KSimplex*> newKSimplexList;
+        for(auto &kSimplex : row)
+            newKSimplexList.push_back(kSimplex);
+        elements.push_back(newKSimplexList);
     }
-    vector< vector<KSimplex *> > elements;
 }
-*/
+
 SimpComp::~SimpComp(){
+	//cout << "Deleting SimpComp... ";
     for(int i = 0; i <= D; i++){
-        for(auto pKSimplex : elements[i])
+        for(auto pKSimplex : elements[i]){
             delete(pKSimplex);
+        }
     }
-    
 }
 
 int SimpComp::count_number_of_simplexes(int level){

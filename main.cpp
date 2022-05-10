@@ -49,6 +49,12 @@ int main(){
     SimpComp *simpComp = seed_sphere_intuitively(3);
     simpComp->print_compact();
     
+    SimpComp simpComp2(*simpComp);
+    simpComp2.print_compact();
+	for(auto &it : simpComp2.elements)
+		it.clear();
+	delete simpComp;
+	cout << "Deleted." << endl;
     return 0;
 }
 

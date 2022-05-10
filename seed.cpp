@@ -298,3 +298,8 @@ SimpComp* seed_sphere_intuitively(int D){
 
     return simpComp;
 }
+
+KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp){
+
+}
+
