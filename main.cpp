@@ -46,15 +46,26 @@ int main(){
     simpComp->print_compact();
     //*/
     
-    SimpComp *simpComp = seed_sphere_intuitively(3);
-    simpComp->print_compact();
+    //SimpComp *simpComp = seed_sphere_intuitively(3);
+    //simpComp->print_compact();
     
-    SimpComp simpComp2(*simpComp);
-    simpComp2.print_compact();
-	for(auto &it : simpComp2.elements)
-		it.clear();
-	delete simpComp;
-	cout << "Deleted." << endl;
+    //SimpComp simpComp2(*simpComp);
+    //simpComp2.print_compact();
+	//for(auto &it : simpComp2.elements)
+	//	it.clear();
+	//delete simpComp;
+	//cout << "Deleted." << endl;
+	
+    SimpComp *simpComp = seed_single_simplex(3);
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+    simpComp->print_compact();
+    cout << endl << "---------------------------------------------------" << endl;
+
+	Pachner_move_1_to_4(simpComp->elements[simpComp->D][0], simpComp);
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+    simpComp->print_compact();
+	
+
     return 0;
 }
 

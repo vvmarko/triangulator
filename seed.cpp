@@ -22,7 +22,6 @@ v->colors.push_back(c);
 cout << "+addV0+" << endl;
         return;
     }
-
     // Seed a KSimplex of level k-1:
 cout << "++++ Seeding seed_KSimplices " << k-1 << " starting" << endl;
     seed_KSimplices(simpComp, k-1);
@@ -31,13 +30,11 @@ cout << "---- Seeding seed_KSimplices " << k-1 << " finished" << endl;
     // Make a copy of old simpComp, 
     // so that old vertices, edges, triangles,... can be found:
     SimpComp *original = new SimpComp(*simpComp);
-
     // Adding vertex:
     KSimplex *v = simpComp->create_ksimplex(0);
 Color *c = new UniqueIDColor();
 v->colors.push_back(c);
 cout << "+addV" << k << "+" << endl;
-
     // new k-1-eders:
     std::vector<KSimplex*> newKSimplices;
     newKSimplices.push_back(v); // adds
@@ -46,7 +43,6 @@ cout << "+addV" << k << "+" << endl;
     // remove nRemove of them, and consider as new only nAdded ones:
     size_t nRemove = 1;
     size_t nAdded = 0;
-
     for(int kTemp = 1; kTemp <= k; kTemp++){ // for each level
 cout << "kTemp = " << kTemp << endl;
         // Find each set of kTemp simplices from all newKSimplices
@@ -60,12 +56,10 @@ cout << "kTemp = " << kTemp << endl;
         // and updating later ones to follow) until the end:
         // kNewKSimplices:       - - - - ... - - - - k   k  k
         // includeNewKSimplices:                    n-2 n-1 n
-
         // Initiate old k-1-eders to existing ones:
         std::vector<KSimplex*> oldKSimplices;
         for(auto &oldKSimplex : original->elements[kTemp-1])
             oldKSimplices.push_back(oldKSimplex);
-
         // Initially, first kTemp newKSimplices will be used:
         std::vector<size_t> includeNewKSimplices;
         for(int i = 0; i < kTemp; i++)
@@ -88,7 +82,6 @@ cout << "^";
 //                KSimplex *oldSimplex = find_common(oldKSimplices, newKSimplices, includeNewKSimplices);
                 newKSimplex->add_neighbor(oldKSimplex);
             }
-
 for(size_t m = 0; m < includeNewKSimplices.size(); m++)
     cout << "m" << includeNewKSimplices[m] << " ";
 cout << " // newKSimplices.size()-nAdded = " << newKSimplices.size()-nAdded << endl;
@@ -119,8 +112,6 @@ cout << " // newKSimplices.size()-nAdded = " << newKSimplices.size()-nAdded << e
 //    original->elements.clear();
 //    delete original; // save to delete the rest
 }*/
-
-
 
 
 /*
@@ -211,8 +202,6 @@ KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small)
     // Seed a KSimplex of level k based on KSimplex of level k-1:
     // Create a new vertex, i.e. KSimplex(0):
     KSimplex *vertex = simpComp->create_ksimplex(0);
-    Color *c = new UniqueIDColor();
-    vertex->colors.push_back(c);
     if(k == 0)
         return vertex;
 
@@ -299,7 +288,45 @@ SimpComp* seed_sphere_intuitively(int D){
     return simpComp;
 }
 
-KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp){
+// Pachner move 1 to 4:
+// Input: 3-simplex (1-2-3-4)
+// Output: Created 0-simplex (5)
+// Beginning structure:
+// k=0: 1, 2, 3, 4
+// k=1: (1-2), (1-3), (1-4), (2-3), (2-4), (3-4)
+// k=2: (1-2-3), (1-2-4), (1-3-4), (2-3-4)
+// k=3: (1-2-3-4)
+// Final structure:
+// k=0: 1, 2, 3, 4, 5
+// k=1: (1-2), (1-3), (1-4), (2-3), (2-4), (3-4), (1-5), (2-5), (3-5), (4-5)
+// k=2: (1-2-3), (1-2-4), (1-3-4), (2-3-4), (1-2-5), (1-3-5), (1-4-5), (2-3-5), (2-4-5), (3-4-5)
+// k=3: (1-2-3-5), (1-2-4-5), (1-3-4-5), (2-3-4-5)
 
+// Add edges between 1 new vertex and each of old vertices
+// Add triangles between each 2 new edges and each of old edges
+// Add tethraeder between each 3 new triangles and each of old triangles
+// ...
+// Add k-aeder between each k-1 new k-1-eders and each of old k-1-eders
+KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp){
+    // For each level k, save length of old simpComp.elements[k], 
+    // so that old vertices, edges, triangles,... can be found:
+	size_t oldLength = simpComp->elements[0].size();
+
+    // Adding vertex:
+    KSimplex *vertex = simpComp->create_ksimplex(0);
+
+    for(int kTemp = 1; kTemp <= simpComp->D; kTemp++){ // for each level
+		size_t nextLength = simpComp->elements[kTemp].size();
+		for(size_t i = 0; i < oldLength; i++){
+			KSimplex* &small = simpComp->elements[kTemp-1][i];
+			build_simplex_one_level_up_with_vertex(simpComp, kTemp, small, vertex);
+		}
+		oldLength = nextLength;
+	}
+	// Delete initial k-simplex from level D:
+	simpComp->remove_simplex(simpComp->elements[simpComp->D][0]);
+	
+	return vertex;
 }
+
 
