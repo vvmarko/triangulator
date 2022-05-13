@@ -22,6 +22,7 @@ public:
     void collect_vertices_IDs(set<int> &s);
 	// Finds a k-simplex with given vertices, if exists:
 	KSimplex* find_vertices(set<KSimplex*> &s);
+	bool reconstruct_neighbors_from_vertices();
     void print_set(set<int> &s);
     void print_vertices_IDs_in_parentheses(set<int> &s);
     void print_compact();
@@ -54,8 +55,8 @@ public:
     void print(string space = "");
     // Searches for the first unique ID color:
     UniqueIDColor* get_uniqueID();
+	bool reconstruct_neighbors_from_vertices();
     void print_compact();
-	static bool reconstruct_neighbors_from_vertices(SimpComp *simpComp);
     // Delete given kSimplex from the list of neighbors of this k-simplex:
     void delete_my_neighbor(KSimplex* kSimplex);
     // Delete given kSimplex as neighbor, and delete this as kSimplex's neighbor:

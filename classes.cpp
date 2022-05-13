@@ -34,12 +34,12 @@ KSimplex::~KSimplex(){
         delete pColor;
 }
 
-bool KSimplex::find_neighbor(KSimplex *k1){
-    if(!k1)
+bool KSimplex::find_neighbor(KSimplex *kSimplex){
+    if(!kSimplex)
         return false;
-    int k = k1->k;
+    int k = kSimplex->k;
     for(auto &it : neighbors->elements[k])
-        if(it == k1)
+        if(it == kSimplex)
             return true;
     return false;
 }
@@ -48,16 +48,17 @@ bool KSimplex::find_neighbor(KSimplex *k1){
 // also adds all simplices of k1.
 // Whenever a neighbor is added to current one,
 // current one is also added to neighbor.
-void KSimplex::add_neighbor(KSimplex *k1){
-    if(!k1)
+void KSimplex::add_neighbor(KSimplex *kSimplex){
+    if(!kSimplex)
         return;
-    int kK1 = k1->k; // extract dimension
-    if(!find_neighbor(k1)) // if doesnt exist already
-        neighbors->elements[kK1].push_back(k1); // add it as a neighbor
-    if(!k1->find_neighbor(this)) // add me as a neigbhor to it as well
-        k1->neighbors->elements[k].push_back(this);
-    if(kK1){ // recursivelly add neighbors at k-1,..0:
-        for(auto &it : k1->neighbors->elements[kK1 - 1])
+    int k1 = kSimplex->k; // extract dimension
+    if(!find_neighbor(kSimplex)){ // if doesn't exist already
+        neighbors->elements[k1].push_back(kSimplex); // add it as a neighbor
+    }
+    if(!kSimplex->find_neighbor(this)) // add me as a neigbhor to it as well
+        kSimplex->neighbors->elements[k].push_back(this);
+    if(k1){ // recursivelly add neighbors at k-1,..0:
+        for(auto &it : kSimplex->neighbors->elements[k1 - 1])
             add_neighbor(it);
     }
 }
@@ -113,24 +114,6 @@ bool subset(set<KSimplex*> &s1, set<KSimplex*> &s2){
 		auto search = s2.find(x);
 		if(search == s2.end())
         	return false;
-	}
-	return true;
-}
-
-bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp *simpComp){
-	for(int k = 1; k <= simpComp->D; k++){
-		for(auto &kSimplex : simpComp->elements[k]){
-			set<KSimplex*> s;
-			kSimplex->collect_vertices(s);
-			for(int tempK = 0; tempK < k; tempK++){
-				for(auto &tempKSimplex : simpComp->elements[tempK]){
-					set<KSimplex*> tempS;
-					tempKSimplex->collect_vertices(tempS);
-					if(subset(tempS, s))
-						kSimplex->add_neighbor(tempKSimplex);
-				}
-			}
-		}
 	}
 	return true;
 }
@@ -264,6 +247,31 @@ KSimplex* SimpComp::find_vertices(set<KSimplex*> &s){
     return nullptr;
 }
 
+bool KSimplex::reconstruct_neighbors_from_vertices(){
+	set<KSimplex*> s;
+	collect_vertices(s);
+	for(int tempK = 0; tempK < k; tempK++){
+		for(auto &tempKSimplex : neighbors->elements[tempK]){
+			set<KSimplex*> tempS;
+			tempKSimplex->collect_vertices(tempS);
+			if(subset(tempS, s))
+				add_neighbor(tempKSimplex);
+		}
+	}
+	return true;
+}
+
+bool SimpComp::reconstruct_neighbors_from_vertices(){
+	for(int k = 1; k <= D; k++){
+		for(auto &kSimplex : elements[k]){
+			bool success = kSimplex->reconstruct_neighbors_from_vertices();
+			if(!success)
+				return false;
+		}
+	}
+	return true;
+}
+
 void SimpComp::print_set(set<int> &s){
     int nNotUniqueID = elements[0].size() - s.size();
     cout << "(";
@@ -379,6 +387,7 @@ KSimplex* SimpComp::create_ksimplex(int k){
         elements[k].push_back(newKSimplex);
         return newKSimplex;
     }else{
+    	cout << "k = " << k << "?!?" << endl;
         log_report(LOG_ERROR, "Adding KSimplex failed...");
         return nullptr;
     }

@@ -17,6 +17,7 @@ int main(){
 	//Function reconstruct_neighbors_from_vertices demonstration:
 	
     SimpComp *simpComp = seed_single_simplex(3);
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
 
     // Print random k-simplex:
@@ -35,7 +36,7 @@ int main(){
     simpComp->elements[1][0]->print("");
 	cout << endl;
 
-	KSimplex::reconstruct_neighbors_from_vertices(simpComp);
+	simpComp->reconstruct_neighbors_from_vertices();
 
     // Print the same k-simplex:
 	cout << endl;
@@ -55,7 +56,9 @@ int main(){
 	//	it.clear();
 	//delete simpComp;
 	//cout << "Deleted." << endl;
-	
+
+	//*
+	cout << "Simulatin Pancher Moves 1->4 and 4->1:" << endl;
     SimpComp *simpComp = seed_single_simplex(3);
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
@@ -64,8 +67,12 @@ int main(){
 	Pachner_move_1_to_4(simpComp->elements[simpComp->D][0], simpComp);
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
+    cout << endl << "---------------------------------------------------" << endl;
 	
-
+	Pachner_move_4_to_1(simpComp->elements[0][ simpComp->elements[0].size()-1 ], simpComp);
+    simpComp->print_compact();
+	//*/
+	
     return 0;
 }
 
