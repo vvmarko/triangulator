@@ -1,10 +1,30 @@
 #include "SeedComplex.h"
 #include "PrintComplex.h"
+#include "SimpCompTableModel.h"
+#include "MainWindow.h"
 
 void SeedComplex::handleAccepted() {		
 	PrintComplex* print = new PrintComplex(ui.cbType->currentText());
 
 	print->show();
+
+	SimpCompItem i;
+
+	i.name = ui.leName->text().toStdString();
+	i.d = atoi(ui.leDimension->text().toStdString().c_str());
+	items->push_back(i);
+
+	SimpCompTableModel* model = new SimpCompTableModel(items);	
+
+	SimpCompTableModel* prevModel;
+
+	prevModel = (SimpCompTableModel*)table->model();
+
+	table->setModel(model);
+
+	delete prevModel;
+
+	table->show();
 	this->close();
 }
 
@@ -12,7 +32,7 @@ void SeedComplex::handleRejected() {
 	this->close();
 }
 
-SeedComplex::SeedComplex(QWidget *parent)
+SeedComplex::SeedComplex(vector<SimpCompItem> *items, QTableView *table, QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
@@ -25,6 +45,9 @@ SeedComplex::SeedComplex(QWidget *parent)
 	
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &SeedComplex::handleAccepted);
 	connect(ui.buttonBox, &QDialogButtonBox::rejected, this, &SeedComplex::handleRejected);
+
+	this->items = items;
+	this->table = table;	
 }
 
 SeedComplex::~SeedComplex()

@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include "ui_MainWindow.h"
+#include "SimpCompTableModel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -15,4 +16,6 @@ private:
 	Ui::MainWindow ui;
 
 	void newFile();
+
+	vector<SimpCompItem> items;	
 };
