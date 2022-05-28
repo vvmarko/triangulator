@@ -14,7 +14,9 @@ using namespace std;
 #include "third-party-software/rapidxml/rapidxml_print.hpp"
 
 #include "color.hpp"
-#include "classes.hpp"
+#include "simpcomp.hpp"
+#include "ksimplex.hpp"
 #include "seed.hpp"
 #include "input-and-output.hpp"
+#include "pachner.hpp"
 

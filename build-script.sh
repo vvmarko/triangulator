@@ -6,7 +6,7 @@
 echo " "
 echo "Compiling component .cpp files..."
 
-g++ -c classes.cpp color.cpp input-and-output.cpp seed.cpp
+g++ -c simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
 
 echo "... done."
 echo " "
@@ -16,7 +16,7 @@ echo " "
 
 echo "Creating triangulator-library.a from component object files..."
 
-ar rcs triangulator-library.a classes.o color.o input-and-output.o seed.o
+ar rcs triangulator-library.a simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "
 echo " "
@@ -26,7 +26,7 @@ echo " "
 
 echo "Cleaning up temporary object files..."
 
-rm classes.o color.o input-and-output.o seed.o
+rm simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "
 echo " "
