@@ -12,10 +12,15 @@ public:
 	MainWindow(QWidget *parent = Q_NULLPTR);
 	~MainWindow();
 
+    void createItemWidget(int row);
+
 private:
 	Ui::MainWindow ui;
 
 	void newFile();
 
-	vector<SimpCompItem> items;	
+    void tblItemClick();
+
+    std::vector<SimpCompItem> items;
+
 };

@@ -1,6 +1,8 @@
 
 #include "SimpCompTableModel.h"
 
+using namespace std;
+
 SimpCompItem::SimpCompItem()
 {    
     d = 0;
@@ -25,15 +27,21 @@ int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const
 
 int SimpCompTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 2;
+    return 3;
 }
 
 QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
 {
     if (role == Qt::DisplayRole)        
-        if (index.column() == 0)
-          return QString::fromStdString(items->at(index.row()).name);
-        else return QString::number(items->at(index.row()).d);
+        switch (index.column())
+        {
+            case 0 :
+              return QString::fromStdString(items->at(index.row()).name);
+            case 1 :
+              return QString::number(items->at(index.row()).d);
+            case 2 :
+              return QString("");
+        }
 
     return QVariant();
 }

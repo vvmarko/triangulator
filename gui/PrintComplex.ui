@@ -15,9 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTextEdit" name="textEdit">
-     <property name="readOnly">
-      <bool>true</bool>
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="styleSheet">
+      <string notr="true">a:link { text-decoration: none; }</string>
      </property>
     </widget>
    </item>

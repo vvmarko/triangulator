@@ -14,4 +14,6 @@ public:
 
 private:
 	Ui::PrintComplex ui;
+
+    void anchorClicked(const QUrl &url);
 };

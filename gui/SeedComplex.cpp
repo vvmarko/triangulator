@@ -3,8 +3,8 @@
 #include "SimpCompTableModel.h"
 #include "MainWindow.h"
 
-void SeedComplex::handleAccepted() {		
-	PrintComplex* print = new PrintComplex(ui.cbType->currentText());
+void SeedComplex::handleAccepted() {			
+    PrintComplex* print = new PrintComplex(ui.cbType->currentText());
 
 	print->show();
 
@@ -24,15 +24,20 @@ void SeedComplex::handleAccepted() {
 
 	delete prevModel;
 
+    for (int i = 0; i < items->size(); i++)
+    {
+        mainWnd->createItemWidget(i);
+    }
+
 	table->show();
-	this->close();
+	this->close();   
 }
 
 void SeedComplex::handleRejected() {
 	this->close();
 }
 
-SeedComplex::SeedComplex(vector<SimpCompItem> *items, QTableView *table, QWidget *parent)
+SeedComplex::SeedComplex(MainWindow *mainWnd, vector<SimpCompItem> *items, QTableView *table, QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
@@ -46,6 +51,7 @@ SeedComplex::SeedComplex(vector<SimpCompItem> *items, QTableView *table, QWidget
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &SeedComplex::handleAccepted);
 	connect(ui.buttonBox, &QDialogButtonBox::rejected, this, &SeedComplex::handleRejected);
 
+    this->mainWnd = mainWnd;
 	this->items = items;
 	this->table = table;	
 }

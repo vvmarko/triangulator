@@ -3,15 +3,15 @@
 // mymodel.h
 #include <QAbstractTableModel>
 
-using namespace std;
+//using namespace std;
 
 class SimpCompItem
 {
 public:
     SimpCompItem();
-    SimpCompItem(string name, int d);
+    SimpCompItem(std::string name, int d);
 
-    string name;
+    std::string name;
     int d;
 };
 
@@ -19,7 +19,7 @@ class SimpCompTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    SimpCompTableModel(vector<SimpCompItem>* items, QObject* parent = nullptr);
+    SimpCompTableModel(std::vector<SimpCompItem>* items, QObject* parent = nullptr);
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -28,5 +28,5 @@ public:
 
     void addItem(SimpCompItem i);    
 private:
-    vector<SimpCompItem> *items;
+    std::vector<SimpCompItem> *items;
 };
