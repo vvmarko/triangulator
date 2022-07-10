@@ -4,7 +4,7 @@
 #include "MainWindow.h"
 
 void SeedComplex::handleAccepted() {			
-    PrintComplex* print = new PrintComplex(ui.cbType->currentText());
+    PrintComplex* print = new PrintComplex(ui.cbType->currentText(), false);
 
 	print->show();
 

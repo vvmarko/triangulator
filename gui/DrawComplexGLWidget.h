@@ -19,9 +19,16 @@ protected:
     {
         // Set up the rendering context, load shaders and other resources, etc.:
         QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();        
-        f->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);       
+        //f->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
         static const char *vertexShaderSource =
+                /*"attribute highp vec4 posAttr;\n"
+                    "uniform highp mat4 matrix;\n"
+                    "void main(void)\n"
+                    "{\n"
+                    "   gl_Position = matrix * posAttr;\n"
+                    "}"; */
             "attribute highp vec4 posAttr;\n"
             "attribute lowp vec4 colAttr;\n"
             "varying lowp vec4 col;\n"
@@ -36,6 +43,11 @@ protected:
             "void main() {\n"
             "   gl_FragColor = col;\n"
             "}\n";
+        /*"uniform mediump vec4 color;\n"
+            "void main(void)\n"
+            "{\n"
+            "   gl_FragColor = color;\n"
+            "}"; */
 
         m_program = new QOpenGLShaderProgram(this);
             m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
@@ -56,58 +68,98 @@ protected:
         //m_projection.perspective(45.0f, w / float(h), 0.01f, 100.0f);        
     }
 
-    void create_circle (GLfloat *vertices) {
-        for (int i = 0; i < 20; i ++) {
-            vertices[i * 6] = 0.5f;
-            vertices[i * 6 + 1] = 0.5f;
-            vertices[i * 6 + 2] = 0.5f + cos((float)i * 2 * M_PI / 20.0);
-            vertices[i * 6 + 3] = 0.5f + sin((float)i * 2 * M_PI / 20.0);
-            vertices[i * 6 + 4] = 0.5f + cos((float)(i + 1) * 2 * M_PI / 20.0);
-            vertices[i * 6 + 5] = 0.5f + sin((float)(i + 1) * 2 * M_PI / 20.0);
-        }
-    }
-
-    void paintGL() override
-    {
-        // Draw the scene:
-        QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
-        f->glClear(GL_COLOR_BUFFER_BIT);
-
-        static const GLfloat vertices[] = {
+    void create_test (GLfloat *vertices, GLfloat *colors) {
+        static const GLfloat verticesTriangle[] = {
                  0.0f,  0.707f,
                 -0.5f, -0.5f,
                  0.5f, -0.5f
             };
 
-        static const GLfloat colors[] = {
+        static const GLfloat colorsTriangle[] = {
                 1.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 1.0f
             };
 
-        GLfloat vertices_circle[2 * 120];
-        GLfloat col_circle[2 * 180];
-
-        create_circle(vertices_circle);
-
-        for (int i = 0; i < 120; i++) {
-            vertices_circle[120 + i] = vertices_circle[i] + 100.0f;
+        for (int i = 0; i < 6; i++) {
+            vertices[i] = verticesTriangle[i];
         }
 
-        for (int i = 0; i < 2 * 180; i++) {
-            col_circle[i] = 1.0f;
+        for (int i = 0; i < 9; i++) {
+            colors[i] = colorsTriangle[i];
         }
 
-        f->glDisable(GL_DEPTH_BUFFER_BIT);
+    }
 
+    void create_circleTriangleFan (GLfloat *vertices, int subdivs) {
+        GLfloat fSubDivs = (GLfloat)subdivs;
+        double diff = 2 * M_PI / fSubDivs;
+        double radius = 2;
+
+        for (int i = 0; i < subdivs; i ++) {
+            vertices[i * 6] = 0.0f;
+            vertices[i * 6 + 1] = 0.0f;
+            vertices[i * 6 + 2] = radius * cos((double)i * diff);
+            vertices[i * 6 + 3] = radius * sin((double)i * diff);
+            vertices[i * 6 + 4] = radius * cos((double)(i + 1) * diff);
+            vertices[i * 6 + 5] = radius * sin((double)(i + 1) * diff);
+        }
+    }
+
+    void create_circle (GLfloat *vertices, int subdivs) {
+        GLfloat fSubDivs = (GLfloat)subdivs;
+        double diff = 2 * M_PI / fSubDivs;
+        double radius = 4;
+
+        for (int i = 0; i < subdivs; i ++) {
+            vertices[i * 4] = radius * cos((double)i * diff);
+            vertices[i * 4 + 1] = radius * sin((double)i * diff);
+            vertices[i * 4 + 2] = radius * cos((double)(i + 1) * diff);
+            vertices[i * 4 + 3] = radius * sin((double)(i + 1) * diff);
+        }
+    }
+
+    void draw_lines(QOpenGLFunctions *f, GLfloat *vertices, int numVertices) {
+        GLfloat *colors = new GLfloat[numVertices * 3];
+
+        int i;
+
+        GLfloat color = (GLfloat)0.0;
+
+        int numVertices3 = numVertices * 3;
+
+        for (i = 0; i < numVertices3; i++)
+        {
+            colors[i] = color;
+        }
+
+        /*QColor color1(255, 255, 255, 255);
+
+        m_program->enableAttributeArray(m_posAttr);
+        m_program->setAttributeArray(m_posAttr, vertices, 2);
+        //program.setUniformValue(m_matrixUniform, pmvMatrix);
+        m_program->setUniformValue(m_colAttr, color1);
         m_program->bind();
 
-        QMatrix4x4 matrix;
-        matrix.perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-        matrix.translate(0, 0, -2);
+        f->glDrawArrays(GL_LINES, 0, numVertices);
 
-        m_program->setUniformValue(m_matrixUniform, matrix);
+        m_program->disableAttributeArray(m_posAttr); */
 
+        f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+
+        f->glEnableVertexAttribArray(m_posAttr);
+        f->glEnableVertexAttribArray(m_colAttr);
+
+        f->glDrawArrays(GL_LINES, 0, numVertices);
+
+        f->glDisableVertexAttribArray(m_colAttr);
+        f->glDisableVertexAttribArray(m_posAttr);        
+
+        delete[] colors;
+    }
+
+    void draw_testTriangle(QOpenGLFunctions *f, GLfloat *vertices, int numVertices, GLfloat *colors) {
         f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
         f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
 
@@ -117,18 +169,72 @@ protected:
         f->glDrawArrays(GL_TRIANGLES, 0, 3);
 
         f->glDisableVertexAttribArray(m_colAttr);
-        f->glDisableVertexAttribArray(m_posAttr);
+        f->glDisableVertexAttribArray(m_posAttr);        
+    }
 
-        f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices_circle);
-        f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, col_circle);
+    void create_simpcomp_line(GLfloat *vertices) {
+        vertices[0] = 115.0f;
+        vertices[1] = 145.0f;
+        vertices[2] = 325.0f;
+        vertices[3] = 225.0f;
+    }
 
-        f->glEnableVertexAttribArray(m_posAttr);
-        f->glEnableVertexAttribArray(m_colAttr);
+    void paintGL() override
+    {
+        // Draw the scene:
+        QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
+        f->glClear(GL_COLOR_BUFFER_BIT);
 
-        f->glDrawArrays(GL_TRIANGLES, 0, 120);
+        //f->glDisable(GL_DEPTH_BUFFER_BIT);
 
-        f->glDisableVertexAttribArray(m_colAttr);
-        f->glDisableVertexAttribArray(m_posAttr);
+        m_program->bind();
+
+        QMatrix4x4 matrix;
+        //matrix.perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
+        //m_program->setUniformValue(m_matrixUniform, matrix);
+        //GLfloat vertices[6], colors[9];
+        //create_test(vertices, colors);
+        //draw_testTriangle(f, vertices, 3, colors);
+
+        QRect rect;
+
+        /*if (this->width() > this->height()) {
+            rect = QRect(0, 0, 100 * this->width() / this->height(), 100);
+        } else {
+            rect = QRect(0, 0, 100, 100 * this->height() / this->width());
+        } */
+
+        rect = QRect(0, 0, this->width(), this->height());
+
+        matrix.setToIdentity();
+        matrix.ortho(rect);
+        //m_program->setUniformValue(m_matrixUniform, matrix);
+        m_program->setUniformValue(m_matrixUniform, matrix);
+
+        GLfloat vertices_line[4 * 2];
+        create_simpcomp_line(vertices_line);
+        draw_lines(f, vertices_line, 2);
+
+        /* matrix.translate(20, 20, 0);
+        m_program->setUniformValue(m_matrixUniform, matrix);
+
+        draw_lines(f, vertices_line, 2); */
+
+        GLfloat vertices_circle[4 * 10];
+
+        create_circle(vertices_circle, 10);
+
+        matrix.setToIdentity();
+        matrix.ortho(rect);
+        matrix.translate(115, 145, 0);
+        m_program->setUniformValue(m_matrixUniform, matrix);
+        draw_lines(f, vertices_circle, 2 * 10);
+
+        matrix.setToIdentity();
+        matrix.ortho(rect);
+        matrix.translate(325, 225, 0);
+        m_program->setUniformValue(m_matrixUniform, matrix);
+        draw_lines(f, vertices_circle, 2 * 10);
 
     }
 };

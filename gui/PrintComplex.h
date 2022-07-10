@@ -9,7 +9,7 @@ class PrintComplex : public QWidget
 	Q_OBJECT
 
 public:
-	PrintComplex(QString complexType, QWidget *parent = Q_NULLPTR);
+    PrintComplex(QString displayStr, bool displayLink, QWidget *parent = Q_NULLPTR);
 	~PrintComplex();
 
 private:

@@ -13,16 +13,11 @@
   <property name="windowTitle">
    <string>DrawComplex</string>
   </property>
-  <widget class="DrawComplexGLWidget" name="openGLWidget">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>411</width>
-     <height>341</height>
-    </rect>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="DrawComplexGLWidget" name="openGLWidget"/>
+   </item>
+  </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
