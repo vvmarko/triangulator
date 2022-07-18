@@ -12,6 +12,7 @@ void SeedComplex::handleAccepted() {
 
 	i.name = ui.leName->text().toStdString();
 	i.d = atoi(ui.leDimension->text().toStdString().c_str());
+    i.drawComplex = NULL;
 	items->push_back(i);
 
 	SimpCompTableModel* model = new SimpCompTableModel(items);	

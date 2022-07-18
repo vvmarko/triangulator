@@ -91,10 +91,10 @@ protected:
 
     }
 
-    void create_circleTriangleFan (GLfloat *vertices, int subdivs) {
+    void create_circleTriangles (GLfloat *vertices, int subdivs) {
         GLfloat fSubDivs = (GLfloat)subdivs;
         double diff = 2 * M_PI / fSubDivs;
-        double radius = 2;
+        double radius = 4;
 
         for (int i = 0; i < subdivs; i ++) {
             vertices[i * 6] = 0.0f;
@@ -103,6 +103,19 @@ protected:
             vertices[i * 6 + 3] = radius * sin((double)i * diff);
             vertices[i * 6 + 4] = radius * cos((double)(i + 1) * diff);
             vertices[i * 6 + 5] = radius * sin((double)(i + 1) * diff);
+        }
+    }
+
+    void create_circleTriangleFan (GLfloat *vertices, int subdivs) {
+        GLfloat fSubDivs = (GLfloat)subdivs;
+        double diff = 2 * M_PI / fSubDivs;
+        double radius = 4;        
+
+        vertices[0] = 0.0f;
+        vertices[1] = 0.0f;
+        for (int i = 0; i <= subdivs; i ++) {
+            vertices[2 + i * 2] = radius * cos((double)i * diff);
+            vertices[2 + i * 2 + 1] = radius * sin((double)i * diff);
         }
     }
 
@@ -155,6 +168,62 @@ protected:
 
         f->glDisableVertexAttribArray(m_colAttr);
         f->glDisableVertexAttribArray(m_posAttr);        
+
+        delete[] colors;
+    }
+
+    void draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices) {
+        GLfloat *colors = new GLfloat[numVertices * 3];
+
+        int i;
+
+        GLfloat color = (GLfloat)0.0;
+
+        int numVertices3 = numVertices * 3;
+
+        for (i = 0; i < numVertices3; i++)
+        {
+            colors[i] = color;
+        }
+
+        f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+
+        f->glEnableVertexAttribArray(m_posAttr);
+        f->glEnableVertexAttribArray(m_colAttr);
+
+        f->glDrawArrays(GL_TRIANGLE_FAN, 0, numVertices);
+
+        f->glDisableVertexAttribArray(m_colAttr);
+        f->glDisableVertexAttribArray(m_posAttr);
+
+        delete[] colors;
+    }
+
+    void draw_triangles(QOpenGLFunctions *f, GLfloat *vertices, int numVertices) {
+        GLfloat *colors = new GLfloat[numVertices * 3];
+
+        int i;
+
+        GLfloat color = (GLfloat)0.0;
+
+        int numVertices3 = numVertices * 3;
+
+        for (i = 0; i < numVertices3; i++)
+        {
+            colors[i] = color;
+        }
+
+        f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+        f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+
+        f->glEnableVertexAttribArray(m_posAttr);
+        f->glEnableVertexAttribArray(m_colAttr);
+
+        f->glDrawArrays(GL_TRIANGLES, 0, numVertices);
+
+        f->glDisableVertexAttribArray(m_colAttr);
+        f->glDisableVertexAttribArray(m_posAttr);
 
         delete[] colors;
     }
@@ -220,21 +289,21 @@ protected:
 
         draw_lines(f, vertices_line, 2); */
 
-        GLfloat vertices_circle[4 * 10];
+        GLfloat vertices_circle[2 * 10 + 2 + 2]; // last vertex is repeated twice
 
-        create_circle(vertices_circle, 10);
+        create_circleTriangleFan(vertices_circle, 10);
 
         matrix.setToIdentity();
         matrix.ortho(rect);
         matrix.translate(115, 145, 0);
         m_program->setUniformValue(m_matrixUniform, matrix);
-        draw_lines(f, vertices_circle, 2 * 10);
+        draw_triangleFan(f, vertices_circle, 2 + 10);
 
         matrix.setToIdentity();
         matrix.ortho(rect);
         matrix.translate(325, 225, 0);
         m_program->setUniformValue(m_matrixUniform, matrix);
-        draw_lines(f, vertices_circle, 2 * 10);
+        draw_triangleFan(f, vertices_circle, 2 + 10);
 
     }
 };

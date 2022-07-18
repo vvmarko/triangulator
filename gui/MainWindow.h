@@ -14,12 +14,14 @@ public:
 
     void createItemWidget(int row);
 
+    void drawComplexWndClosed(DrawComplex *wnd);
+
 private:
 	Ui::MainWindow ui;
 
 	void newFile();
 
-    void tblItemClick();
+    void tblItemClick();   
 
     std::vector<SimpCompItem> items;
 

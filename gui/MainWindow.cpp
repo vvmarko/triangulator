@@ -3,7 +3,6 @@
 #include "DrawComplex.h"
 #include <QPushButton>
 #include "SimpCompTableModel.h"
-#include <QMessageBox>
 
 void MainWindow::newFile() {
     SeedComplex* seedDialog = new SeedComplex(this, &items, ui.tblComplexes);
@@ -11,13 +10,28 @@ void MainWindow::newFile() {
     seedDialog->show();    
 }
 
+void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
+    for (int i = 0; i < items.size(); i++)
+    {
+        if (items[i].drawComplex == wnd) {
+            items[i].drawComplex = NULL;
+        }
+    }
+}
+
 void MainWindow::tblItemClick() {
     QPushButton *btn = (QPushButton *)sender();
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
-    DrawComplex* complexDialog = new DrawComplex();
-
-    complexDialog->show();
+    if (items[i].drawComplex == NULL) {
+        items[i].drawComplex = new DrawComplex(this);
+        //connect(items[i].drawComplex, &DrawComplex::destroyed, this, &MainWindow::drawComplexWndClosed);
+        items[i].drawComplex->show();
+    } else {        
+        items[i].drawComplex->close();
+        delete items[i].drawComplex;
+        items[i].drawComplex = NULL;
+    }
 }
 
 void MainWindow::createItemWidget(int row) {
