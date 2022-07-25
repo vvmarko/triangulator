@@ -19,4 +19,6 @@ private:
     MainWindow *mainWnd;
 
     void closeEvent(QCloseEvent* event) override;
+
+    void sliderValueChanged(int value);
 };

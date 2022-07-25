@@ -15,6 +15,8 @@ public:
     QOpenGLShaderProgram *m_program;
 
 protected:
+    GLfloat vertex1_x_pos;
+
     void initializeGL() override
     {
         // Set up the rendering context, load shaders and other resources, etc.:
@@ -59,6 +61,8 @@ protected:
             Q_ASSERT(m_colAttr != -1);
             m_matrixUniform = m_program->uniformLocation("matrix");
             Q_ASSERT(m_matrixUniform != -1);
+
+         vertex1_x_pos = 115;
     }
 
     void resizeGL(int w, int h) override
@@ -242,7 +246,7 @@ protected:
     }
 
     void create_simpcomp_line(GLfloat *vertices) {
-        vertices[0] = 115.0f;
+        vertices[0] = vertex1_x_pos;
         vertices[1] = 145.0f;
         vertices[2] = 325.0f;
         vertices[3] = 225.0f;
@@ -295,7 +299,7 @@ protected:
 
         matrix.setToIdentity();
         matrix.ortho(rect);
-        matrix.translate(115, 145, 0);
+        matrix.translate(vertex1_x_pos, 145, 0);
         m_program->setUniformValue(m_matrixUniform, matrix);
         draw_triangleFan(f, vertices_circle, 2 + 10);
 
@@ -305,6 +309,11 @@ protected:
         m_program->setUniformValue(m_matrixUniform, matrix);
         draw_triangleFan(f, vertices_circle, 2 + 10);
 
+    }
+
+public:
+    void set_vertex1_x_pos(GLfloat value) {
+        vertex1_x_pos = value;
     }
 };
 

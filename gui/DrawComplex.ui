@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>457</width>
-    <height>387</height>
+    <height>382</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,13 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="DrawComplexGLWidget" name="openGLWidget"/>
+   </item>
+   <item>
+    <widget class="QSlider" name="horizontalSlider">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
