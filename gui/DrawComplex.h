@@ -21,4 +21,5 @@ private:
     void closeEvent(QCloseEvent* event) override;
 
     void sliderValueChanged(int value);
+    void spinBoxValueChanged(int value);
 };
