@@ -4,10 +4,17 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <math.h>
+#include <QStatusBar>
+#include <QMouseEvent>
+#include <QDialog>
+#include <QLabel>
+#include <QVBoxLayout>
 
 class DrawComplexGLWidget :
 	public QOpenGLWidget
 {
+private:
+    QStatusBar *drawComplexStatusBar = NULL;    
 public:
     DrawComplexGLWidget(QWidget* parent) : QOpenGLWidget(parent) { }
 
@@ -312,8 +319,58 @@ protected:
     }
 
 public:
-    void set_vertex1_x_pos(GLfloat value) {
+    void set_vertex1_x_pos(GLfloat value)
+    {
         vertex1_x_pos = value;
+    }    
+
+    void setDrawComplexStatusBar (QStatusBar *drawComplex)
+    {
+        drawComplexStatusBar = drawComplex;
     }
+
+protected:
+    void leaveEvent(QEvent *event) override {
+        if (drawComplexStatusBar != NULL) {
+            drawComplexStatusBar->showMessage("0, 0");
+        }
+    }
+
+    void enterEvent(QEnterEvent *e) override {
+        std::string s = std::to_string((int)e->position().x());
+        std::string s1 = std::to_string((int)e->position().y());
+        if (drawComplexStatusBar != NULL) {
+            drawComplexStatusBar->showMessage((s + ", " + s1).c_str());
+        }
+    }
+
+    void mouseMoveEvent(QMouseEvent *e) override
+    {
+        std::string s = std::to_string((int)e->position().x());
+        std::string s1 = std::to_string((int)e->position().y());
+        if (drawComplexStatusBar != NULL) {
+            drawComplexStatusBar->showMessage((s + ", " + s1).c_str());
+        }
+    }
+
+    void mouseReleaseEvent(QMouseEvent *e) override
+    {
+        std::string s = std::to_string((int)e->position().x());
+        std::string s1 = std::to_string((int)e->position().y());
+        QDialog *dlg = new QDialog();
+        dlg->setWindowTitle("Coordinates");
+        QVBoxLayout *layout = new QVBoxLayout();
+        QLabel *label = new QLabel();
+        label->setText((s + ", " + s1).c_str());
+        layout->addWidget(label);
+        dlg->setLayout(layout);
+        dlg->setGeometry((parentWidget()->frameSize().width() -
+                         parentWidget()->size().width()) * 2 + parentWidget()->pos().x() + this->pos().x() + e->position().x(),
+                         (parentWidget()->frameSize().height() -
+                         parentWidget()->size().height()) * 2 + parentWidget()->pos().y() + this->pos().y() + e->position().y(),
+                         200, 100);
+        dlg->show();
+    }
+
 };
 

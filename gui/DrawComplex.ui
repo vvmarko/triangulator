@@ -10,6 +10,9 @@
     <height>439</height>
    </rect>
   </property>
+  <property name="mouseTracking">
+   <bool>false</bool>
+  </property>
   <property name="windowTitle">
    <string>DrawComplex</string>
   </property>
@@ -21,6 +24,9 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="mouseTracking">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
