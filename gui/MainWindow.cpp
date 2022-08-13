@@ -42,17 +42,28 @@ void MainWindow::createItemWidget(int row) {
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 2), btnDrawComplex);
 }
 
+void MainWindow::quit()
+{
+    QApplication::quit();
+}
+
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
 
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::newFile);
+    connect(ui.actionQuit, &QAction::triggered, this, &MainWindow::quit);
 
     SimpCompTableModel *model = new SimpCompTableModel(&items);
 
     ui.tblComplexes->setModel(model);
     ui.tblComplexes->show();
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    QApplication::quit();
 }
 
 MainWindow::~MainWindow()

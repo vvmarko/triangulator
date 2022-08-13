@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;    
-    w.statusBar()->showMessage("Status");    
+    w.statusBar()->showMessage("Status");
     /*QLabel* status = new QLabel();
     status->setText("Status");
     status->setLineWidth(0);

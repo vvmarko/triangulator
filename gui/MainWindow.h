@@ -20,9 +20,11 @@ private:
 	Ui::MainWindow ui;
 
 	void newFile();
+    void quit();
 
     void tblItemClick();   
 
     std::vector<SimpCompItem> items;
 
+    void closeEvent(QCloseEvent *e) override;
 };
