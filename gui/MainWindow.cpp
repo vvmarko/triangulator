@@ -3,11 +3,28 @@
 #include "DrawComplex.h"
 #include <QPushButton>
 #include "SimpCompTableModel.h"
+#include "LogViewer.h"
 
 void MainWindow::newFile() {
     SeedComplex* seedDialog = new SeedComplex(this, &items, ui.tblComplexes);
 
     seedDialog->show();    
+}
+
+void MainWindow::openLogFile() {    
+    if (!viewLogFileVisible)
+    {
+        logViewerDialog = new LogViewer(this, "");
+
+        logViewerDialog->show();
+        viewLogFileVisible = true;
+    } else
+    {
+        logViewerDialog->close();
+        viewLogFileVisible = false;
+        delete logViewerDialog;
+        logViewerDialog = NULL;
+    }
 }
 
 void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
@@ -17,6 +34,13 @@ void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
             items[i].drawComplex = NULL;
         }
     }
+}
+
+void MainWindow::viewLogFileClosed()
+{
+    viewLogFileVisible = false;
+    delete logViewerDialog;
+    logViewerDialog = NULL;
 }
 
 void MainWindow::tblItemClick() {
@@ -53,12 +77,16 @@ MainWindow::MainWindow(QWidget *parent)
 	ui.setupUi(this);
 
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::newFile);
+    connect(ui.actionView_Log_File, &QAction::triggered, this, &MainWindow::openLogFile);
     connect(ui.actionQuit, &QAction::triggered, this, &MainWindow::quit);
 
     SimpCompTableModel *model = new SimpCompTableModel(&items);
 
     ui.tblComplexes->setModel(model);
     ui.tblComplexes->show();
+
+    viewLogFileVisible = false;
+    logViewerDialog = NULL;
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

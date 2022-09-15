@@ -4,6 +4,8 @@
 #include "ui_MainWindow.h"
 #include "SimpCompTableModel.h"
 
+class LogViewer;
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -15,16 +17,21 @@ public:
     void createItemWidget(int row);
 
     void drawComplexWndClosed(DrawComplex *wnd);
+    void viewLogFileClosed();
 
 private:
 	Ui::MainWindow ui;
 
+    bool viewLogFileVisible;
+    LogViewer* logViewerDialog;
+
 	void newFile();
+    void openLogFile();
     void quit();
 
     void tblItemClick();   
 
     std::vector<SimpCompItem> items;
 
-    void closeEvent(QCloseEvent *e) override;
+    void closeEvent(QCloseEvent *e) override;    
 };
