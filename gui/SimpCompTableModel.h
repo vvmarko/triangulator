@@ -3,6 +3,7 @@
 // mymodel.h
 #include <QAbstractTableModel>
 #include "DrawComplex.h"
+#include "PrintComplex.h"
 
 //using namespace std;
 
@@ -15,6 +16,7 @@ public:
     std::string name;
     int d;
     DrawComplex *drawComplex; // each simplicial complex has its own table item
+    PrintComplex *printComplex; // each simplicial complex has its own table item
 };
 
 class SimpCompTableModel : public QAbstractTableModel

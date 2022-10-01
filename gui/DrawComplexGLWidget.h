@@ -18,6 +18,8 @@ private:
 public:
     DrawComplexGLWidget(QWidget* parent) : QOpenGLWidget(parent) { }
 
+    std::vector<QWidget*> childWindows;
+
     int m_posAttr, m_colAttr, m_matrixUniform;
     QOpenGLShaderProgram *m_program;
 
@@ -353,6 +355,18 @@ protected:
         }
     }
 
+    void coordinatesWindowFinished(int result) {
+        bool erased = false;
+        QDialog *dlg = (QDialog *)sender();
+
+        for (int i = 0; i < childWindows.size() && !erased; i++)
+          if (childWindows[i] == dlg)
+            {
+                childWindows.erase(childWindows.begin() + i);
+                erased = true;
+            }
+    }
+
     void mouseReleaseEvent(QMouseEvent *e) override
     {
         std::string s = std::to_string((int)e->position().x());
@@ -370,6 +384,8 @@ protected:
                          parentWidget()->size().height()) * 2 + parentWidget()->pos().y() + this->pos().y() + e->position().y(),
                          200, 100);
         dlg->show();
+        connect(dlg, &QDialog::finished, this, &DrawComplexGLWidget::coordinatesWindowFinished);
+        childWindows.push_back(dlg);
     }
 
 };

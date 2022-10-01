@@ -40,9 +40,18 @@ DrawComplex::~DrawComplex()
 {
 }
 
-void DrawComplex::closeEvent (QCloseEvent* event)
+DrawComplexGLWidget *DrawComplex::getGLWidget()
 {
+    return ui.openGLWidget;
+}
+
+void DrawComplex::closeEvent (QCloseEvent* event)
+{    
     mainWnd->drawComplexWndClosed(this);
+    for(QWidget *w:ui.openGLWidget->childWindows)
+    {
+        w->close();
+    }
 }
 
 void DrawComplex::setStatusMessage(QString s)

@@ -36,6 +36,15 @@ void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
     }
 }
 
+void MainWindow::printComplexWndClosed(PrintComplex *wnd) {
+    for (int i = 0; i < items.size(); i++)
+    {
+        if (items[i].printComplex == wnd) {
+            items[i].printComplex = NULL;
+        }
+    }
+}
+
 void MainWindow::viewLogFileClosed()
 {
     viewLogFileVisible = false;
@@ -43,7 +52,7 @@ void MainWindow::viewLogFileClosed()
     logViewerDialog = NULL;
 }
 
-void MainWindow::tblItemClick() {
+void MainWindow::tblItemDrawComplexClick() {
     QPushButton *btn = (QPushButton *)sender();
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
@@ -58,12 +67,65 @@ void MainWindow::tblItemClick() {
     }
 }
 
+void MainWindow::tblItemPrintComplexClick() {
+    QPushButton *btn = (QPushButton *)sender();
+    int i = ui.tblComplexes->indexAt(btn->pos()).row();
+
+    if (items[i].printComplex == NULL) {
+        items[i].printComplex = new PrintComplex(this, "", false);
+        //connect(items[i].drawComplex, &DrawComplex::destroyed, this, &MainWindow::drawComplexWndClosed);
+        items[i].printComplex->show();
+    } else {                        
+        items[i].printComplex->close();
+        delete items[i].printComplex;
+        items[i].printComplex = NULL;
+    }
+}
+
+void MainWindow::tblItemDeleteRowClick() {
+    QPushButton *btn = (QPushButton *)sender();
+    int i = ui.tblComplexes->indexAt(btn->pos()).row();
+
+    if (items[i].printComplex != NULL) {                
+        items[i].printComplex->close();
+        delete items[i].printComplex;
+    }
+    if (items[i].drawComplex != NULL) {
+        items[i].drawComplex->close();
+        delete items[i].drawComplex;
+    }
+    items.erase(items.begin() + i);
+
+    SimpCompTableModel* model = new SimpCompTableModel(&items);
+
+    SimpCompTableModel* prevModel;
+
+    prevModel = (SimpCompTableModel*)ui.tblComplexes->model();
+
+    ui.tblComplexes->setModel(model);
+
+    delete prevModel;
+
+    for (int i = 0; i < items.size(); i++)
+    {
+        createItemWidget(i);
+    }
+
+    ui.tblComplexes->show();
+}
+
 void MainWindow::createItemWidget(int row) {
-    QPushButton *btnDrawComplex = new QPushButton("Crtaj");
+    QPushButton *btnPrintComplex = new QPushButton("Listaj");
+    QPushButton *btnDrawComplex = new QPushButton("Crtaj");    
+    QPushButton *btnDeleteRow = new QPushButton("Obriši");
 
-    connect(btnDrawComplex, &QPushButton::released, this, &MainWindow::tblItemClick);
+    connect(btnPrintComplex, &QPushButton::released, this, &MainWindow::tblItemPrintComplexClick);
+    connect(btnDrawComplex, &QPushButton::released, this, &MainWindow::tblItemDrawComplexClick);    
+    connect(btnDeleteRow, &QPushButton::released, this, &MainWindow::tblItemDeleteRowClick);
 
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 2), btnDrawComplex);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 2), btnPrintComplex);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 3), btnDrawComplex);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 4), btnDeleteRow);
 }
 
 void MainWindow::quit()

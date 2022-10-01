@@ -4,7 +4,7 @@
 #include "MainWindow.h"
 
 void SeedComplex::handleAccepted() {			
-    PrintComplex* print = new PrintComplex(ui.cbType->currentText(), false);
+    PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false);
 
 	print->show();
 
@@ -13,6 +13,8 @@ void SeedComplex::handleAccepted() {
 	i.name = ui.leName->text().toStdString();
 	i.d = atoi(ui.leDimension->text().toStdString().c_str());
     i.drawComplex = NULL;
+    print->parent = NULL;
+    i.printComplex = print;
 	items->push_back(i);
 
 	SimpCompTableModel* model = new SimpCompTableModel(items);	

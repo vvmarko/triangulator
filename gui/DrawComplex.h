@@ -13,14 +13,16 @@ class DrawComplex : public QWidget
 
 public:
     DrawComplex(MainWindow *mainWnd, QWidget *parent = Q_NULLPTR);
-	~DrawComplex();
+	~DrawComplex();    
+
+    DrawComplexGLWidget *getGLWidget();
 
 private:
 	Ui::DrawComplex ui;
 
     MainWindow *mainWnd;
 
-    QStatusBar *statusBar;
+    QStatusBar *statusBar;   
 
     void closeEvent(QCloseEvent* event) override;
 

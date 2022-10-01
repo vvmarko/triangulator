@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>461</width>
+    <width>540</width>
     <height>346</height>
    </rect>
   </property>
@@ -25,7 +25,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>461</width>
+     <width>540</width>
      <height>22</height>
     </rect>
    </property>
@@ -68,7 +68,7 @@
    <property name="text">
     <string>Log</string>
    </property>
-  </action>  
+  </action>
   <action name="actionView_Log_File">
    <property name="text">
     <string>View Log File</string>

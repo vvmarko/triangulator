@@ -17,6 +17,7 @@ public:
     void createItemWidget(int row);
 
     void drawComplexWndClosed(DrawComplex *wnd);
+    void printComplexWndClosed(PrintComplex *wnd);
     void viewLogFileClosed();
 
 private:
@@ -29,7 +30,9 @@ private:
     void openLogFile();
     void quit();
 
-    void tblItemClick();   
+    void tblItemPrintComplexClick();
+    void tblItemDrawComplexClick();
+    void tblItemDeleteRowClick();
 
     std::vector<SimpCompItem> items;
 

@@ -13,7 +13,7 @@ void LogViewer::logFileChanged(const QString &path) {
 
     if (fileAccessed == 1) {
            //ui.textEdit->moveCursor(QTextCursor::End);
-           ui.textEdit->insertPlainText("<asynchronous log file read attempted, waiting...>\n");
+           //ui.textEdit->insertPlainText("<asynchronous log file read attempted, waiting...>\n");
            ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
            while (fileAccessed == 1) { }
        }

@@ -27,7 +27,7 @@ int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const
 
 int SimpCompTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 3;
+    return 5; // name, dimension, print complex, draw complex, delete row
 }
 
 QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
@@ -40,6 +40,10 @@ QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
             case 1 :
               return QString::number(items->at(index.row()).d);
             case 2 :
+              return QString("");
+            case 3 :
+              return QString("");
+            case 4 :
               return QString("");
         }
 
