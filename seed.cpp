@@ -129,7 +129,7 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
 // k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
 // k=3: / 1-2-3-4.
 KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* small, KSimplex *vertex){
-    int k = small->k + 1;
+    int k = (small ? small->k + 1 : 0);
 	set<KSimplex*> s;
 	small->collect_vertices(s);
     s.insert(vertex);
@@ -176,7 +176,7 @@ KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* s
 
 KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* small){
     // Seed a KSimplex of level k based on KSimplex of level k-1:
-    int k = small->k + 1;
+    int k = (small ? small->k + 1 : 0);
     // Create a new vertex, i.e. KSimplex(0):
     KSimplex *vertex = simpComp->create_ksimplex(0);
     if(k == 0)
