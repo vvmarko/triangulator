@@ -23,6 +23,10 @@ public:
     // Finds a k-simplex with given vertices, if exists:
     KSimplex* find_vertices(set<KSimplex*> &s);
     bool reconstruct_neighbors_from_vertices();
+    // Finds a k-simplex with given given ID, if exists:
+    KSimplex* find_KSimplex(size_t id);
+    // Finds a k-simplex with given IDs, if exists:
+    KSimplex* find_KSimplex(set<int> IDs);
     void print_set(set<int> &s);
     void print_vertices_IDs_in_parentheses(set<int> &s);
     void print_compact();

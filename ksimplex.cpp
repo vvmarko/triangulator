@@ -151,5 +151,3 @@ bool KSimplex::reconstruct_neighbors_from_vertices(){
 	}
 	return true;
 }
-
-

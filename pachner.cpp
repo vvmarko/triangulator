@@ -101,5 +101,27 @@ KSimplex* Pachner_move_4_to_1(KSimplex *kSimplex, SimpComp *simpComp){
 	
 	return simpComp->elements[simpComp->D][0];
 }
+// Pachner move 3 to 2 
+// Input: 1-simplex (1-5) to perform a move on, and complex simpComp.
+// Output: 2-simplex kSimplex (2-3-4) create by the move.
+// Beginning structure:
+// k=0: 1, 2, 3, 4, 5
+// k=1: (1-2), (1-3), (1-4), (2-3), (2-4), (3-4), (2-5), (3-5), (4-5), (1-5)
+// k=2: (1-2-3), (1-2-4), (1-3-4), (2-3-5), (2-4-5), (3-4-5), (1-2-5), (1-3-5), (1-4-5)
+// k=3: (1-2-3-5), (1-2-4-5), (1-3-4-5)
+// Final structure:
+// k=0: 1, 2, 3, 4, 5
+// k=1: (1-2), (1-3), (1-4), (2-3), (2-4), (3-4), (2-5), (3-5), (4-5)
+// k=2: (1-2-3), (1-2-4), (1-3-4), (2-3-4), (2-3-5), (2-4-5), (3-4-5)
+// k=3: (1-2-3-4), (2-3-4-5)
+KSimplex* Pachner_move_3_to_2(KSimplex *kSimplex, SimpComp *simpComp){
+	// for k == 1:
+kSimplex->print("");
+//	set<KSimplex*> &s;
+//	kSimplex->collect_vertices(s);
+//	simpComp->find_vertices(s);
+
+return nullptr;    
+}
 
 

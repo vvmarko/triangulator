@@ -4,23 +4,87 @@
 
 #include "triangulator.hpp"
 
-std::ostream &operator<<(std::ostream &os, set<int> &s) { 
-	os << "(";
-	bool first = true;
-	for(auto &it : s){
-		if(!first)
-			os << ",";
-		first = false;
-		os << it;
-	}
-	os << ")";
-    return os;
+KSimplex::KSimplex(){
+    k = 0;
+    neighbors = new SimpComp(0);
+}
+
+KSimplex::KSimplex(int k, int D){
+    this->k = k;
+    this->D = D;
+    neighbors = new SimpComp(D);
+}
+
+KSimplex::~KSimplex(){
+    for(auto pColor : colors)
+        delete pColor;
+    delete neighbors;
+}
+
+bool KSimplex::find_neighbor(KSimplex *k1){
+    if(!k1)
+        return false;
+    int k = k1->k;
+    for(auto &it : neighbors->elements[k])
+        if(it == k1)
+            return true;
+    return false;
+}
+
+// By adding neighbor k1, function add_neighbor
+// also adds all simplices of k1.
+// Whenever a neighbor is added to current one,
+// the opposite is also done.
+void KSimplex::add_neighbor(KSimplex *k1){
+    if(!k1)
+        return;
+    int kK1 = k1->k; // extract dimension
+    if(!find_neighbor(k1)) // if doesnt exist already
+        neighbors->elements[kK1].push_back(k1); // add it as a neighbor
+    if(!k1->find_neighbor(this)) // add me as a neigbhor to it as well
+        k1->neighbors->elements[k].push_back(this);
+    if(kK1){ // recursivelly add neighbors at k-1,..0:
+        for(auto &it : k1->neighbors->elements[kK1 - 1])
+            add_neighbor(it);
+    }
+}
+
+void KSimplex::print(string space){
+    cout << space << "Printing KSimplex: " << " k = " << k << ", D = " << D << endl;
+//        cout << space << "Printing colors:" << endl;
+    for(auto &c : colors){
+        c->print(space + "  ");
+    }
+// Recursively prints neighbors:
+//        cout << space << "  Printing neighbors:" << endl;
+//        neighbors->print(space + "    ");
+}
+
+UniqueIDColor* KSimplex::get_uniqueID(){
+    for(auto pColor : colors)
+        if(pColor->type == TYPE_UNIQUE_ID)
+            return static_cast<UniqueIDColor*>(pColor);
+    return nullptr;
+}
+
+void KSimplex::print_compact(){
+    UniqueIDColor* pColor = get_uniqueID();
+    if(!pColor){
+        cout << "simplex";
+    }else{
+        pColor->print_compact();
+        if( k && (neighbors->elements[0].size()) ){
+            // empty ordered set container
+            set<int> s;
+            neighbors->print_vertices_in_parentheses(s);
+        }
+    }
 }
 
 SimpComp::SimpComp(int dim):
         name {""}, D{dim}{
     for(int i = 0; i <= D; i++){
-//        list<KSimplex*> listaKSimpleksa;
+//            list<KSimplex*> listaKSimpleksa;
         vector<KSimplex*> listaKSimpleksa;
         elements.push_back(listaKSimpleksa);
     }
@@ -30,32 +94,34 @@ SimpComp::SimpComp(int dim):
 SimpComp::SimpComp(string s, int dim):
         name {s}, D{dim}{
     for(int i = 0; i <= D; i++){
-//        list<KSimplex*> listaKSimpleksa;
+//            list<KSimplex*> listaKSimpleksa;
         vector<KSimplex*> listaKSimpleksa;
         elements.push_back(listaKSimpleksa);
     }
     log_report(LOG_INFO, "initialize: Setting up everything for a new graph.");
 }
 
-// Copy constructor - creating new SimpComp by copying existing one:
-SimpComp::SimpComp(const SimpComp& simpComp){
-	name = simpComp.name;
-    D = simpComp.D;
-    for(auto &row : simpComp.elements){
-        vector<KSimplex*> newKSimplexList;
-        for(auto &kSimplex : row)
-            newKSimplexList.push_back(kSimplex);
-        elements.push_back(newKSimplexList);
+/*
+// Shallow copy, keeping original KSimplex pointers,
+// without creating new KSimplex-es by copying existing ones:
+SimpComp::SimpComp(const SimpComp& s){
+    name = s.name;
+    D = s.D;
+    for(auto &pointers : elements){
+        vector<KSimplex*> listaKSimpleksa;
+        for(auto &kSimplex : pointers)
+            listaKSimpleksa.push_back(kSimplex);
+        elements.push_back(listaKSimpleksa);
     }
+    vector< vector<KSimplex *> > elements;
 }
-
+*/
 SimpComp::~SimpComp(){
-	//cout << "Deleting SimpComp... ";
     for(int i = 0; i <= D; i++){
-        for(auto pKSimplex : elements[i]){
+        for(auto pKSimplex : elements[i])
             delete(pKSimplex);
-        }
     }
+    
 }
 
 int SimpComp::count_number_of_simplexes(int level){
@@ -84,68 +150,12 @@ bool SimpComp::all_uniqueID(int level){
 }
 
 // Collects neighboring vertices into a set<int>:
-void SimpComp::collect_vertices(set<KSimplex*> &s){
-    for(auto &kSimplex : elements[0]){
-        s.insert(kSimplex);
-    }
-}
-
-// Collects neighboring vertices IDs into a set<int>:
-void SimpComp::collect_vertices_IDs(set<int> &s){
+void SimpComp::collect_vertices(set<int> &s){
     for(auto &it : elements[0]){
         Color *pColor = it->get_uniqueID();
         if(pColor)
             s.insert( static_cast<UniqueIDColor*>(pColor)->id );
     }
-}
-
-// Finds a k-simplex with given vertices, if exists:
-KSimplex* SimpComp::find_vertices(set<KSimplex*> &s){
-	int kFound = s.size() - 1;
-	if(kFound > D)
-		return nullptr;
-    for(auto &it : elements[kFound]){
-		set<KSimplex*> sTemp;
-        it->collect_vertices(sTemp);
-        if(sTemp == s)
-        	return it;
-    }
-    return nullptr;
-}
-
-bool SimpComp::reconstruct_neighbors_from_vertices(){
-	for(int k = 1; k <= D; k++){
-		for(auto &kSimplex : elements[k]){
-			bool success = kSimplex->reconstruct_neighbors_from_vertices();
-			if(!success)
-				return false;
-		}
-	}
-	return true;
-}
-
-// Finds a k-simplex with given ID, if exists:
-KSimplex* SimpComp::find_KSimplex(size_t id){
-    for(auto &it : elements[0]){
-        for(auto pColor : it->colors)
-            if(pColor->type == TYPE_UNIQUE_ID)
-                if((static_cast<UniqueIDColor*>(pColor))->id == id)
-                    return it;
-    }
-    return nullptr;
-}
-
-// Finds a k-simplex with given IDs, if exists:
-KSimplex* SimpComp::find_KSimplex(set<int> IDs){
-	set<KSimplex*> sTemp;
-    for(auto &id : IDs){
-        KSimplex *temp = find_KSimplex(id);
-        if(!temp)
-            return nullptr;
-        sTemp.insert(temp);
-    }
-
-	return find_vertices(sTemp);
 }
 
 void SimpComp::print_set(set<int> &s){
@@ -163,8 +173,8 @@ void SimpComp::print_set(set<int> &s){
     cout << ")";
 }
 
-void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
-    collect_vertices_IDs(s);
+void SimpComp::print_vertices_in_parentheses(set<int> &s){
+    collect_vertices(s);
     if(s.size())
         print_set(s);
 }
@@ -223,7 +233,7 @@ void SimpComp::print_compact(){
                             UniqueIDColor* pColor = elements[k][i]->get_uniqueID();
                             if(pColor)
                                 s.insert( static_cast<UniqueIDColor*>(pColor)->id );
-                            elements[k][i]->neighbors->print_vertices_IDs_in_parentheses(s);
+                            elements[k][i]->neighbors->print_vertices_in_parentheses(s);
                         }
                         cout << endl;
                     }
@@ -257,47 +267,13 @@ KSimplex* SimpComp::create_ksimplex(int k){
     string s = "Creating KSimplex at level: " + k;
     log_report(LOG_INFO, s);
     if ( (k >= 0) && (k <= D) ){
-        // Creating new KSimplex at level k:
         KSimplex *newKSimplex = new KSimplex(k, D);
-        // Add newly created k-simplex to the this simplicial complex elements:
         elements[k].push_back(newKSimplex);
         return newKSimplex;
     }else{
-    	cout << "k = " << k << "?!?" << endl;
         log_report(LOG_ERROR, "Adding KSimplex failed...");
         return nullptr;
     }
-}
-
-// Remove given simplex after disconnecting neighbors:
-void SimpComp::remove_simplex(KSimplex *kSimplex){
-    if(!kSimplex)
-        error("remove_simplex: nullptr given.");
-    int k = kSimplex->k;
-    if(k > D)
-        error("remove_simplex: k("+to_string(k)+")>D("+to_string(D)+")");
-
-    // Find the position of kSimplex in neighbors->elements[k]:
-    unsigned int i = 0;
-    while( (i < elements[k].size()) && (elements[k][i] != kSimplex) )
-        i++;
-    if(i == elements[k].size())
-        error("remove_simplex: kSimplex not found on level "+to_string(k));
-
-    // If not last:
-    if(i < elements[k].size() - 1){
-        // Copy the pointer of the last kSimplex onto position i:
-        elements[k][i] = elements[k][ elements[k].size() - 1 ];
-    }
-
-    // Remove the last element:
-    elements[k].pop_back();
-
-    // Delete all neigbhors from kSimplex:
-    kSimplex->delete_all_neighbors();
-
-    // Free the memory reserved by kSimplex:
-    delete kSimplex;
 }
 
 void SimpComp::print_sizes(){
