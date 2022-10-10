@@ -7,16 +7,16 @@ int main(){
     cout << endl << "---------------------------------------------------"
             << endl << "General seed example, compact printing:" << endl << endl;
 
-    //SimpComp *simpComp = seed_single_simplex(3);
+    //SimpComp *simpComp = seed_single_simplex(3, "triangle");
     //simpComp->print_compact();
 
-    //SimpComp *simpComp = seed_sphere(3);
+    //SimpComp *simpComp = seed_sphere(3, "sphere");
     //simpComp->print_compact();
 
 	/*
 	//Function reconstruct_neighbors_from_vertices demonstration:
 	
-    SimpComp *simpComp = seed_single_simplex(3);
+    SimpComp *simpComp = seed_single_simplex(3, "sphere");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
 
@@ -47,7 +47,7 @@ int main(){
     simpComp->print_compact();
     //*/
     
-    //SimpComp *simpComp = seed_sphere_intuitively(3);
+    //SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
     //simpComp->print_compact();
     
     //SimpComp simpComp2(*simpComp);
@@ -59,7 +59,7 @@ int main(){
 
 	/*
 	cout << "Simulatin Pancher Moves 1->4 and 4->1:" << endl;
-    SimpComp *simpComp = seed_single_simplex(3);
+    SimpComp *simpComp = seed_single_simplex(3, "PancherSimulation");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
     cout << endl << "---------------------------------------------------" << endl;
@@ -74,7 +74,7 @@ int main(){
 	//*/
 
     /*
-    SimpComp *simpComp = seed_sphere(3);
+    SimpComp *simpComp = seed_sphere(3, "simpCompFindByIDs");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
 	cout << "Testing find_KSimplex by ID:" << endl;
     KSimplex* temp = simpComp->find_KSimplex(2);
@@ -94,7 +94,7 @@ int main(){
 	/*
 	//cout << "Simulatin Pancher Moves 3->2 and 2->3:" << endl;
 	cout << "Simulatin Pancher Move 3->2:" << endl;
-    SimpComp *simpComp = seed_sphere(3);
+    SimpComp *simpComp = seed_sphere(3, "PancherSimulation");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
     cout << endl << "---------------------------------------------------" << endl;

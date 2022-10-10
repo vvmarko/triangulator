@@ -187,7 +187,7 @@ KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* small){
 }
 
 // Seed a single simplex or sphere of dimension d:
-SimpComp* seed_single_simplex_or_sphere(int D, int sphere){
+SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
     string s = "Creating general ";
     s += (sphere ? "sphere" : "simplicial complex");
     s += ", D = " + to_string(D) + "...";
@@ -198,6 +198,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere){
     }
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
     SimpComp *simpComp = new SimpComp(D);
+    simpComp->name = name;
     KSimplex *small = nullptr;
 
     // Progress to further dimensions by adding new vertex and conntecting it:
@@ -214,18 +215,18 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere){
     return simpComp;
 }
 
-SimpComp* seed_single_simplex(int D){
-    return seed_single_simplex_or_sphere(D, 0);
+SimpComp* seed_single_simplex(int D, string name){
+    return seed_single_simplex_or_sphere(D, 0, name);
 }
 
-SimpComp* seed_sphere(int D){
-    return seed_single_simplex_or_sphere(D, 1);
+SimpComp* seed_sphere(int D, string name){
+    return seed_single_simplex_or_sphere(D, 1, name);
 }
 
 // Seed a single sphere of dimension d
 // by seeding a simplex of dimension d+1, and deleting only it:
-SimpComp* seed_sphere_intuitively(int D){
-    string s = "Creating general sphere, D = " + to_string(D) + "...";
+SimpComp* seed_sphere_intuitively(int D, string name){
+    string s = "Creating general sphere " + name + ", D = " + to_string(D) + "...";
     log_report(LOG_INFO, s);
     if(D < 0){
         log_report(LOG_ERROR, "Not possible to seed for dimension lower than 0");
@@ -233,8 +234,9 @@ SimpComp* seed_sphere_intuitively(int D){
     }
     // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
     SimpComp *simpComp = new SimpComp(D+1);
-    KSimplex *small = nullptr;
+    simpComp->name = name;
 
+    KSimplex *small = nullptr;
     // Progress to further dimensions by adding new vertex and conntecting it:
     for(int k = 0; k <= D+1; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
