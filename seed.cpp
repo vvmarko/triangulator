@@ -128,7 +128,8 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
 // k=1: 1-2, 1-3, 2-3, / 1-4, 2-4, 3-4.
 // k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
 // k=3: / 1-2-3-4.
-KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSimplex* small, KSimplex *vertex){
+KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* small, KSimplex *vertex){
+    int k = small->k + 1;
 	set<KSimplex*> s;
 	small->collect_vertices(s);
     s.insert(vertex);
@@ -162,7 +163,7 @@ KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, int k, KSim
         // old kTemp-1-eders and the new vertex v:
         for(int iKSimplex = 0; iKSimplex < oldSize; iKSimplex++){
             // Create temporary KSimplex by appending vertex to one of old k-simplices at level kTemp-1
-            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, kTemp, small->neighbors->elements[kTemp-1][iKSimplex], vertex);
+            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, small->neighbors->elements[kTemp-1][iKSimplex], vertex);
 			if(k <= simpComp->D)
 	        	big->add_neighbor(newKSimplex);
         }
@@ -181,7 +182,7 @@ KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small)
         return vertex;
 
     // Connect new vertex with k-simplex small:
-    return build_simplex_one_level_up_with_vertex(simpComp, k, small, vertex);
+    return build_simplex_one_level_up_with_vertex(simpComp, small, vertex);
 }
 
 // Seed a single simplex or sphere of dimension d:

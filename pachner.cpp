@@ -36,7 +36,7 @@ KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp){
 			// Take k-simplex:
 			KSimplex* &small = simpComp->elements[kTemp-1][i];
 			// Append vertex to it, and save it at current level:
-			build_simplex_one_level_up_with_vertex(simpComp, kTemp, small, vertex);
+			build_simplex_one_level_up_with_vertex(simpComp, small, vertex);
 		}
 		// Update the old length from current level:
 		oldLength = nextLength;
