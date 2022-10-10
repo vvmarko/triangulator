@@ -47,6 +47,16 @@ KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp){
 	return vertex;
 }
 
+KSimplex* build_KSimplex(SimpComp* simpComp, set<KSimplex*> &s){
+	// Create new k-simplex of the level that is equal to s.size()-1:
+	KSimplex* newKSimplex = simpComp->create_ksimplex(s.size()-1);
+	// Add all vertices to newKSimplex:
+	for(auto &it : s)
+		it->add_neighbor(newKSimplex);
+	newKSimplex->reconstruct_neighbors_from_vertices();
+	return newKSimplex;
+}
+
 // Pachner move 4 to 1:
 // Input: 0-simplex (5) to remove.
 // Output: Resulting 3-simplex (1-2-3-4).

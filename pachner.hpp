@@ -1,4 +1,7 @@
 
+// Connect k-simplex neighbors based on given vertices, assuming all sub-simplices exist:
+KSimplex* build_KSimplex(SimpComp* simpComp, set<KSimplex*> &s);
+
 // Pachner move 1 to 4:
 KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp);
 

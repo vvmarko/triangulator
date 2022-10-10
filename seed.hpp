@@ -1,7 +1,4 @@
 
-// Build k-simplex based on given vertices:
-KSimplex* build_KSimplex(SimpComp* simpComp, set<KSimplex*> &s);
-
 void seed_KSimplices(SimpComp* simpComp, int k);
 
 // Seed a single simplex or sphere of dimension d:

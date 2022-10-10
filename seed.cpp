@@ -121,16 +121,6 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
     return os;
 }
 
-KSimplex* build_KSimplex(SimpComp* simpComp, set<KSimplex*> &s){
-	// Create new k-simplex of the level that is equal to s.size():
-	KSimplex* newKSimplex = simpComp->create_ksimplex(s.size()-1);
-	// Add all vertices to newKSimplex:
-	for(auto &it : s)
-		it->add_neighbor(newKSimplex);
-	newKSimplex->reconstruct_neighbors_from_vertices();
-	return newKSimplex;
-}
-
 // Function seed_single_simplex_advance_vertex
 // connects new vertex v with k-simplices of up to dimension k:
 // At each level k, old and new k-simplices are delimited using / sign:
