@@ -192,17 +192,17 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
     s += (sphere ? "sphere" : "simplicial complex");
     s += ", D = " + to_string(D) + "...";
     log_report(LOG_INFO, s);
-    if(D < 0){
-        log_report(LOG_ERROR, "Not possible to seed for dimension lower than 0");
+    if(D <= 0){
+        log_report(LOG_ERROR, "Not possible to seed for dimension lower or equal to 0");
         return nullptr;
     }
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
     SimpComp *simpComp = new SimpComp(D);
     simpComp->name = name;
-    KSimplex *small = nullptr;
+    KSimplex *small = simpComp->create_ksimplex(0);
 
     // Progress to further dimensions by adding new vertex and conntecting it:
-    for(int k = 0; k <= D+sphere; k++){
+    for(int k = 1; k <= D+sphere; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
         small = build_simplex_one_level_up(simpComp, small);
     }
