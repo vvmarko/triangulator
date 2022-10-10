@@ -47,8 +47,9 @@ int main(){
     simpComp->print_compact();
     //*/
     
-    //SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
-    //simpComp->print_compact();
+    SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+    simpComp->print_compact();
     
     //SimpComp simpComp2(*simpComp);
     //simpComp2.print_compact();
