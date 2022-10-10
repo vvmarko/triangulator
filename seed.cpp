@@ -174,8 +174,9 @@ KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* s
     return big;
 }
 
-KSimplex* build_simplex_one_level_up(SimpComp *simpComp, int k, KSimplex* small){
+KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* small){
     // Seed a KSimplex of level k based on KSimplex of level k-1:
+    int k = small->k + 1;
     // Create a new vertex, i.e. KSimplex(0):
     KSimplex *vertex = simpComp->create_ksimplex(0);
     if(k == 0)
@@ -202,7 +203,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere){
     // Progress to further dimensions by adding new vertex and conntecting it:
     for(int k = 0; k <= D+sphere; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
-        small = build_simplex_one_level_up(simpComp, k, small);
+        small = build_simplex_one_level_up(simpComp, small);
     }
 
     // If seeding simplicial complex, add boundary color:
@@ -237,7 +238,7 @@ SimpComp* seed_sphere_intuitively(int D){
     // Progress to further dimensions by adding new vertex and conntecting it:
     for(int k = 0; k <= D+1; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
-        small = build_simplex_one_level_up(simpComp, k, small);
+        small = build_simplex_one_level_up(simpComp, small);
     }
 
     // Delete the last created k-simplex after disconnecting neighbors:
