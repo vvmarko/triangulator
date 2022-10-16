@@ -2,6 +2,7 @@
 //TODO:
 // - check arguments against graph levels, invalid values, null pointers, etc.
 
+#include <algorithm>
 #include "triangulator.hpp"
 
 std::ostream &operator<<(std::ostream &os, set<int> &s) { 
@@ -146,6 +147,24 @@ KSimplex* SimpComp::find_KSimplex(set<int> IDs){
     }
 
 	return find_vertices(sTemp);
+}
+
+// Deletes a k-simplex with given IDs, if exists:
+void SimpComp::delete_KSimplex(set<int> IDs){
+    int kFound = IDs.size() - 1;
+	if(kFound > D)
+		return;
+
+    KSimplex* toDelete = find_KSimplex(IDs);
+    if(!toDelete) error("No KSimplex to delete!");
+
+    toDelete->delete_all_neighbors();
+
+    auto &vec = elements[kFound];
+    vec.erase(std::remove(vec.begin(), vec.end(), toDelete), vec.end());    
+
+    delete(toDelete);
+    toDelete = nullptr;
 }
 
 void SimpComp::print_set(set<int> &s){

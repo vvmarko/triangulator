@@ -27,6 +27,8 @@ public:
     KSimplex* find_KSimplex(size_t id);
     // Finds a k-simplex with given IDs, if exists:
     KSimplex* find_KSimplex(set<int> IDs);
+    // Deletes a k-simplex with given IDs, if exists:
+    void delete_KSimplex(set<int> IDs);
     void print_set(set<int> &s);
     void print_vertices_IDs_in_parentheses(set<int> &s);
     void print_compact();
