@@ -34,6 +34,8 @@ public:
     void print_compact();
     // Creating new KSimplex at level k:
     KSimplex* create_ksimplex(int k);
+    // Creates new KSimplex given a set of vertices:
+    KSimplex* create_ksimplex_from_vertices(set<KSimplex*> &s);
     // Remove given simplex after disconnecting neighbors:
     void remove_simplex(KSimplex* kSimplex);
     void print_sizes();

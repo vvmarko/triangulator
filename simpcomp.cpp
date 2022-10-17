@@ -189,7 +189,7 @@ void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
 }
 
 void SimpComp::print_compact(){
-    cout << "Printing SimpComp " << name << ", D = " << D << endl;
+    cout << endl << "Printing SimpComp " << name << ", D = " << D << endl;
     if(elements.empty())
         return;
     
@@ -286,6 +286,35 @@ KSimplex* SimpComp::create_ksimplex(int k){
         log_report(LOG_ERROR, "Adding KSimplex failed...");
         return nullptr;
     }
+}
+
+// Creates new KSimplex given a set of vertices:
+KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
+    KSimplex *kSimplex = create_ksimplex((int) s.size()-1);
+    for(auto &tempKSimplex : s){
+        kSimplex->neighbors->elements[0].push_back(tempKSimplex);
+    }
+
+
+
+
+//TODO: Populate neighbor->elements[1], [2], ...
+
+
+
+
+/*
+	collect_vertices(s);
+	for(int tempK = 0; tempK < k; tempK++){
+		for(auto &tempKSimplex : neighbors->elements[tempK]){
+			set<KSimplex*> tempS;
+			tempKSimplex->collect_vertices(tempS);
+			if(subset(tempS, s))
+				add_neighbor(tempKSimplex);
+		}
+	}
+*/
+	return kSimplex;
 }
 
 // Remove given simplex after disconnecting neighbors:

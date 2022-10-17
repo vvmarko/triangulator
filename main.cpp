@@ -6,18 +6,24 @@ int main(){
 
     test();
 
-    cout << endl << "---------------------------------------------------"
-            << endl << "General seed example, compact printing:" << endl << endl;
+    cout << endl << "---------------------------------------------------" << endl << endl;
 
 
+    //*
+//cout << endl << "Testing preparing simpComp from 3D-sphere to Pachner 3->2 initial state:" << endl;
     
-    //SimpComp simpComp2(*simpComp);
-    //simpComp2.print_compact();
-	//for(auto &it : simpComp2.elements)
-	//	it.clear();
-	//delete simpComp;
-	//cout << "Deleted." << endl;
-
+    SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+//simpComp->print_compact();
+    set<int> s1 = {1,2,3,4};
+    simpComp->delete_KSimplex(s1);
+    set<int> s2 = {2,3,4,5};
+    simpComp->delete_KSimplex(s2);
+    set<int> s3 = {2,3,4};
+    simpComp->delete_KSimplex(s3);
+//simpComp->print_compact();
+    //*/
+    
 	/*
 	cout << "Simulatin Pancher Moves 1->4 and 4->1:" << endl;
     SimpComp *simpComp = seed_single_simplex(3, "PancherSimulation");
@@ -34,23 +40,6 @@ int main(){
     simpComp->print_compact();
 	//*/
 
-    /*
-    SimpComp *simpComp = seed_sphere(3, "simpCompFindByIDs");
-    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
-	cout << "Testing find_KSimplex by ID:" << endl;
-    KSimplex* temp = simpComp->find_KSimplex(2);
-    if(temp)
-        temp->print_compact();
-    else
-        cout << "2 not found!!!" << endl;
-    cout << endl << "---------------------------------------------------" << endl;
-
-	cout << "Testing find_KSimplex by IDs:" << endl;
-	set<int> IDs {1, 2, 4};
-	temp = simpComp->find_KSimplex(IDs);
-    cout << endl << "---------------------------------------------------" << endl;
-    temp->print();
-    //*/
 
 	/*
 	//cout << "Simulatin Pancher Moves 3->2 and 2->3:" << endl;
@@ -59,24 +48,16 @@ int main(){
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
     simpComp->print_compact();
     cout << endl << "---------------------------------------------------" << endl;
-    
+    */  
     
         
 
 
 
 
-/*
-	set<KSimplex*> &s;
-	kSimplex->collect_vertices(s);
-    s.insert(simpComp->elements[0][4]);
-        	simpComp->find_vertices(s);
-
-
-	simpComp->Pachner_move_3_to_2(simpComp->elements[simpComp->D][0], simpComp);
-    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
-    simpComp->print_compact();
-    cout << endl << "---------------------------------------------------" << endl;
+//*
+    cout << endl << "Testing Pachner_move_3_to_2" << endl;
+	Pachner_move_3_to_2(simpComp->elements[1][6], simpComp);
 	
 	//Pachner_move_2_to_3(simpComp->elements[0][ simpComp->elements[0].size()-1 ], simpComp);
     //simpComp->print_compact();
