@@ -19,6 +19,7 @@ void error(string message){
 
 void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
 {
+    
     // TODO: Memory leaking problems.
 
     using namespace rapidxml;
@@ -41,19 +42,32 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
     xml_node<>* dimensionNode = treeXml.allocate_node(node_element, dimensionCString, DCString);
     base->append_node(dimensionNode);
 
+    
     vector<xml_node<>*> levels = get_element_levels_as_xml_nodes(simpComp, treeXml);
     for (auto nd : levels) base->append_node(nd);
 
-    string ndStr;
+    string ndStr = "ksimplex";
+    char* ndCstr = treeXml.allocate_string(ndStr.c_str(), ndStr.length() + 1);
+
+    string idStr;
+    char* idCstr;
+    xml_attribute<>* idAttr;
+    string idAttrStr = "id";
+    char* idAttrCstr = treeXml.allocate_string(idAttrStr.c_str(), idAttrStr.length() + 1);
+
     string colorTypeStr;
     string colorValStr;
     string levelString = "level";
     char* levelCStr = treeXml.allocate_string(levelString.c_str(), levelString.length() + 1);;
     for (unsigned int lvl = 0; lvl < simpComp->elements.size(); lvl++) {
         for (auto ks : simpComp->elements[lvl]) {
-            ndStr = "ksimplex " + ks->colors.back()->get_color_value_as_str();
-            char* ndCstr = treeXml.allocate_string(ndStr.c_str(), ndStr.length() + 1);
             xml_node<>* ksNd = treeXml.allocate_node(node_element, ndCstr);
+
+            idStr = ks->colors.back()->get_color_value_as_str();
+            idCstr = treeXml.allocate_string(idStr.c_str(), idStr.length() + 1);
+            idAttr = treeXml.allocate_attribute(idAttrCstr, idCstr);
+            ksNd->append_attribute(idAttr);
+
             base->append_node(ksNd);
 
             char* lvlCStr = treeXml.allocate_string(to_string(lvl).c_str(), to_string(lvl).length() + 1);
@@ -98,15 +112,19 @@ vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp
 
     vector<xml_node<>*> nodesXml;
 
-    string lvlStr;
     string simpsStr;
     bool first;
 
+    xml_node<>* currentNode;
+    string lvlStr = "level";
+    char* lvlCstr = mp.allocate_string(lvlStr.c_str(), lvlStr.length() + 1);
+
+    string lvlAttrName = "lvl";
+    char * lvlAttrNameCstr = mp.allocate_string(lvlAttrName.c_str(), lvlAttrName.length() + 1);
+    xml_attribute<> *attr;
+
     for (unsigned int lvl = 0; lvl < simpComp->elements.size(); lvl++) {
         // TODO: Memory leaking problems.
-
-        lvlStr = "level " + to_string(lvl);
-        char* lvlCstr = mp.allocate_string(lvlStr.c_str(), lvlStr.length() + 1);
 
         simpsStr = "";
         first = true;
@@ -118,9 +136,36 @@ vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp
             simpsStr += ksimp->colors.back()->get_color_value_as_str();      // Assuming no sorting is done.
         }
         char* simpsCstr = mp.allocate_string(simpsStr.c_str(), simpsStr.length() + 1);
+        
+        currentNode = mp.allocate_node(node_element, lvlCstr, simpsCstr);
 
-        nodesXml.push_back(mp.allocate_node(node_element, lvlCstr, simpsCstr));
+        char* lvlAttrVal = mp.allocate_string(to_string(lvl).c_str(), to_string(lvl).length() + 1);
+        attr = mp.allocate_attribute(lvlAttrNameCstr, lvlAttrVal);
+        currentNode->append_attribute(attr);
+
+        nodesXml.push_back(currentNode);
     }
 
     return nodesXml;
+}
+
+SimpComp* read_complex_from_xml_file( const string& filepath )
+{
+    using namespace rapidxml;
+
+    file<> file(filepath.c_str()); // TODO: Check for exceptions.
+
+    xml_document<> doc;
+    doc.parse<0>(file.data());
+
+    return nullptr;
+
+    return read_complex_from_xml_file(doc);
+}
+
+SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
+{
+    using namespace rapidxml;
+    return new SimpComp(0);
+
 }

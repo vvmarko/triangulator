@@ -45,7 +45,7 @@ int main(){
 
 	cout << endl;
     simpComp->print_compact();
-    //*/
+    //
     
     SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
@@ -121,7 +121,13 @@ int main(){
 	//Pachner_move_2_to_3(simpComp->elements[0][ simpComp->elements[0].size()-1 ], simpComp);
     //simpComp->print_compact();
 	//*/
+
+    SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+    simpComp->print_compact();
+
+    save_complex_to_xml_file(simpComp, "test1.xml");
+    read_complex_from_xml_file("test1.xml");
 	
     return 0;
 }
-

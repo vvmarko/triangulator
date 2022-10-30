@@ -24,3 +24,6 @@ void error(string message);
 
 void save_complex_to_xml_file(SimpComp* simpComp, const string& filename);
 vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp, rapidxml::memory_pool<>& mp);
+
+SimpComp* read_complex_from_xml_file( const string& filepath );
+SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& file );
