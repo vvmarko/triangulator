@@ -27,3 +27,4 @@ vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp
 
 SimpComp* read_complex_from_xml_file( const string& filepath );
 SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& file );
+void read_level_node(rapidxml::xml_node<>* node, SimpComp* sc);

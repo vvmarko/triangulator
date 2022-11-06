@@ -57,7 +57,7 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
 
     string colorTypeStr;
     string colorValStr;
-    string levelString = "level";
+    string levelString = "self_level";
     char* levelCStr = treeXml.allocate_string(levelString.c_str(), levelString.length() + 1);;
     for (unsigned int lvl = 0; lvl < simpComp->elements.size(); lvl++) {
         for (auto ks : simpComp->elements[lvl]) {
@@ -151,6 +151,7 @@ vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp
 
 SimpComp* read_complex_from_xml_file( const string& filepath )
 {
+    // TODO: Error handling.
     using namespace rapidxml;
 
     file<> file(filepath.c_str()); // TODO: Check for exceptions.
@@ -158,14 +159,34 @@ SimpComp* read_complex_from_xml_file( const string& filepath )
     xml_document<> doc;
     doc.parse<0>(file.data());
 
-    return nullptr;
-
     return read_complex_from_xml_file(doc);
 }
 
 SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
 {
     using namespace rapidxml;
-    return new SimpComp(0);
+
+    xml_node<>* current_sc = doc.first_node();  // Only one SimpComp per .xml file supported?
+    xml_node<>* current_node = current_sc->first_node();
+
+    string sc_name = current_node->value();
+    current_node = current_node->next_sibling();
+    std::cout << "Parsing SimpComp " << sc_name << "." << std::endl;
+
+    int sc_dimension = stoi(current_node->value());
+    std::cout << "Complex dimension: " << sc_dimension << "." << std::endl;
+
+    for (current_node = current_node->next_sibling();
+         current_node != 0;
+         current_node = current_node->next_sibling())
+        if ((std::string) current_node->name() == "level")
+            std::cout << "LVL" << std::endl;
+        else if ((std::string) current_node->name() == "ksimplex")
+            std::cout << "KSIMPLEX" << std::endl; 
+
+    return nullptr;
 
 }
+
+// fn: read levels
+// fn: read simplex
