@@ -5,22 +5,23 @@
 using namespace std;
 
 class MainWindow;
+class SimpCompItem;
 
 class PrintComplex : public QWidget
 {
 	Q_OBJECT
 
 public:
-    PrintComplex(MainWindow *mainWnd, QString displayStr, bool displayLink, QWidget *parent = Q_NULLPTR);
+    PrintComplex(MainWindow *mainWnd, QString displayStr, bool displayLink, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
 	~PrintComplex();
 
-    PrintComplex *parent;
+    SimpCompItem *item;    
 
-    std::vector<PrintComplex*> childWindows;
+    //std::vector<PrintComplex*> childWindows;
 
     MainWindow *mainWnd;
 
-    void closeWindowAndChildWindows(PrintComplex *window);
+    //void closeWindowAndChildWindows(PrintComplex *window);
 
 private:
 	Ui::PrintComplex ui;

@@ -4,18 +4,19 @@
 #include "MainWindow.h"
 
 void SeedComplex::handleAccepted() {			
-    PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false);
-
-	print->show();
-
 	SimpCompItem i;
 
 	i.name = ui.leName->text().toStdString();
 	i.d = atoi(ui.leDimension->text().toStdString().c_str());
     i.drawComplex = NULL;
-    print->parent = NULL;
-    i.printComplex = print;
-	items->push_back(i);
+    //print->parent = NULL;
+    items->push_back(i);
+
+    PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false, (&items->back()), NULL);
+
+    items->back().printComplex = print;
+
+    print->show();
 
 	SimpCompTableModel* model = new SimpCompTableModel(items);	
 

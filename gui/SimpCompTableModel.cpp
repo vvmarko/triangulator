@@ -6,12 +6,14 @@ using namespace std;
 SimpCompItem::SimpCompItem()
 {    
     d = 0;
+    removeWindowFromChildWindowsOnClose = true;
 }
 
 SimpCompItem::SimpCompItem(string name, int d)
 {
     this->name = name;
     this->d = d;
+    removeWindowFromChildWindowsOnClose = true;
 }
 
 SimpCompTableModel::SimpCompTableModel(vector<SimpCompItem> *items, QObject* parent)

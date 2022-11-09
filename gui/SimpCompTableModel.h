@@ -2,10 +2,11 @@
 
 // mymodel.h
 #include <QAbstractTableModel>
-#include "DrawComplex.h"
-#include "PrintComplex.h"
 
 //using namespace std;
+
+class DrawComplex;
+class PrintComplex;
 
 class SimpCompItem
 {
@@ -17,6 +18,9 @@ public:
     int d;
     DrawComplex *drawComplex; // each simplicial complex has its own table item
     PrintComplex *printComplex; // each simplicial complex has its own table item
+
+    std::vector<QWidget *> childWindows;
+    bool removeWindowFromChildWindowsOnClose;
 };
 
 class SimpCompTableModel : public QAbstractTableModel

@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include "SimpCompTableModel.h"
 #include "LogViewer.h"
+#include "PrintComplex.h"
 
 void MainWindow::newFile() {
     SeedComplex* seedDialog = new SeedComplex(this, &items, ui.tblComplexes);
@@ -31,7 +32,7 @@ void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
     for (int i = 0; i < items.size(); i++)
     {
         if (items[i].drawComplex == wnd) {
-            items[i].drawComplex = NULL;
+            items[i].drawComplex = NULL;            
         }
     }
 }
@@ -40,7 +41,7 @@ void MainWindow::printComplexWndClosed(PrintComplex *wnd) {
     for (int i = 0; i < items.size(); i++)
     {
         if (items[i].printComplex == wnd) {
-            items[i].printComplex = NULL;
+            items[i].printComplex = NULL;            
         }
     }
 }
@@ -57,9 +58,9 @@ void MainWindow::tblItemDrawComplexClick() {
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
     if (items[i].drawComplex == NULL) {
-        items[i].drawComplex = new DrawComplex(this);
+        items[i].drawComplex = new DrawComplex(this, &(items[i]));
         //connect(items[i].drawComplex, &DrawComplex::destroyed, this, &MainWindow::drawComplexWndClosed);
-        items[i].drawComplex->show();
+        items[i].drawComplex->show();        
     } else {        
         items[i].drawComplex->close();
         delete items[i].drawComplex;
@@ -72,8 +73,8 @@ void MainWindow::tblItemPrintComplexClick() {
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
     if (items[i].printComplex == NULL) {
-        items[i].printComplex = new PrintComplex(this, "", false);
-        //connect(items[i].drawComplex, &DrawComplex::destroyed, this, &MainWindow::drawComplexWndClosed);
+        items[i].printComplex = new PrintComplex(this, "", false, &(items[i]));
+        //connect(items[i].drawComplex, &DrawComplex::destroyed, this, &MainWindow::drawComplexWndClosed);                                
         items[i].printComplex->show();
     } else {                        
         items[i].printComplex->close();
@@ -84,16 +85,34 @@ void MainWindow::tblItemPrintComplexClick() {
 
 void MainWindow::tblItemDeleteRowClick() {
     QPushButton *btn = (QPushButton *)sender();
-    int i = ui.tblComplexes->indexAt(btn->pos()).row();
+    int i = ui.tblComplexes->indexAt(btn->pos()).row();    
 
-    if (items[i].printComplex != NULL) {                
-        items[i].printComplex->close();
-        delete items[i].printComplex;
+    items[i].removeWindowFromChildWindowsOnClose = false;
+
+    int j = 0;
+
+    for (QWidget *w : items[i].childWindows)
+    {
+        w->close();
+        if (items[i].printComplex == w)
+        {
+            //items[i].printComplex->close();
+            delete items[i].printComplex;
+        }
+        else if (items[i].drawComplex == w)
+        {
+            //items[i].drawComplex->close();
+            delete items[i].drawComplex;
+        }
+        else
+        {
+            delete (Inspector *)w;
+        }
+        items[i].childWindows[j] = NULL;
+        j++;
+
     }
-    if (items[i].drawComplex != NULL) {
-        items[i].drawComplex->close();
-        delete items[i].drawComplex;
-    }
+
     items.erase(items.begin() + i);
 
     SimpCompTableModel* model = new SimpCompTableModel(&items);

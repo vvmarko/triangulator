@@ -6,13 +6,14 @@
 #include <QMouseEvent>
 
 class MainWindow;
+class SimpCompItem;
 
 class DrawComplex : public QWidget
 {
 	Q_OBJECT
 
 public:
-    DrawComplex(MainWindow *mainWnd, QWidget *parent = Q_NULLPTR);
+    DrawComplex(MainWindow *mainWnd, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
 	~DrawComplex();    
 
     DrawComplexGLWidget *getGLWidget();
