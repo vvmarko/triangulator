@@ -209,8 +209,8 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
 
     // If seeding simplicial complex, add boundary color:
 	if(!sphere)
-		for(auto &kSimplex : simpComp->elements[simpComp->D-1])
-			kSimplex->colors.push_back(new BoundaryColor(true));
+		for(auto &kSimplex : simpComp->elements[simpComp->D])
+			kSimplex->colors.push_back(new BoundaryColor());
     
     return simpComp;
 }
@@ -240,7 +240,7 @@ SimpComp* seed_sphere_intuitively(int D, string name){
     // Delete the last created k-simplex after disconnecting neighbors:
     simpComp->remove_simplex(simpComp->elements[D+1][0]);
     // Remove BoundaryColor, as sphere doesn't have them:
-	for(auto &kSimplex : simpComp->elements[simpComp->D-1])
+	for(auto &kSimplex : simpComp->elements[simpComp->D])
 		kSimplex->colors.pop_back();
 
     // For each k-simplex from elements:

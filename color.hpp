@@ -33,7 +33,7 @@ class SimpComp;
 // Color class definitions
 // #######################
 
-
+// Colors define features of K-simplices:
 class Color{
 public:
     virtual void print(string space = "");
@@ -45,16 +45,16 @@ public:
     int type;
 };
 
+// Whether the KSimplex of this color represents a boundary:
 class BoundaryColor : public Color{
 public:
-    BoundaryColor(bool boundary);
+    BoundaryColor();
     void print(string space = "");
 
     string get_color_value_as_str() const;
-
-    bool boundary; // whether the KSimplex of this color represents a boundary
 };
 
+// Unique ID of KSimplex:
 class UniqueIDColor : public Color{
 public:
     UniqueIDColor();
@@ -70,6 +70,7 @@ public:
     unsigned long id; // whether the KSimplex of this color represents a boundary
 };
 
+// Drawing coordinates:
 class ScreenCoordinateColor : public Color{
 public:
     ScreenCoordinateColor();

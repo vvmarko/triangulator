@@ -20,19 +20,17 @@ bool Color::set_color_value_from_str(const string& source)
     return false;
 }
 
-BoundaryColor::BoundaryColor(bool boundary){
+BoundaryColor::BoundaryColor(){
     type = TYPE_BOUNDARY;
-    this->boundary = boundary;
 }
 void BoundaryColor::print(string space){
     Color::print(space);
-    cout << space << "Boundary = " << (boundary?"true":"false") << endl;
+    cout << space << "Boundary = true" << endl;
 }
 
 string BoundaryColor::get_color_value_as_str() const
 {
-    if (this->boundary) return "1";
-    return "0";
+    return "1";
 }
 
 UniqueIDColor::UniqueIDColor(){
