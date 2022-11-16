@@ -19,6 +19,7 @@ KSimplex::~KSimplex(){
 	//cout << "Deleting KSimplex... ";
     for(auto pColor : colors)
         delete pColor;
+    delete neighbors;
 }
 
 bool KSimplex::find_neighbor(KSimplex *kSimplex){
