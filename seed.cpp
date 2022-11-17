@@ -209,7 +209,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
 
     // If seeding simplicial complex, add boundary color:
 	if(!sphere)
-		for(auto &kSimplex : simpComp->elements[simpComp->D])
+		for(auto &kSimplex : simpComp->elements[simpComp->D-1])
 			kSimplex->colors.push_back(new BoundaryColor());
     
     return simpComp;
