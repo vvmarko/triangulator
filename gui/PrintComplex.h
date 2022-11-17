@@ -17,11 +17,7 @@ public:
 
     SimpCompItem *item;    
 
-    //std::vector<PrintComplex*> childWindows;
-
     MainWindow *mainWnd;
-
-    //void closeWindowAndChildWindows(PrintComplex *window);
 
 private:
 	Ui::PrintComplex ui;

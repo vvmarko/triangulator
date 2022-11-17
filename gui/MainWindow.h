@@ -20,6 +20,8 @@ public:
     void printComplexWndClosed(PrintComplex *wnd);
     void viewLogFileClosed();
 
+    void updateSimpCompTableModel();
+
 private:
 	Ui::MainWindow ui;
 
@@ -27,11 +29,13 @@ private:
     LogViewer* logViewerDialog;
 
 	void newFile();
+    void openFile();    
     void openLogFile();
     void quit();
 
     void tblItemPrintComplexClick();
-    void tblItemDrawComplexClick();
+    void tblItemDrawComplexClick();    
+    void tblItemSaveComplexAsClick();
     void tblItemDeleteRowClick();
 
     std::vector<SimpCompItem> items;

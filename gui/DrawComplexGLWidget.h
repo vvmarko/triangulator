@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include "SimpCompTableModel.h"
 #include "Inspector.h"
+#include "Utils.h"
 
 class DrawComplexGLWidget :
 	public QOpenGLWidget
@@ -19,8 +20,6 @@ private:
     QStatusBar *drawComplexStatusBar = NULL;    
 public:
     DrawComplexGLWidget(QWidget* parent) : QOpenGLWidget(parent) { }
-
-    //std::vector<QWidget*> childWindows;
 
     SimpCompItem *item;
 
@@ -359,39 +358,20 @@ protected:
         }
     }
 
-    /*void coordinatesWindowFinished(int result) {
-        bool erased = false;
-        QDialog *dlg = (QDialog *)sender();
-
-        for (int i = 0; i < item->childWindows.size() && !erased; i++)
-          if (childWindows[i] == dlg)
-            {
-                childWindows.erase(childWindows.begin() + i);
-                erased = true;
-            }
-    }*/
-
     void mouseReleaseEvent(QMouseEvent *e) override
     {
         std::string s = std::to_string((int)e->position().x());
         std::string s1 = std::to_string((int)e->position().y());
-        //QDialog *dlg = new QDialog();
-        //dlg->setWindowTitle("Coordinates");
+
         QVBoxLayout *layout = new QVBoxLayout();
         QLabel *label = new QLabel();
         label->setText((s + ", " + s1).c_str());
         layout->addWidget(label);
-        //dlg->setLayout(layout);
-        //dlg->setGeometry((parentWidget()->frameSize().width() -
-        //                 parentWidget()->size().width()) * 2 + parentWidget()->pos().x() + this->pos().x() + e->position().x(),
-        //                 (parentWidget()->frameSize().height() -
-        //                 parentWidget()->size().height()) * 2 + parentWidget()->pos().y() + this->pos().y() + e->position().y(),
-        //                 200, 100);
-        //dlg->show();
+
         Inspector *inspector = new Inspector("456", QString::fromStdString(s + ", " + s1), item);
-        //connect(dlg, &QDialog::finished, this, &DrawComplexGLWidget::coordinatesWindowFinished);
-        //childWindows.push_back(dlg);
-        //item->childWindows.push_back(dlg);                
+
+        Utils::openWindowOnRandomPos(inspector);
+
         inspector->show();
     }
 

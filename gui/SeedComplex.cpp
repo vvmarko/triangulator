@@ -7,9 +7,7 @@ void SeedComplex::handleAccepted() {
 	SimpCompItem i;
 
 	i.name = ui.leName->text().toStdString();
-	i.d = atoi(ui.leDimension->text().toStdString().c_str());
-    i.drawComplex = NULL;
-    //print->parent = NULL;
+	i.d = atoi(ui.leDimension->text().toStdString().c_str());    
     items->push_back(i);
 
     PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false, (&items->back()), NULL);
@@ -18,20 +16,7 @@ void SeedComplex::handleAccepted() {
 
     print->show();
 
-	SimpCompTableModel* model = new SimpCompTableModel(items);	
-
-	SimpCompTableModel* prevModel;
-
-	prevModel = (SimpCompTableModel*)table->model();
-
-	table->setModel(model);
-
-	delete prevModel;
-
-    for (int i = 0; i < items->size(); i++)
-    {
-        mainWnd->createItemWidget(i);
-    }
+    mainWnd->updateSimpCompTableModel();
 
 	table->show();
 	this->close();   

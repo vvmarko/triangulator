@@ -52,10 +52,7 @@ DrawComplexGLWidget *DrawComplex::getGLWidget()
 void DrawComplex::closeEvent (QCloseEvent* event)
 {    
     mainWnd->drawComplexWndClosed(this);
-    /*for(QWidget *w:ui.openGLWidget->childWindows)
-    {
-        w->close();
-    } */
+
     bool erased = false;
 
     if (ui.openGLWidget->item->removeWindowFromChildWindowsOnClose)

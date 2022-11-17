@@ -6,6 +6,8 @@ using namespace std;
 SimpCompItem::SimpCompItem()
 {    
     d = 0;
+    drawComplex = NULL;
+    printComplex = NULL;
     removeWindowFromChildWindowsOnClose = true;
 }
 
@@ -13,6 +15,8 @@ SimpCompItem::SimpCompItem(string name, int d)
 {
     this->name = name;
     this->d = d;
+    drawComplex = NULL;
+    printComplex = NULL;
     removeWindowFromChildWindowsOnClose = true;
 }
 
@@ -29,7 +33,7 @@ int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const
 
 int SimpCompTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 5; // name, dimension, print complex, draw complex, delete row
+    return 6; // name, dimension, print complex, draw complex, save as, delete row
 }
 
 QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
