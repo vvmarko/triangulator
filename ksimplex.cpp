@@ -153,3 +153,9 @@ bool KSimplex::reconstruct_neighbors_from_vertices(){
 	return true;
 }
 
+bool KSimplex::is_a_boundary(){
+    for(auto &color : colors)
+        if(color->type == TYPE_BOUNDARY)
+            return true;
+    return false;
+}

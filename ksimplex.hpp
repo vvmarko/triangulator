@@ -21,6 +21,8 @@ public:
     UniqueIDColor* get_uniqueID();
     // Reconstruct the neighbors table if neighbor vertices are known:
     bool reconstruct_neighbors_from_vertices();
+    // Determines whether BoundaryColor color exists:
+    bool is_a_boundary();
     // Print a k-simplex by listing IDs of its vertices:
     void print_compact();
     // Delete given kSimplex from the list of neighbors of this k-simplex:

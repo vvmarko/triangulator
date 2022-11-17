@@ -10,9 +10,20 @@ int main(){
 
 
 
+cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);" << endl;
+    SimpComp *simpComp = seed_single_simplex(3, "seed_single_simplex and 3");
+    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+    if(simpComp->elements[3][0]->is_a_boundary())
+        cout << "Jeste boundary elements[3][0]" << endl;
+    else
+        cout << "Nije boundary elements[3][0]" << endl;
+    if(simpComp->elements[2][0]->is_a_boundary())
+        cout << "Jeste boundary elements[2][0]" << endl;
+    else
+        cout << "Nije boundary elements[2][0]" << endl;
 
 
-    //*
+    /*
 //cout << endl << "Testing preparing simpComp from 3D-sphere to Pachner 3->2 initial state:" << endl;
     SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
