@@ -58,6 +58,7 @@ public:
 class UniqueIDColor : public Color{
 public:
     UniqueIDColor();
+    UniqueIDColor(unsigned long uid);
     void print(string space = "");
     void print_compact();
 
@@ -77,6 +78,7 @@ public:
     void print(string space = "");
 
     string get_color_value_as_str() const;
+    bool set_color_value_from_str(const string& source);
 
     int x, y; // screen coordinates
 };

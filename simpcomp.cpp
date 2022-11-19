@@ -126,12 +126,13 @@ bool SimpComp::reconstruct_neighbors_from_vertices(){
 
 // Finds a k-simplex with given ID, if exists:
 KSimplex* SimpComp::find_KSimplex(size_t id){
-    for(auto &it : elements[0]){
-        for(auto pColor : it->colors)
-            if(pColor->type == TYPE_UNIQUE_ID)
-                if((static_cast<UniqueIDColor*>(pColor))->id == id)
-                    return it;
-    }
+    for (auto &lvl: elements)
+        for(auto &it : lvl)
+            for(auto pColor : it->colors)
+                if(pColor->type == TYPE_UNIQUE_ID)
+                    if((static_cast<UniqueIDColor*>(pColor))->id == id)
+                        return it;
+    
     return nullptr;
 }
 

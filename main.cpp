@@ -127,7 +127,10 @@ int main(){
     simpComp->print_compact();
 
     save_complex_to_xml_file(simpComp, "test1.xml");
-    read_complex_from_xml_file("test1.xml");
+    delete simpComp;
+    SimpComp *simpComp2 = read_complex_from_xml_file("test1.xml");
+    simpComp2->print();
+    
 	
     return 0;
 }

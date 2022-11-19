@@ -40,6 +40,11 @@ UniqueIDColor::UniqueIDColor(){
     id = next_free_uid_number++;
 }
 
+UniqueIDColor::UniqueIDColor(unsigned long uid){
+    type = TYPE_UNIQUE_ID;
+    id = uid;
+}
+
 void UniqueIDColor::print(string space){
     cout << space << "id = " << id << endl;
 }
@@ -87,4 +92,13 @@ void ScreenCoordinateColor::print(string space){
 string ScreenCoordinateColor::get_color_value_as_str() const
 {
     return "(" + to_string(this->x) + "," + to_string(y) + ")";
+}
+
+bool ScreenCoordinateColor::set_color_value_from_str(const string& source)
+{
+    int divider = source.find(",");
+    this->x = stoi(source.substr(1, divider));
+    this->y = stoi(source.substr(divider + sizeof(","), source.length() - sizeof(")")));
+
+    return true;
 }

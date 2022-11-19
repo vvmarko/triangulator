@@ -55,10 +55,16 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
     string idAttrStr = "id";
     char* idAttrCstr = treeXml.allocate_string(idAttrStr.c_str(), idAttrStr.length() + 1);
 
+    string colorString = "color";
+    char* colorCString = treeXml.allocate_string(colorString.c_str(), colorString.length() + 1);
+    string colorIdString = "color_type";
+    char* colorIdCString = treeXml.allocate_string(colorIdString.c_str(), colorIdString.length() + 1);
+    xml_attribute<> *color_id_attr;
+
     string colorTypeStr;
     string colorValStr;
     string levelString = "self_level";
-    char* levelCStr = treeXml.allocate_string(levelString.c_str(), levelString.length() + 1);;
+    char* levelCStr = treeXml.allocate_string(levelString.c_str(), levelString.length() + 1);
     for (unsigned int lvl = 0; lvl < simpComp->elements.size(); lvl++) {
         for (auto ks : simpComp->elements[lvl]) {
             xml_node<>* ksNd = treeXml.allocate_node(node_element, ndCstr);
@@ -79,7 +85,10 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
                 char* colorTypeCstr = treeXml.allocate_string(colorTypeStr.c_str(), colorTypeStr.length() + 1);
                 colorValStr = (*it)->get_color_value_as_str();
                 char* colorValCstr = treeXml.allocate_string(colorValStr.c_str(), colorValStr.length() + 1);
-                xml_node<>* color_nd = treeXml.allocate_node(node_element, colorTypeCstr, colorValCstr);
+                xml_node<>* color_nd = treeXml.allocate_node(node_element, colorCString, colorValCstr);
+
+                color_id_attr = treeXml.allocate_attribute(colorIdCString, colorTypeCstr);
+                color_nd->append_attribute(color_id_attr);
 
                 ksNd->append_node(color_nd);
             }
@@ -166,8 +175,8 @@ SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
 {
     using namespace rapidxml;
 
-    xml_node<>* current_sc = doc.first_node();  // Only one SimpComp per .xml file supported?
-    xml_node<>* current_node = current_sc->first_node();
+    // Reading basic SimpComp properties
+    xml_node<>* current_node = doc.first_node()->first_node();
 
     string sc_name = current_node->value();
     current_node = current_node->next_sibling();
@@ -176,17 +185,108 @@ SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
     int sc_dimension = stoi(current_node->value());
     std::cout << "Complex dimension: " << sc_dimension << "." << std::endl;
 
+    SimpComp* sc = new SimpComp(sc_name, sc_dimension);
+
+    // Read all other nodes
+    vector<size_t>* simplices;
+    bool first = true;
     for (current_node = current_node->next_sibling();
          current_node != 0;
          current_node = current_node->next_sibling())
         if ((std::string) current_node->name() == "level")
-            std::cout << "LVL" << std::endl;
+            read_level_node(current_node, sc, stoi(current_node->first_attribute()->value()));
         else if ((std::string) current_node->name() == "ksimplex")
-            std::cout << "KSIMPLEX" << std::endl; 
+            read_ksimplex_node(current_node, sc);
 
-    return nullptr;
+    // Remove temp colors:
+    for (auto &lvl: sc->elements)
+        for (auto &ks: lvl)
+            if (!ks->colors.empty()) ks->colors.erase(ks->colors.begin());
+            // This way of removing is inefficient, and some other way should be considered
+
+    return sc;
 
 }
 
-// fn: read levels
-// fn: read simplex
+
+
+// TODO: Check if size_t is OK here.
+// NOTE: Following two functions can be combined into single loop. Leaving as-is until I get a completely working version. -D.C.
+// QUESTION: Coloring in these functions is dependent on implementation of functions from color.hpp header. This is bad uncoupling. Should this be changed?
+void read_level_node(rapidxml::xml_node<>* node, SimpComp* sc, int level, string delimiter)
+{
+    vector<unsigned long>* ids = parse_level(node, delimiter);
+
+    for (auto id: *ids) {
+        if (sc->find_KSimplex(id)) throw -1; //TODO: Exception handling.
+        sc->create_ksimplex(level);
+        sc->elements[level].back()->colors.push_back(new UniqueIDColor(id));
+    }
+}
+
+void read_ksimplex_node(rapidxml::xml_node<>* node, SimpComp* sc, string delimiter)
+{
+    KSimplex* current = sc->find_KSimplex(stoi(node->first_attribute()->value()));
+
+    for (rapidxml::xml_node<>* child = node->first_node();
+         child != 0;
+         child = child->next_sibling())
+        /*
+        // This part should not be neccessary...
+        if ((std::string) child->name() == "self_level") {
+            if (stoi(child->value()) != current->k) throw -1; // TODO: Exception
+        }*/
+        if ((std::string) child->name() == "color")
+            colorize_node(current, child);
+        else if ((std::string) child->name() == "level") {
+            vector<unsigned long>* ids = parse_level(child, delimiter);
+            for (auto id: *ids)
+                current->add_neighbor(sc->find_KSimplex(id));
+        }
+
+    
+}
+
+void colorize_node(KSimplex* ks, rapidxml::xml_node<>* color_node)
+{
+    int color_type = stoi(color_node->first_attribute()->value());
+    
+    // This is a horrible solution. We should think of some other way of doing this
+    Color* color;
+    // NOTE: This seems as a bad solution.
+    switch(color_type) {
+    case TYPE_BOUNDARY:
+        color = new BoundaryColor(stoi(color_node->value()));
+        ks->colors.push_back(static_cast<BoundaryColor*>(color));
+        break;
+    case TYPE_UNIQUE_ID:
+        color = new UniqueIDColor(stoi(color_node->value()));
+        ks->colors.push_back(static_cast<UniqueIDColor*>(color));
+        break;
+    case TYPE_SCREEN_COORDINATE:
+        ScreenCoordinateColor* scc = new ScreenCoordinateColor();
+        scc -> set_color_value_from_str(color_node->value());
+        ks->colors.push_back(scc);
+        break;
+    }
+    
+}
+
+vector<unsigned long>* parse_level(rapidxml::xml_node<>* node, string delimiter)
+{
+    vector<unsigned long>* ids = new vector<unsigned long>();
+    string elements = node->value();
+    std::size_t pos;
+
+    if (elements.empty()) return ids;
+
+    while ( (pos = elements.find(delimiter)) != std::string::npos)
+    {
+        ids->push_back(stoi(elements.substr(0, pos)));
+        elements.erase(0, pos + delimiter.length());
+    }
+    // Last element comes after the last delimiter:
+    ids->push_back(stoi(elements.substr(0, pos)));
+    
+    return ids;
+}
