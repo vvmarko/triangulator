@@ -124,12 +124,15 @@ int main(){
 
     SimpComp *simpComp = seed_sphere_intuitively(3, "sphere");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
-    simpComp->print_compact();
+    //simpComp->print();
 
     save_complex_to_xml_file(simpComp, "test1.xml");
     delete simpComp;
+
     SimpComp *simpComp2 = read_complex_from_xml_file("test1.xml");
-    simpComp2->print();
+    //simpComp2->print();
+    save_complex_to_xml_file(simpComp2, "test2.xml");
+    delete simpComp2;
     
 	
     return 0;

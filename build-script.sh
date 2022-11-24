@@ -41,7 +41,7 @@ echo " "
 
 echo "Compiling main.cpp and linking it to triangulator-library.a..."
 
-g++ main.cpp -g -L . -l :triangulator-library.a -o execute-me
+g++ main.cpp -g -O0 -L . -l :triangulator-library.a -o execute-me
 
 echo "... done."
 echo " "
