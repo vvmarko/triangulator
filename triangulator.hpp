@@ -14,8 +14,6 @@ using namespace std;
 #include "third-party-software/rapidxml/rapidxml_print.hpp"
 #include "third-party-software/rapidxml/rapidxml_utils.hpp"
 
-class KSimplex;     // Had to do a predeclaration because is used in get_color_from_str
-
 #include "color.hpp"
 #include "simpcomp.hpp"
 #include "ksimplex.hpp"

@@ -306,7 +306,6 @@ void read_level_node(rapidxml::xml_node<>* node, SimpComp* sc, int level, string
  */
 void read_ksimplex_node(rapidxml::xml_node<>* node, SimpComp* sc, string delimiter)
 {
-    std::cout << "BEGINNING_STATE: \n\n";
     sc->print();
     KSimplex* current = sc->find_KSimplex(stoi(node->first_attribute()->value()));
     for (rapidxml::xml_node<>* child = node->first_node();      // Iterate through properties.
@@ -316,15 +315,7 @@ void read_ksimplex_node(rapidxml::xml_node<>* node, SimpComp* sc, string delimit
             colorize_node(current, child);
         else if ((std::string) child->name() == "level") {
             vector<unsigned long>* ids = parse_level(child, delimiter);
-            std::cout << "\n\n\n!!!!!!!!!!!!!!!!!!!!!!!\n\n\n";
-            std::cout <<"[";
-            for (auto id: *ids) std::cout << id << ",";
-            std::cout << "]\n\n";
-            for (auto id: *ids){
-                std::cout << "\n\nADDING SIMPLEX_ID: " << id << std::endl << std::endl;
-                current->add_neighbor(sc->find_KSimplex(id));
-                sc->print();
-            }
+            for (auto id: *ids) current->add_neighbor(sc->find_KSimplex(id));
             delete ids;
         }
     

@@ -26,7 +26,7 @@
 // Forward declarations of neccesary classes
 // ######################
 
-class Ksimplex;
+class KSimplex;
 class SimpComp;
 
 // #######################

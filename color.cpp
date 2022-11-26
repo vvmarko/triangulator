@@ -38,7 +38,7 @@ void Color::colorize_node_from_string(KSimplex* ks, const int color_type, const 
         ks->colors.push_back(static_cast<BoundaryColor*>(color));
         break;
     case TYPE_UNIQUE_ID:
-        ks->colors.push_back(new UniqueIDColor(stoi(color_value)));
+        ks->colors.push_back(new UniqueIDColor());
         break;
     case TYPE_SCREEN_COORDINATE:
         color = new ScreenCoordinateColor();
