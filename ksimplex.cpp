@@ -25,8 +25,8 @@ KSimplex::~KSimplex(){
 bool KSimplex::find_neighbor(KSimplex *kSimplex){
     if(!kSimplex)
         return false;
-    int k = kSimplex->k;
-    for(auto &it : neighbors->elements[k])
+    int k1 = kSimplex->k;
+    for(auto &it : neighbors->elements[k1])
         if(it == kSimplex)
             return true;
     return false;
@@ -37,6 +37,7 @@ bool KSimplex::find_neighbor(KSimplex *kSimplex){
 // Whenever a neighbor is added to current one,
 // current one is also added to neighbor.
 void KSimplex::add_neighbor(KSimplex *kSimplex){
+  int k2;
     if(!kSimplex)
         return;
     int k1 = kSimplex->k; // extract dimension
@@ -48,16 +49,26 @@ void KSimplex::add_neighbor(KSimplex *kSimplex){
       log_report(LOG_ERROR, "You have tried to connect two simplices of the same level as neighbors! This is wrong and should never happen, skipping. Fix your code.");
       return;
     }
-    if(!find_neighbor(kSimplex)){ // if doesn't exist already
+    if(!find_neighbor(kSimplex)){ // if kSimplex is not already my neighbor
         neighbors->elements[k1].push_back(kSimplex); // add it as a neighbor
     }
-    if(!kSimplex->find_neighbor(this)) // add me as a neigbhor to it as well
-        kSimplex->neighbors->elements[k].push_back(this);
-    if(k1){ // recursivelly add neighbors at k-1,..0:
-        for(auto &it : kSimplex->neighbors->elements[k1 - 1])
-            add_neighbor(it);
+    if(!kSimplex->find_neighbor(this)){ // if I am not already his neighbor
+        kSimplex->neighbors->elements[k].push_back(this); // add me as his neigbhor as well
+    }
+    if(k1 && k>k1){ // if kSimplex is my subsimplex (k>k1) and is not a vertex (k1!=0), then add all his neighbor subsimplices (k1-1,...,0) as my neighbors:
+      for (k2=0 ; k2<k1 ; k2++){
+        for(auto &it : kSimplex->neighbors->elements[k2])
+	  add_neighbor(it);
+      }
+    }
+    if(k && k<k1){ // on the other hand, if I am a subsimplex of kSimplex (k<k1) and I am not a vertex (k!=0), then add all my neighbor subsimplices (k-1,...,0) as his neighbors:
+      for (k2=0 ; k2<k ; k2++){
+        for(auto &it : neighbors->elements[k2])
+          kSimplex->add_neighbor(it);
+      }
     }
 }
+
 
 // Collects neighboring vertices into a set<int>:
 void KSimplex::collect_vertices(set<KSimplex*> &s){

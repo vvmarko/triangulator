@@ -10,14 +10,12 @@ int main(){
   cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
   cout         << "#######################################################" << endl << endl;
   
-    SimpComp *g1 = seed_sphere(3,"obicna 3-sfera");
+    SimpComp *g1 = seed_sphere(3,"obicna 2-sfera");
     UniqueIDColor::colorize_entire_complex(g1);
-    //    g1->print_detailed();
+    g1->print_detailed();
 
-    KSimplex *s1 = g1->elements[2][0];
-    KSimplex *s2 = g1->elements[2][1];
-    s1->add_neighbor(s1);
-    s1->add_neighbor(s2);
+    //    KSimplex *s1 = g1->elements[2][0];
+    //    KSimplex *s2 = g1->elements[2][1];
 
     
 
