@@ -16,6 +16,7 @@ echo " "
 
 echo "Creating triangulator-library.a from component object files..."
 
+rm -f triangulator-library.a
 ar rcs triangulator-library.a simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "

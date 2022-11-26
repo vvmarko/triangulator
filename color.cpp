@@ -20,6 +20,21 @@ bool Color::set_color_value_from_str(const string& source)
     return false;
 }
 
+string get_color_name_from_type(int color_type)
+{
+switch(color_type) {
+    case TYPE_BOUNDARY:
+      return "Boundary";
+    case TYPE_UNIQUE_ID:
+      return "UniqueID";
+    case TYPE_SCREEN_COORDINATE:
+      return "ScreenCoordinate";
+    default:
+      return "Unknown color name, type " + to_string(color_type);
+    }
+}
+
+
 BoundaryColor::BoundaryColor(){
     type = TYPE_BOUNDARY;
 }
@@ -30,7 +45,7 @@ void BoundaryColor::print(string space){
 
 string BoundaryColor::get_color_value_as_str() const
 {
-    return "1";
+    return "true";
 }
 
 UniqueIDColor::UniqueIDColor(){
@@ -86,3 +101,4 @@ string ScreenCoordinateColor::get_color_value_as_str() const
 {
     return "(" + to_string(this->x) + "," + to_string(y) + ")";
 }
+

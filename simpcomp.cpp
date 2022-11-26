@@ -189,7 +189,7 @@ void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
 }
 
 void SimpComp::print_compact(){
-    cout << endl << "Printing SimpComp " << name << ", D = " << D << endl;
+  //    cout << endl << "Printing SimpComp " << name << ", D = " << D << endl;
     if(elements.empty())
         return;
     
@@ -207,7 +207,7 @@ void SimpComp::print_compact(){
             // vAll and sAll:
             // 14 (2-4-8), 15 (3-5-9), ...
             for(size_t k = 0; k < elements.size(); k++){
-                cout << "Simplices k = " << k << ":" << endl;
+	      cout << "Simplices at level k = " << k << ":   ";
                 if(!elements[k].empty()){
                     elements[k][0]->print_compact();
                     for(size_t i = 1; i < elements[k].size(); i++){
@@ -215,12 +215,12 @@ void SimpComp::print_compact(){
                         elements[k][i]->print_compact();
                     }
                     cout << endl;
-                }
+                } else { cout << endl; }
             }
         }else{
             // vAll and not sAll:
             for(size_t k = 0; k < elements.size(); k++){
-                cout << "Simplices k = " << k << ":" << endl;
+	      cout << "Simplices at level k = " << k << ":   ";
                 if(!elements[k].empty()){
                     if(!k){ // print vertices:
                         // 14, 15, 18, ...
@@ -246,14 +246,14 @@ void SimpComp::print_compact(){
                         }
                         cout << endl;
                     }
-                }
+                } else { cout << endl; }
             }
         }
     }else{
         // not vAll:
         // 8, 4, Simplex, 15, ...
         for(size_t k = 0; k < elements.size(); k++){
-            cout << "Simplices k = " << k << ":" << endl;
+	  cout << "Simplices at level k = " << k << ":   ";
             bool first = true;
             for(size_t i = 0; i < elements[k].size(); i++){
                 if(!first)
@@ -270,6 +270,46 @@ void SimpComp::print_compact(){
         }
     }
 }
+
+void SimpComp::print_detailed(){
+    cout << endl;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=======   _____________________________________________   =======" << endl;
+    cout << "=======  /                                             \\  =======" << endl;
+    cout << "=======  | Detailed printing of the simplicial complex |  =======" << endl;
+    cout << "=======  \\_____________________________________________/  =======" << endl;
+    cout << "=======                                                   =======" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << endl;
+    cout << "Name of the complex: " << name << endl;
+    cout << "Dimension:           " << D << endl;
+    cout << "List of elements:" << endl;
+    cout << "---------------------------------------------" << endl;
+    print_compact();
+    cout << "---------------------------------------------" << endl;
+    cout << endl;
+    for(size_t k = 0; k < elements.size(); k++){
+      cout << "==============================================================" << endl;
+      cout << "Printing details of simplices at level k = " << k << " of the complex" << endl;
+      cout << "==============================================================" << endl << endl;
+      for(size_t i = 0; i < elements[k].size(); i++) elements[k][i]->print_detailed();
+      cout << endl;
+    }
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=======   _____________________________________________   =======" << endl;
+    cout << "=======  /                                             \\  =======" << endl;
+    cout << "=======  | Finished printing of the simplicial complex |  =======" << endl;
+    cout << "=======  \\_____________________________________________/  =======" << endl;
+    cout << "=======                                                   =======" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << endl;
+}
+
+
 
 // Creating new KSimplex at level k:
 KSimplex* SimpComp::create_ksimplex(int k){

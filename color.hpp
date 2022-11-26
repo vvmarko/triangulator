@@ -45,6 +45,8 @@ public:
     int type;
 };
 
+string get_color_name_from_type(int color_type);
+
 // Whether the KSimplex of this color represents a boundary:
 class BoundaryColor : public Color{
 public:

@@ -4,12 +4,21 @@
 
 int main(){
 
-    test();
+  //    test();
 
-    cout << endl << "---------------------------------------------------" << endl << endl;
+  cout << endl << "#######################################################" << endl;
+  cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
+  cout         << "#######################################################" << endl << endl;
+  
+    SimpComp *g1 = seed_sphere(3,"obicna 3-sfera");
+    UniqueIDColor::colorize_entire_complex(g1);
+    g1->print_detailed();
 
 
 
+    
+
+    /*
 cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);" << endl;
     SimpComp *simpComp = seed_single_simplex(3, "seed_single_simplex and 3");
     UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
@@ -21,7 +30,7 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
         cout << "Jeste boundary elements[2][0]" << endl;
     else
         cout << "Nije boundary elements[2][0]" << endl;
-
+    */
 
     /*
 //cout << endl << "Testing preparing simpComp from 3D-sphere to Pachner 3->2 initial state:" << endl;
@@ -81,7 +90,9 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
 
 
 
-
+  cout << endl << "#################################################" << endl;
+  cout         << "############ END OF THE MAIN FUNCTION ###########" << endl;
+  cout         << "#################################################" << endl << endl;
 	
     return 0;
 }

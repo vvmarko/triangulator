@@ -97,6 +97,28 @@ void KSimplex::print_compact(){
     }
 }
 
+void KSimplex::print_detailed(){
+    UniqueIDColor* pColor = get_uniqueID();
+    cout << "Simplex ID: ";
+    if(pColor)
+      pColor->print_compact();
+    if( k && (neighbors->elements[0].size()) ){
+            // empty ordered set container
+            set<int> s;
+            neighbors->print_vertices_IDs_in_parentheses(s);
+    }
+    cout << endl << endl;
+    cout << "List of colors: " << endl;
+    for(auto col : colors)
+      cout << "color: " << get_color_name_from_type(col->type) << " (type " << col->type << "), value: " << col->get_color_value_as_str() << endl;
+    cout << endl;
+    cout << "Table of neighbors: " << endl;
+    cout << "---------------------------------------------" << endl;
+    neighbors->print_compact();
+    cout << "---------------------------------------------" << endl << endl;
+}
+
+
 bool subset(set<KSimplex*> &s1, set<KSimplex*> &s2){
 	for(auto x : s1){
 		auto search = s2.find(x);

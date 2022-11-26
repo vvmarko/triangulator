@@ -25,6 +25,8 @@ public:
     bool is_a_boundary();
     // Print a k-simplex by listing IDs of its vertices:
     void print_compact();
+    // Print a k-simplex by listing all of its details and neighbors:
+    void print_detailed();
     // Delete given kSimplex from the list of neighbors of this k-simplex:
     void delete_my_neighbor(KSimplex* kSimplex);
     // Delete given kSimplex as neighbor, and delete this as kSimplex's neighbor:
