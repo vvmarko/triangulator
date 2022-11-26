@@ -12,9 +12,12 @@ int main(){
   
     SimpComp *g1 = seed_sphere(3,"obicna 3-sfera");
     UniqueIDColor::colorize_entire_complex(g1);
-    g1->print_detailed();
+    //    g1->print_detailed();
 
-
+    KSimplex *s1 = g1->elements[2][0];
+    KSimplex *s2 = g1->elements[2][1];
+    s1->add_neighbor(s1);
+    s1->add_neighbor(s2);
 
     
 

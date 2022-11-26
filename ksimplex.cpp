@@ -40,6 +40,14 @@ void KSimplex::add_neighbor(KSimplex *kSimplex){
     if(!kSimplex)
         return;
     int k1 = kSimplex->k; // extract dimension
+    if (kSimplex==this){
+      log_report(LOG_ERROR, "You have tried to add a simplex as a neighbor to itself! This is wrong and should never happen, skipping. Fix your code.");
+      return;
+    }
+    if (k1==k){
+      log_report(LOG_ERROR, "You have tried to connect two simplices of the same level as neighbors! This is wrong and should never happen, skipping. Fix your code.");
+      return;
+    }
     if(!find_neighbor(kSimplex)){ // if doesn't exist already
         neighbors->elements[k1].push_back(kSimplex); // add it as a neighbor
     }
