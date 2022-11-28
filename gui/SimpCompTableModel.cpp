@@ -33,7 +33,7 @@ int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const
 
 int SimpCompTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 6; // name, dimension, print complex, draw complex, save as, delete row
+    return 7; // name, dimension, topology, print complex, draw complex, save as, delete row
 }
 
 QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
@@ -51,6 +51,10 @@ QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
               return QString("");
             case 4 :
               return QString("");
+            case 5 :
+              return QString("");
+            case 6 :
+              return QString("");
         }
 
     return QVariant();
@@ -60,10 +64,12 @@ QVariant SimpCompTableModel::headerData(int section, Qt::Orientation orientation
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch (section) {
-        case 0:
-            return QString("Name");
-        case 1:
-            return QString("Dimension");        
+          case 0:
+              return QString("Name");
+          case 1:
+              return QString("Dimension");
+          case 2:
+              return QString("Topology");
         }
     }
     return QVariant();

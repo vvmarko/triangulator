@@ -7,11 +7,10 @@
 #include "PrintComplex.h"
 #include <QFileDialog>
 #include "Utils.h"
+#include <QMessageBox>
 
 void MainWindow::newFile() {
     SeedComplex* seedDialog = new SeedComplex(this, &items, ui.tblComplexes);
-
-    Utils::openWindowOnRandomPos(seedDialog);
 
     seedDialog->show();    
 }
@@ -49,6 +48,8 @@ void MainWindow::openLogFile() {
     if (!viewLogFileVisible)
     {
         logViewerDialog = new LogViewer(this, "");
+
+        Utils::openWindowOnRandomPos(logViewerDialog);
 
         logViewerDialog->show();
         viewLogFileVisible = true;
@@ -120,6 +121,25 @@ void MainWindow::tblItemSaveComplexAsClick() {
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save Simplicial Complex"), "", tr("SimpComp Files (*.xml)"));
 
+    if (fileName.lastIndexOf('.') != -1)
+    {
+        QString extension;
+
+        extension = fileName.right(fileName.length() - fileName.lastIndexOf('.') - 1);
+        if (extension != "xml") {
+            QMessageBox msgBox(QMessageBox::Critical, "Error", "File extension must be .xml",
+                               QMessageBox::Ok);
+
+            msgBox.exec();
+
+            return;
+        }
+    }
+        else
+        {
+            fileName += ".xml";
+        }
+
     QFile *f = new QFile(fileName);
     f->open(QIODeviceBase::NewOnly);
     QTextStream t(f);
@@ -131,6 +151,13 @@ void MainWindow::tblItemSaveComplexAsClick() {
 void MainWindow::tblItemDeleteRowClick() {
     QPushButton *btn = (QPushButton *)sender();
     int i = ui.tblComplexes->indexAt(btn->pos()).row();    
+
+    QMessageBox msgBox(QMessageBox::Question, "Confirm", "Are you sure?", QMessageBox::Yes | QMessageBox::No);
+
+    if (msgBox.exec() == QMessageBox::No)
+    {
+        return;
+    }
 
     items[i].removeWindowFromChildWindowsOnClose = false;
 
@@ -174,10 +201,10 @@ void MainWindow::createItemWidget(int row) {
     connect(btnSaveComplexAs, &QPushButton::released, this, &MainWindow::tblItemSaveComplexAsClick);
     connect(btnDeleteRow, &QPushButton::released, this, &MainWindow::tblItemDeleteRowClick);
 
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 2), btnPrintComplex);
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 3), btnDrawComplex);
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 4), btnSaveComplexAs);
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 5), btnDeleteRow);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 3), btnPrintComplex);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 4), btnDrawComplex);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 5), btnSaveComplexAs);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 6), btnDeleteRow);
 }
 
 void MainWindow::quit()
