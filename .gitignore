@@ -1,3 +1,5 @@
-# ignore library
-triangulator-library.a
-execute-me
+# ignore build
+build
+
+#ignore VSCode
+.vscode
