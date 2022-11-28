@@ -26,7 +26,7 @@
 // Forward declarations of neccesary classes
 // ######################
 
-class Ksimplex;
+class KSimplex;
 class SimpComp;
 
 // #######################
@@ -40,7 +40,8 @@ public:
     virtual void print_compact();
 
     virtual string get_color_value_as_str() const;
-    virtual bool set_color_value_from_str(const string& source);
+    virtual void set_color_value_from_str(const string& source) = 0;
+    static void colorize_node_from_string(KSimplex* ks, const int color_type, const string& color_value);
 
     int type;
 };
@@ -52,14 +53,15 @@ class BoundaryColor : public Color{
 public:
     BoundaryColor();
     void print(string space = "");
-
     string get_color_value_as_str() const;
+    void set_color_value_from_str(const string& source) override;
 };
 
 // Unique ID of KSimplex:
 class UniqueIDColor : public Color{
 public:
     UniqueIDColor();
+    UniqueIDColor(unsigned long uid);
     void print(string space = "");
     void print_compact();
 
@@ -67,6 +69,7 @@ public:
     static bool colorize_entire_complex(SimpComp* G);
 
     string get_color_value_as_str() const;
+    void set_color_value_from_str(const string& source) override;
 
     static unsigned long next_free_uid_number;
     unsigned long id; // whether the KSimplex of this color represents a boundary
@@ -80,6 +83,7 @@ public:
     void print(string space = "");
 
     string get_color_value_as_str() const;
+    void set_color_value_from_str(const string& source);
 
     int x, y; // screen coordinates
 };
