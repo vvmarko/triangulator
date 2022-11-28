@@ -24,3 +24,10 @@ void error(string message);
 
 void save_complex_to_xml_file(SimpComp* simpComp, const string& filename);
 vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp, rapidxml::memory_pool<>& mp);
+
+SimpComp* read_complex_from_xml_file( const string& filepath );
+SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& file );
+void read_level_node(rapidxml::xml_node<>* node, SimpComp* sc, int level, string delimiter = ",");
+void read_ksimplex_node(rapidxml::xml_node<>* node, SimpComp* sc, string delimiter = ",");
+void colorize_node(KSimplex* ks, rapidxml::xml_node<>* color_node);
+vector<unsigned long>* parse_level(rapidxml::xml_node<>* node, string delimiter = ",");

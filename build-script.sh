@@ -6,7 +6,7 @@
 echo " "
 echo "Compiling component .cpp files..."
 
-g++ -c simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
+g++ -c -g simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
 
 echo "... done."
 echo " "
@@ -42,7 +42,7 @@ echo " "
 
 echo "Compiling main.cpp and linking it to triangulator-library.a..."
 
-g++ main.cpp -L . -l :triangulator-library.a -o execute-me
+g++ main.cpp -g -O0 -L . -l :triangulator-library.a -o execute-me
 
 echo "... done."
 echo " "

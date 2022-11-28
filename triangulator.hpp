@@ -12,6 +12,7 @@ using namespace std;
 #include "third-party-software/rapidxml/rapidxml.hpp"
 #include "rapidxml-patch.hpp"
 #include "third-party-software/rapidxml/rapidxml_print.hpp"
+#include "third-party-software/rapidxml/rapidxml_utils.hpp"
 
 #include "color.hpp"
 #include "simpcomp.hpp"

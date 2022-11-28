@@ -9,14 +9,18 @@ int main(){
   cout << endl << "#######################################################" << endl;
   cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
   cout         << "#######################################################" << endl << endl;
-  
+
+  /*  
     SimpComp *g1 = seed_sphere(3,"obicna 2-sfera");
     UniqueIDColor::colorize_entire_complex(g1);
     g1->print_detailed();
+  */
 
-    //    KSimplex *s1 = g1->elements[2][0];
-    //    KSimplex *s2 = g1->elements[2][1];
-
+    SimpComp *simpComp = seed_sphere_intuitively(3, "moja_sfera");
+    UniqueIDColor::colorize_entire_complex(simpComp);
+    save_complex_to_xml_file(simpComp, "test1.xml");
+    SimpComp *simpComp2 = read_complex_from_xml_file("test1.xml");
+    save_complex_to_xml_file(simpComp2, "test2.xml");
     
 
     /*
@@ -32,6 +36,7 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
     else
         cout << "Nije boundary elements[2][0]" << endl;
     */
+
 
     /*
 //cout << endl << "Testing preparing simpComp from 3D-sphere to Pachner 3->2 initial state:" << endl;
@@ -91,10 +96,10 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
 
 
 
+
   cout << endl << "#################################################" << endl;
   cout         << "############ END OF THE MAIN FUNCTION ###########" << endl;
   cout         << "#################################################" << endl << endl;
 	
     return 0;
 }
-
