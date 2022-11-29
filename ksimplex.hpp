@@ -27,6 +27,8 @@ public:
     void print_compact();
     // Print a k-simplex by listing all of its details and neighbors:
     void print_detailed();
+    // Print a k-simplex in HTML format, for gui:
+    string print_html();
     // Delete given kSimplex from the list of neighbors of this k-simplex:
     void delete_my_neighbor(KSimplex* kSimplex);
     // Delete given kSimplex as neighbor, and delete this as kSimplex's neighbor:
