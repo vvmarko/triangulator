@@ -6,6 +6,8 @@ project(Triangulator VERSION 0.5)
 
 # Some options for build system generation.
 option(DEBUGGING "Toggle debugging mode for symbol generation etc." ON)
+option(COMPILE_LIBRARY "Compile triangulator core library. If turned off, it is expected to put precompiled triangulator.<ext> library
+                        and its headers in precompiled_libs/triangulator folder." OFF)
 option(ENABLE_TESTING "Choose whether to compile test files." ON)
 option(ENABLE_GUI "Compile and use Qt GUI for triangulator." OFF)
 
@@ -27,18 +29,32 @@ target_compile_options(compiler_flags INTERFACE
   "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
-# Generate build system for rapidxml.
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party_software/rapidxml)
+if(COMPILE_LIBRARY)
+  # Generate build system for rapidxml.
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/third_party_software/rapidxml)
 
-# Generate build system for triangulator library and append it to the list
-# of libraries to be included.
-add_subdirectory(library)
-list(APPEND TRIANG_INCLUDE_LIBS TriangulatorLib)
+  # Generate build system for triangulator library and append it to the list
+  # of libraries to be included.
+  add_subdirectory(library)
+  list(APPEND TRIANG_INCLUDE_LIBS TriangulatorLib)
+
+else()
+  #find_library(TRG_PRECOMP NAMES Triangulator.a Triangulator.dll
+  #             PATHS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs NO_DEFAULT_PATH)             
+  if(UNIX)
+    list(APPEND TRIANG_INCLUDE_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator/Triangulator.a)
+  elseif(WIN32)
+    list(APPEND TRIANG_INCLUDE_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator/Triangulator.dll)
+  else()
+    message("OS not supported.")
+  endif()
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator ${CMAKE_CURRENT_SOURCE_DIR}/third_party_software/rapidxml)
+  file(COPY precompiled_libs DESTINATION ${CMAKE_BINARY_DIR}/precompiled_libs)
+endif()
 
 # For now, GUI is not built this way.
 if(ENABLE_GUI)
     add_subdirectory(GUI)
-    list(APPEND TRIANG_INCLUDE_LIBS TriangulatorGUI)
 endif()
 
 if(ENABLE_TESTING)
