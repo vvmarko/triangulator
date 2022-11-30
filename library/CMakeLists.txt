@@ -2,17 +2,17 @@ add_library(TriangulatorLib STATIC)
 
 # List of our source files.
 list(APPEND TRIANGULATOR_SRCS
-    implementation/color.cpp
-    implementation/input_and_output.cpp
-    implementation/ksimplex.cpp
-    implementation/pachner.cpp
-    implementation/seed.cpp
-    implementation/simpcomp.cpp
+    src/color.cpp
+    src/input_and_output.cpp
+    src/ksimplex.cpp
+    src/pachner.cpp
+    src/seed.cpp
+    src/simpcomp.cpp
     )
 
 # List of directories to include header files from.
 list(APPEND TRIANGULATOR_HDRS
-    ${CMAKE_CURRENT_SOURCE_DIR}/headers
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
     )
 
 target_sources(TriangulatorLib PUBLIC ${TRIANGULATOR_SRCS})

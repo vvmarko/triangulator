@@ -2,11 +2,12 @@
 cmake_minimum_required(VERSION 3.15)
 
 # Project name and version.
-project(Triangulator VERSION 1.0)
+project(Triangulator VERSION 0.5)
 
 # Some options for build system generation.
 option(DEBUGGING "Toggle debugging mode for symbol generation etc." ON)
-option(TRIANG_USE_GUI "Compile and use Qt GUI for triangulator." OFF)
+option(ENABLE_TESTING "Choose whether to compile test files." ON)
+option(ENABLE_GUI "Compile and use Qt GUI for triangulator." OFF)
 
 # If we are in debugging mode, toggle debug symbol generation.
 if(DEBUGGING)
@@ -18,7 +19,7 @@ endif()
 add_library(compiler_flags INTERFACE)
 target_compile_features(compiler_flags INTERFACE cxx_std_11)
 
-# Setting compiler flags on supported compilers.
+# Setting appropriate compiler flags on supported compilers.
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 target_compile_options(compiler_flags INTERFACE
@@ -35,11 +36,11 @@ add_subdirectory(library)
 list(APPEND TRIANG_INCLUDE_LIBS TriangulatorLib)
 
 # For now, GUI is not built this way.
-if(TRIANG_USE_GUI)
+if(ENABLE_GUI)
     add_subdirectory(GUI)
     list(APPEND TRIANG_INCLUDE_LIBS TriangulatorGUI)
 endif()
 
-# Adding executables.
-add_executable(Test test/test.cpp)
-target_link_libraries(Test ${TRIANG_INCLUDE_LIBS} compiler_flags)
+if(ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
