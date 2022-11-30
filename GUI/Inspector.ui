@@ -7,51 +7,66 @@
     <x>0</x>
     <y>0</y>
     <width>354</width>
-    <height>429</height>
+    <height>514</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Inspector</string>
   </property>
-  <widget class="QLabel" name="lCoords">
-   <property name="geometry">
-    <rect>
-     <x>21</x>
-     <y>380</y>
-     <width>311</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Koordinate:</string>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="textBrowser">
-   <property name="geometry">
-    <rect>
-     <x>21</x>
-     <y>60</y>
-     <width>311</width>
-     <height>301</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QLabel" name="lSimplexName">
-   <property name="geometry">
-    <rect>
-     <x>21</x>
-     <y>20</y>
-     <width>311</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Naziv simpleksa</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignCenter</set>
-   </property>
-  </widget>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="lSimplexName">
+     <property name="text">
+      <string>Naziv simpleksa</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTextBrowser" name="textBrowser"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="lCoords">
+     <property name="text">
+      <string>Koordinate:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Actions:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="btnApplyPachnerMove">
+       <property name="text">
+        <string>Apply Pachner move</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAttachNewSimplex">
+       <property name="text">
+        <string>Attach new simplex</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btnAddNewColor">
+     <property name="text">
+      <string>Add new color</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

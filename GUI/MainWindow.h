@@ -33,7 +33,7 @@ private:
     void openLogFile();
     void quit();
 
-    void tblItemPrintComplexClick();
+    void tblItemPrintComplexClick();    
     void tblItemDrawComplexClick();    
     void tblItemSaveComplexAsClick();
     void tblItemDeleteRowClick();

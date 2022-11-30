@@ -33,6 +33,7 @@ public:
     void print_vertices_IDs_in_parentheses(set<int> &s);
     void print_compact();
     void print_detailed();
+    string print_html();
     // Creating new KSimplex at level k:
     KSimplex* create_ksimplex(int k);
     // Creates new KSimplex given a set of vertices:

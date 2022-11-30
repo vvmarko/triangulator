@@ -10,11 +10,11 @@ void SeedComplex::handleAccepted() {
 	i.d = atoi(ui.leDimension->text().toStdString().c_str());    
     items->push_back(i);
 
-    PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false, (&items->back()), NULL);
+    //PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false, (&items->back()), NULL);
 
-    items->back().printComplex = print;
+    //items->back().printComplex = print;
 
-    print->show();
+    //print->show();
 
     mainWnd->updateSimpCompTableModel();
 

@@ -19,7 +19,6 @@ KSimplex::~KSimplex(){
 	//cout << "Deleting KSimplex... ";
     for(auto pColor : colors)
         delete pColor;
-    delete neighbors;
 }
 
 bool KSimplex::find_neighbor(KSimplex *kSimplex){
@@ -135,6 +134,31 @@ void KSimplex::print_detailed(){
     cout << "---------------------------------------------" << endl;
     neighbors->print_compact();
     cout << "---------------------------------------------" << endl << endl;
+}
+
+string KSimplex::print_html(){
+  string str = "";
+    set<int> s;
+    UniqueIDColor* pColor = get_uniqueID();
+    if(!pColor){
+      log_report(LOG_ERROR,"HTML printing requires all simplices to have a UniqueID color! Apply UniqueIDColor::colorize_entire_complex() to your data.");
+    }else{
+    str = str + "[<a href=\"http://triangulatorgui.com/" + pColor->get_color_value_as_str() + ".html\">";
+      if (k==0) {
+	s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+      } else {
+        neighbors->collect_vertices_IDs(s);
+      }
+      bool first = true;
+      for(auto itr = s.begin(); itr != s.end(); itr++){
+          if(!first)
+              str = str + "-";
+          first = false;
+          str = str + to_string(*itr);
+      }
+      str = str + "</a>]";
+    }
+    return str;
 }
 
 

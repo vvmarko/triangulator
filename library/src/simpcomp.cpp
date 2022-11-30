@@ -25,7 +25,7 @@ SimpComp::SimpComp(int dim):
         vector<KSimplex*> listaKSimpleksa;
         elements.push_back(listaKSimpleksa);
     }
-    log_report(LOG_INFO, "initialize: Setting up everything for a new graph.");
+    log_report(LOG_DEBUG, "initialize: Setting up everything for a new graph.");
 }
 
 SimpComp::SimpComp(string s, int dim):
@@ -35,7 +35,7 @@ SimpComp::SimpComp(string s, int dim):
         vector<KSimplex*> listaKSimpleksa;
         elements.push_back(listaKSimpleksa);
     }
-    log_report(LOG_INFO, "initialize: Setting up everything for a new graph.");
+    log_report(LOG_DEBUG, "initialize: Setting up everything for a new graph.");
 }
 
 // Copy constructor - creating new SimpComp by copying existing one:
@@ -310,12 +310,27 @@ void SimpComp::print_detailed(){
     cout << endl;
 }
 
+string SimpComp::print_html(){
+  string s = "";
+            for(size_t k = 0; k < elements.size(); k++){
+	      s = s + "<b>Level " + to_string(k) + ":</b><br>";
+                if(!elements[k].empty()){
+                    for(size_t i = 0; i < elements[k].size(); i++){
+                        s = s + " ";
+                        s = s + elements[k][i]->print_html();
+                    }
+                }
+                s = s + "<br>";
+            }
+	    return s;
+}
+
 
 
 // Creating new KSimplex at level k:
 KSimplex* SimpComp::create_ksimplex(int k){
-    string s = "Creating KSimplex at level: " + k;
-    log_report(LOG_INFO, s);
+  string s = "Creating KSimplex at level: " + to_string(k);
+    log_report(LOG_DEBUG, s);
     if ( (k >= 0) && (k <= D) ){
         // Creating new KSimplex at level k:
         KSimplex *newKSimplex = new KSimplex(k, D);
