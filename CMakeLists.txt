@@ -37,19 +37,12 @@ if(COMPILE_LIBRARY)
   # of libraries to be included.
   add_subdirectory(library)
   list(APPEND TRIANG_INCLUDE_LIBS TriangulatorLib)
-
 else()
-  #find_library(TRG_PRECOMP NAMES Triangulator.a Triangulator.dll
-  #             PATHS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs NO_DEFAULT_PATH)             
-  if(UNIX)
-    list(APPEND TRIANG_INCLUDE_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator/Triangulator.a)
-  elseif(WIN32)
-    list(APPEND TRIANG_INCLUDE_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator/Triangulator.dll)
-  else()
-    message("OS not supported.")
-  endif()
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator ${CMAKE_CURRENT_SOURCE_DIR}/third_party_software/rapidxml)
-  file(COPY precompiled_libs DESTINATION ${CMAKE_BINARY_DIR}/precompiled_libs)
+  # If precompiled version of the library and its headers are provided.
+  find_library(TRG_PRECOMP NAMES Triangulato Triangulator.a Triangulator.dll
+               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator NO_DEFAULT_PATH)
+  list(APPEND TRIANG_INCLUDE_LIBS ${TRG_PRECOMP})
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/triangulator ${CMAKE_CURRENT_SOURCE_DIR}/precompiled_libs/rapidxml)
 endif()
 
 # For now, GUI is not built this way.
