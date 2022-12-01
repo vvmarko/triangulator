@@ -9,7 +9,7 @@ class KSimplex;
 class SimpComp{
 public:
     SimpComp(int dim);
-    SimpComp(string s, int dim);
+    SimpComp(string SimpCompName, int dim);
     SimpComp(const SimpComp& simpComp);
     ~SimpComp();
     int count_number_of_simplexes(int level);
@@ -43,6 +43,7 @@ public:
     void print_sizes();
 
     string name;
+    string topology;
     int D;
     // An element at each level
     // is a list or vector of KSimplex pointers to KSimplex on that level:

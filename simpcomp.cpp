@@ -18,8 +18,9 @@ std::ostream &operator<<(std::ostream &os, set<int> &s) {
     return os;
 }
 
-SimpComp::SimpComp(int dim):
-        name {""}, D{dim}{
+// Constructor:
+SimpComp::SimpComp(string SimpCompName, int dim):
+        name {SimpCompName}, topology{""}, D{dim}{
     for(int i = 0; i <= D; i++){
 //        list<KSimplex*> listaKSimpleksa;
         vector<KSimplex*> listaKSimpleksa;
@@ -28,19 +29,14 @@ SimpComp::SimpComp(int dim):
     log_report(LOG_DEBUG, "initialize: Setting up everything for a new graph.");
 }
 
-SimpComp::SimpComp(string s, int dim):
-        name {s}, D{dim}{
-    for(int i = 0; i <= D; i++){
-//        list<KSimplex*> listaKSimpleksa;
-        vector<KSimplex*> listaKSimpleksa;
-        elements.push_back(listaKSimpleksa);
-    }
-    log_report(LOG_DEBUG, "initialize: Setting up everything for a new graph.");
+// Delegating constructor:
+SimpComp::SimpComp(int dim):SimpComp("", dim){
 }
 
 // Copy constructor - creating new SimpComp by copying existing one:
 SimpComp::SimpComp(const SimpComp& simpComp){
 	name = simpComp.name;
+	topology = simpComp.topology;
     D = simpComp.D;
     for(auto &row : simpComp.elements){
         vector<KSimplex*> newKSimplexList;
@@ -50,6 +46,7 @@ SimpComp::SimpComp(const SimpComp& simpComp){
     }
 }
 
+// Destructor:
 SimpComp::~SimpComp(){
 	//cout << "Deleting SimpComp... ";
     for(int i = 0; i <= D; i++){
@@ -59,12 +56,13 @@ SimpComp::~SimpComp(){
     }
 }
 
+// Count number of simplexes on a given level:
 int SimpComp::count_number_of_simplexes(int level){
     return elements[level].size();
 }
 
 void SimpComp::print(string space){
-    cout << space << "Printing SimpComp " << name << ", D = " << D << endl;
+    cout << space << "Printing SimpComp " << name << ", topology = " << topology << ", D = " << D << endl;
     for(size_t i = 0; i < elements.size(); i++){
         if(!elements[i].empty()){
             cout << space << "  Printing SimpComp " << name << " elements, level = " << i << ":" << endl;
@@ -75,6 +73,7 @@ void SimpComp::print(string space){
     }
 }
 
+// Check if all K-simplices on a given level have unique IDs:
 bool SimpComp::all_uniqueID(int level){
     size_t i = 0;
     if(level > D)
@@ -168,6 +167,9 @@ void SimpComp::delete_KSimplex(set<int> IDs){
     toDelete = nullptr;
 }
 
+// Printing set elements (IDs) and later "Simplex" for elements[0],
+// with "-" as a delimiter
+// (not checking whether s IDs belong to elements[0]):
 void SimpComp::print_set(set<int> &s){
     int nNotUniqueID = elements[0].size() - s.size();
     cout << "(";
@@ -285,6 +287,7 @@ void SimpComp::print_detailed(){
     cout << "=================================================================" << endl;
     cout << endl;
     cout << "Name of the complex: " << name << endl;
+    cout << "Topology of the complex: " << topology << endl;
     cout << "Dimension:           " << D << endl;
     cout << "List of elements:" << endl;
     cout << "---------------------------------------------" << endl;

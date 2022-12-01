@@ -87,11 +87,11 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
 	/*
 	//cout << "Simulatin Pancher Moves 3->2 and 2->3:" << endl;
 	cout << "Simulatin Pancher Move 3->2:" << endl;
-    SimpComp *simpComp = seed_sphere(3, "PancherSimulation");
-    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+    SimpComp *simpCompP32 = seed_sphere(3, "PancherSimulation");
+    UniqueIDColor::colorize_simplices_at_level(simpCompP32, 0);
     simpComp->print_compact();
     cout << endl << "---------------------------------------------------" << endl;
-    */  
+    //*/  
     
         
 
@@ -112,6 +112,8 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
   cout << endl << "#################################################" << endl;
   cout         << "############ END OF THE MAIN FUNCTION ###########" << endl;
   cout         << "#################################################" << endl << endl;
+	
+	
 	
     return 0;
 }

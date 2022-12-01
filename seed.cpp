@@ -199,6 +199,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
     SimpComp *simpComp = new SimpComp(D);
     simpComp->name = name;
+    simpComp->topology = sphere ? "sphere" : "linear";
     KSimplex *small = simpComp->create_ksimplex(0);
 
     // Progress to further dimensions by adding new vertex and conntecting it:
@@ -236,6 +237,7 @@ SimpComp* seed_sphere_intuitively(int D, string name){
     SimpComp *simpComp = new SimpComp(D+1);
     simpComp = seed_single_simplex(D+1, name);
     simpComp->name = name;
+    simpComp->topology = "sphere";
 
     // Delete the last created k-simplex after disconnecting neighbors:
     simpComp->remove_simplex(simpComp->elements[D+1][0]);
