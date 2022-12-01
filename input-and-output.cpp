@@ -50,6 +50,7 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
      * <"complex_name">
      *      <name> "complex_name" </name>
      *      <dimension> "D" </dimension>
+     *      <topology> "topology of the complex" </topology>
      *      [<level lvl="l"> "simplices_id_list" </level> ...]
      *      [
      *      <ksimplex id="ksimplex_ID">
@@ -76,6 +77,13 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
     char* DCString = treeXml.allocate_string(to_string(simpComp->D).c_str(), to_string(simpComp->D).length() + 1);
     xml_node<>* dimensionNode = treeXml.allocate_node(node_element, dimensionCString, DCString);
     base->append_node(dimensionNode);
+
+    // Node called topology keeps the topology of the complex
+    string topologyString = "topology";
+    // rapidxml uses these C-style strings:
+    char* topologyCString = treeXml.allocate_string(topologyString.c_str(), topologyString.length() + 1);
+    xml_node<>* topologyNode = treeXml.allocate_node(node_element, topologyCString, simpComp->topology.c_str());
+    base->append_node(topologyNode);
 
     // We iterate through all the levels and get ids of simplices at that level
     vector<xml_node<>*> levels = get_element_levels_as_xml_nodes(simpComp, treeXml);
@@ -248,9 +256,14 @@ SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
 
     int sc_dimension = stoi(current_node->value());     // Complex dimension.
     //    std::cout << "Complex dimension: " << sc_dimension << "." << std::endl;
+    current_node = current_node->next_sibling();
 
+    string sc_topology = current_node->value();             // Complex topology.
+    //    std::cout << "Complex topology: " << sc_topology << "." << std::endl;
+    
     SimpComp* sc = new SimpComp(sc_name, sc_dimension);
-
+    sc->topology = sc_topology;
+    
     vector<size_t>* simplices;
     for (current_node = current_node->next_sibling();       // Read all other nodes
          current_node != 0;

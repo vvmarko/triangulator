@@ -287,8 +287,8 @@ void SimpComp::print_detailed(){
     cout << "=================================================================" << endl;
     cout << endl;
     cout << "Name of the complex: " << name << endl;
-    cout << "Topology of the complex: " << topology << endl;
     cout << "Dimension:           " << D << endl;
+    cout << "Topology:            " << topology << endl;
     cout << "List of elements:" << endl;
     cout << "---------------------------------------------" << endl;
     print_compact();

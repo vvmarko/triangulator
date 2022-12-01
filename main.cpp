@@ -16,8 +16,14 @@ int main(){
     g1->print_detailed();
   */
 
-    SimpComp *simpComp = seed_sphere_intuitively(5, "5-sfera");
+    SimpComp *simpComp = seed_sphere(3, "3-sfera");
     UniqueIDColor::colorize_entire_complex(simpComp);
+    save_complex_to_xml_file(simpComp,"proba.xml");
+    SimpComp *sc2 = read_complex_from_xml_file("proba.xml");
+    save_complex_to_xml_file(sc2,"proba2.xml");
+    sc2->print_detailed();
+    
+    /*
     string s=simpComp->print_html();
     cout << "<br><br>";
     cout << s;
@@ -25,7 +31,7 @@ int main(){
     s=simpComp->elements[0][1]->neighbors->print_html();
     cout << s << endl;
     cout << "<br><br>";
-
+    */
     
     /*
     SimpComp *simpComp = seed_sphere_intuitively(3, "moja_sfera");
