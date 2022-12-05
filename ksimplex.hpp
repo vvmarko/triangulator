@@ -20,7 +20,7 @@ public:
     // Searches for the first unique ID color:
     UniqueIDColor* get_uniqueID();
     // Reconstruct the neighbors table if neighbor vertices are known:
-    bool reconstruct_neighbors_from_vertices();
+    bool reconstruct_neighbors_from_vertices(SimpComp *simpComp);
     // Determines whether BoundaryColor color exists:
     bool is_a_boundary();
     // Print a k-simplex by listing IDs of its vertices:

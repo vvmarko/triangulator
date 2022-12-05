@@ -54,7 +54,7 @@ KSimplex* build_KSimplex(SimpComp* simpComp, set<KSimplex*> &s){
 	// Add all vertices to newKSimplex:
 	for(auto &it : s)
 		it->add_neighbor(newKSimplex);
-	newKSimplex->reconstruct_neighbors_from_vertices();
+	newKSimplex->reconstruct_neighbors_from_vertices(simpComp);
 	return newKSimplex;
 }
 

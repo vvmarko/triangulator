@@ -80,10 +80,8 @@ public:
 
   // Removes a simplex with given UniqueIDs of its vertices, if it exists,
   // by disconnecting it from all of its neighbors and then deleting it
-  // TODO: ova f-ja treba da se preimenuje kao prethodna, i da se
-  //       popravi da bude wrapper za prethodnu, a ne da implementira svoj
-  //       algoritam za brisanje simpleksa
-    void delete_KSimplex(set<int> IDs);
+    void remove_simplex(set<int> IDs);
+  //    void delete_KSimplex(set<int> IDs);
 
   
   // #################################
@@ -91,7 +89,7 @@ public:
   // #################################
   
   // Counts the number of simplices of a given level within the complex
-    int count_number_of_simplexes(int level);
+    int count_number_of_simplices(int level);
 
   
   // ##########################################
@@ -129,9 +127,18 @@ public:
   // #####################################################################
 
   // If all simplices have known vertex-neighbors, reconstruct all other neighbor relations
+  //
+  // IMPORTANT NOTE: This function works under the assumption that all simplices in the
+  // complex have appropriate vertex neighbors, i.e., neighbors->elements[0] is prefilled
+  // correctly, for every simplex. There is no easy way to validate this assumption within
+  // the function itself, so no validation is done --- you must take care yourself to
+  // satisfy this assumption before invoking the function. Otherwise its behavior is
+  // undefined --- the function *will do something*, but probably not what you expect.
+  // You have been warned...
+  //
   // (this simply calls KSimplex::reconstruct_neighbors_from_vertices() for all simplices
-  // in the complex, see the corresponding KSimplex class function for details)
-    bool reconstruct_neighbors_from_vertices();
+  // in the complex, see the corresponding KSimplex class function for further details)
+  bool reconstruct_neighbors_from_vertices();
   
 
   // ###################

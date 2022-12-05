@@ -71,13 +71,12 @@ void KSimplex::add_neighbor(KSimplex *kSimplex){
 
 // Collects neighboring vertices into a set<int>:
 void KSimplex::collect_vertices(set<KSimplex*> &s){
-	// If this k-simplex is a vertex, return it:
+	// If this k-simplex is a vertex, put it into the set:
     if(k == 0){
         s.insert(this);
 		return;
 	}
-    
-	// Otherwise, collect IDs of neighboring vertices:
+	// Otherwise, collect neighboring vertices into a set:
     for(auto &kSimplex : neighbors->elements[0]){
         s.insert(kSimplex);
     }
@@ -198,22 +197,24 @@ void KSimplex::delete_neighbor(KSimplex* kSimplex){
 
 void KSimplex::delete_all_neighbors(){
     for(int i = 0; i < neighbors->elements.size(); i++){
-        for(auto &it : neighbors->elements[i]){
-            delete_neighbor(it);
+        for(auto &it : neighbors->elements[i]){ // TODO: FIXME: Ovo mozda nece da obrise bas sve susede?
+	  delete_neighbor(it); // Iterator prolazi kroz skup ciji elementi se menjaju u petlji, moze da preskoci neke od njih...
         }
     }
 }
 
-bool KSimplex::reconstruct_neighbors_from_vertices(){
+bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp* simpComp){
 	set<KSimplex*> s;
 	collect_vertices(s);
-	for(int tempK = 0; tempK < k; tempK++){
-		for(auto &tempKSimplex : neighbors->elements[tempK]){
-			set<KSimplex*> tempS;
-			tempKSimplex->collect_vertices(tempS);
-			if(subset(tempS, s))
-				add_neighbor(tempKSimplex);
-		}
+	for(int tempK = 0; tempK <= simpComp->D; tempK++){
+	    if(tempK!=k){ // skip level k in the loop, there must be no neighbors at that level
+               for(auto &tempKSimplex : simpComp->elements[tempK]){
+                   set<KSimplex*> tempS;
+                   tempKSimplex->collect_vertices(tempS);
+                   if( (subset(tempS, s)) || (subset(s, tempS)) )
+                       add_neighbor(tempKSimplex);
+	       }
+	    }
 	}
 	return true;
 }

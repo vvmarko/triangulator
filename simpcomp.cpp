@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "triangulator.hpp"
 
+// TODO: ne vidim da bilo gde koristimo cout skupa integera,
+//       da li nam ova funkcija uopste treba negde?
 std::ostream &operator<<(std::ostream &os, set<int> &s) { 
 	os << "(";
 	bool first = true;
@@ -18,37 +20,82 @@ std::ostream &operator<<(std::ostream &os, set<int> &s) {
     return os;
 }
 
-// Constructor:
+// #############################
+// SimpComp class implementation
+// #############################
+
+// General information:
+//
+// Here are the implementations of the functions for the SimpComp class,
+// declared in "simpcomp.hpp" file. See that file for the description
+// of the purpose of each function, and see here (below) for how it
+// works.
+
+
+// ##########################################
+// Constructors and destructors of a complex:
+// ##########################################
+
+// Default constructor
 SimpComp::SimpComp(string SimpCompName, int dim):
         name {SimpCompName}, topology{""}, D{dim}{
-    for(int i = 0; i <= D; i++){
-//        list<KSimplex*> listaKSimpleksa;
-        vector<KSimplex*> listaKSimpleksa;
-        elements.push_back(listaKSimpleksa);
+    if (D<1){
+      log_report(LOG_ERROR, "SimpComp constructor called for dimension less than 1!! Probably a bug in seed function.");
+      log_report(LOG_ERROR, "If you see this message, the rest of the code will probably fail, fix your code!");
     }
-    log_report(LOG_DEBUG, "initialize: Setting up everything for a new graph.");
+// Grow vector "elements" to size D+1, containing vectors of pointers to simplices, for each level k = 0,...,D:
+    for(int i = 0; i <= D; i++){
+        vector<KSimplex*> listOfKSimplices;
+        elements.push_back(listOfKSimplices);
+    }
+    log_report(LOG_DEBUG, "Default constructor: initializing a new simplicial complex object");
+    log_report(LOG_DEBUG, "Name of the complex: "+name);
+    log_report(LOG_DEBUG, "Dimension of the complex: "+to_string(D));
 }
 
-// Delegating constructor:
+
+// No-name constructor
+// Just call the default constructor with an empty name string
 SimpComp::SimpComp(int dim):SimpComp("", dim){
 }
 
-// Copy constructor - creating new SimpComp by copying existing one:
+// Copy constructor
 SimpComp::SimpComp(const SimpComp& simpComp){
-	name = simpComp.name;
-	topology = simpComp.topology;
+    name = simpComp.name;
+    topology = simpComp.topology;
     D = simpComp.D;
     for(auto &row : simpComp.elements){
         vector<KSimplex*> newKSimplexList;
         for(auto &kSimplex : row)
-            newKSimplexList.push_back(kSimplex);
+	  newKSimplexList.push_back(kSimplex); // TODO: FIXME: Ovo ne valja!!
+// Kad kopiramo kompleks, trebalo bi da kopiramo i simplekse koji su zakaceni za njega.
+// Kompleksi su nezavisne strukture, i dva kompleksa ne smeju da dele iste simplekse.
+// Sta ce da se dogodi sa pointerom na simpleks u ovom kompleksu, ako obrisemo taj simpleks
+// pozivanjem remove_simplex() u onom drugom kompleksu?
+//
+// Kopiranje simplicijalnih kompleksa je netrivijalna operacija, i nije dobra ideja
+// da se tako nesto radi u konstruktoru. Umesto konstruktora, trebalo bi napraviti pravu
+// funkciju za kopiranje, koja ce da pozove default konstruktor za nov kompleks, i zatim da
+// ga "sazida" pozivanjem create_ksimplex() i povezivanjem svakog novog simpleksa sa njegovim
+// novim susedima, po ugledu na neighbor tabele u starom kompleksu. Ovo je prilicno komplikovano,
+// i mora da se radi odredjenim redom po nivoima, privremenim bojenjem ekvivalentnih simpleksa
+// u starom i novom kompleksu, itdisl.
+//
+// Ili, ako ne zelimo to sve da radimo, jedno moguce (kratko i "prljavo") resenje je da se operacija
+// kopiranja realizuje tako sto se prvo stari kompleks snimi u neki privremeni .xml fajl pomocu
+// save_complex_to_xml_file(), pa se zatim novi kompleks kreira ucitavanjem tog istog fajla
+// pomocu read_complex_from_xml_file(), i na kraju se pozove operativni sistem da obrise
+// privremeni fajl. Na taj nacin ceo gornji komplikovan posao zapravo rade f-je za snimanje i
+// ucitavanje kompleksa, jer one vec vrse sva neophodna privremena bojenja itd.
         elements.push_back(newKSimplexList);
     }
 }
 
-// Destructor:
+// Default destructor
 SimpComp::~SimpComp(){
-	//cout << "Deleting SimpComp... ";
+    log_report(LOG_DEBUG, "Default destructor: deallocating an existing simplicial complex object");
+    log_report(LOG_DEBUG, "Name of the complex: "+name);
+    log_report(LOG_DEBUG, "Dimension of the complex: "+to_string(D));
     for(int i = 0; i <= D; i++){
         for(auto pKSimplex : elements[i]){
             delete(pKSimplex);
@@ -56,11 +103,240 @@ SimpComp::~SimpComp(){
     }
 }
 
-// Count number of simplexes on a given level:
-int SimpComp::count_number_of_simplexes(int level){
+
+// ###########################################
+// Adding and removing simplices in a complex:
+// ###########################################
+
+
+// Creates a new simplex of level k, and adds it to the complex
+KSimplex* SimpComp::create_ksimplex(int k){
+    log_report(LOG_DEBUG, "Creating KSimplex at level " + to_string(k) + " in complex "+ this->name );
+    if ( (k >= 0) && (k <= D) ){
+        // Creating new KSimplex at level k:
+        KSimplex *newKSimplex = new KSimplex(k, D);
+        // Add newly created k-simplex to the k-th list of elements of this simplicial complex:
+        elements[k].push_back(newKSimplex);
+        return newKSimplex;
+    }else{
+        log_report(LOG_ERROR, "You have attempted to create a simplex of level " + to_string(k) + ", which is outside the [0,...,D] range.");
+        log_report(LOG_ERROR, "This is not allowed, since the dimension of the complex is " + to_string(D) + ". Nullptr created instead, fix your code!");
+        return nullptr;
+    }
+}
+
+// Given a set of vertices, creates a new simplex in the complex,
+// and assigns those vertices as its neighbors
+KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
+  int level= (int) s.size()-1;
+  log_report(LOG_DEBUG, "Creating KSimplex using a set of vertices as its neighbors, at level " + to_string(level) + " in complex "+ this->name );
+  if (level > 0){
+    KSimplex *kSimplex = create_ksimplex((int) s.size()-1);
+    for(auto &tempKSimplex : s){
+        kSimplex->neighbors->elements[0].push_back(tempKSimplex);
+    }
+    return kSimplex;
+  }
+  if (level = 0){
+    log_report(LOG_ERROR, "You have attempted to create a simplex from a set of vertices, which contains only one vertex.");
+    log_report(LOG_ERROR, "This does not make sense. Nullptr created instead, fix your code!");
+  }
+  if (level < 0) {
+    log_report(LOG_ERROR, "You have attempted to create a simplex from a set of vertices, which is apparently empty.");
+    log_report(LOG_ERROR, "This does not make sense. Nullptr created instead, fix your code!");
+  }
+  return nullptr;  
+}
+
+// Removes a given simplex from a complex, by disconnecting it
+// from all of its neighbors and then deleting it
+void SimpComp::remove_simplex(KSimplex *kSimplex){
+    if(!kSimplex){
+      log_report(LOG_WARN, "You have tried to remove a simplex from complex " + name + ", but provided a nullptr instead of the simplex.");
+      log_report(LOG_WARN, "I am skipping this, but you should not be removing nonexistent simplices, check your code.");
+      return;
+    }
+    int level = kSimplex->k;
+    if(level > D){
+      log_report(LOG_ERROR, "You have tried to remove a simplex of level " + to_string(level) + " from complex " + name + " of dimension " + to_string(D) + ".");
+      log_report(LOG_ERROR, "This simplex either does not belong to that complex, or the structure of the complex is corrupted. Fix your code!");
+      return;
+    }
+    // Find the position of kSimplex in elements[level]:
+    unsigned int i = 0;
+    while( (i < elements[level].size()) && (elements[level][i] != kSimplex) )
+        i++;
+    // If not an element:
+    if(i == elements[level].size()){
+      log_report(LOG_WARN, "You have tried to remove a simplex from complex " + name + ", but apparently it is not an element of the complex.");
+      log_report(LOG_WARN, "I am skipping this, but you should not be removing simplices that belong to other complexes from this complex, check your code.");
+      return;
+    }
+    log_report(LOG_DEBUG, "Removing the simplex of level " + to_string(level) + " from complex "+ this->name );
+    // If not last:
+    if(i < elements[level].size() - 1){
+        // Copy the pointer of the last kSimplex onto position i:
+        elements[level][i] = elements[level][ elements[level].size() - 1 ];
+    }
+    // Remove the last element:
+    elements[level].pop_back();
+    // Disconnect kSimplex from all of its neighbors, and delete its neighbor lists:
+    kSimplex->delete_all_neighbors();
+    // Free the memory reserved by kSimplex:
+    delete kSimplex;
+}
+
+// Removes a simplex with given UniqueIDs of its vertices, if it exists,
+// by disconnecting it from all of its neighbors and then deleting it
+// TODO: ova f-ja treba da se preimenuje kao prethodna, i da se
+//       popravi da bude wrapper za prethodnu, a ne da implementira svoj
+//       algoritam za brisanje simpleksa
+ 
+// Deletes a k-simplex with given IDs, if exists:
+//void SimpComp::delete_KSimplex(set<int> IDs)
+void SimpComp::remove_simplex(set<int> IDs){
+    int kFound = IDs.size() - 1;
+    if(kFound > D){
+      log_report(LOG_ERROR, "You have provided a set of " + to_string(kFound+1) + " UniqueIDs for vertices which should uniquely specify a");
+      log_report(LOG_ERROR, "simplex of level " + to_string(kFound) + ", in order to remove it from complex " + name + " of dimension " + to_string(D) + ".");
+      log_report(LOG_ERROR, "This simplex either does not belong to that complex, or the structure of the complex is corrupted. Skipping, fix your code!");
+      return;
+    }
+    if(kFound < 0){
+      log_report(LOG_WARN, "You have provided an empty set of UniqueIDs for vertices which should uniquely specify a simplex, in order to remove it from a complex.");
+      log_report(LOG_WARN, "A simplex cannot be specified with an empty set of vertices. Skipping, fix your code!");
+      return;
+    }
+    KSimplex* toDelete = find_KSimplex(IDs);
+    if(!toDelete){
+      log_report(LOG_ERROR, "You have provided a set of UniqueIDs for vertices which should uniquely specify a simplex, in order to remove it from a complex.");
+      log_report(LOG_ERROR, "But such a simplex could not be found. I am skipping this, but you should not generate empty sets of UniqueID's, check your code.");
+      return;
+    }
+    remove_simplex(toDelete);
+}
+
+
+// #################################
+// Functions for sizes and counting:
+// #################################
+
+// Counts the number of simplices of a given level within the complex
+int SimpComp::count_number_of_simplices(int level){
     return elements[level].size();
 }
 
+
+// ##########################################
+// Verifying various properties of a complex:
+// ##########################################
+
+// Verify if all simplices of a given level are colored with UniqueIDColor
+bool SimpComp::all_uniqueID(int level){
+    size_t i = 0;
+    if( (level > D) || (level < 0) )
+        return false;
+    while( (i < elements[level].size()) && (elements[level][i]->get_uniqueID()) )
+        i++;
+    return i == elements[level].size();
+}
+
+
+// #########################################################
+// Finding and collecting simplices with various properties:
+// #########################################################
+
+// Collect all vertices (simplices of level=0) of a complex into a set
+// (this is typically used over a complex of neighbors, see KSimplex class)
+void SimpComp::collect_vertices(set<KSimplex*> &s){
+    for(auto &kSimplex : elements[0]){
+        s.insert(kSimplex);
+    }
+}
+
+// Collect UniqueID numbers for all vertices (that have UniqueIDColor) into a set
+// (similar to above, typically used over a complex of neighbors of a KSimplex)
+void SimpComp::collect_vertices_IDs(set<int> &s){
+    for(auto &it : elements[0]){
+        UniqueIDColor *pColor = it->get_uniqueID();
+        if(pColor)
+            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+    }
+}
+
+// Finds a simplex which contains precisely the given set of vertices, if it exists
+KSimplex* SimpComp::find_vertices(set<KSimplex*> &s){
+    int kFound = s.size() - 1;
+    if( (kFound > D) || (kFound < 0) )
+        return nullptr;
+    for(auto &it : elements[kFound]){
+		set<KSimplex*> sTemp;
+        it->collect_vertices(sTemp);
+        if(sTemp == s)
+        	return it;
+    }
+    return nullptr;
+}
+
+// Finds a simplex with a given UniqueID number, if it exists
+KSimplex* SimpComp::find_KSimplex(size_t id){
+    for(auto &lvl: elements)
+        for(auto &it : lvl){
+            UniqueIDColor *pColor = it->get_uniqueID();
+            if( (pColor) && (pColor->id == id) )
+                return it;
+	}
+    return nullptr;
+}
+
+// Finds a simplex whose vertices are colored with UniqueIDs from a given set, if it exists
+KSimplex* SimpComp::find_KSimplex(set<int> IDs){
+    set<KSimplex*> sTemp;
+    for(auto &id : IDs){
+        KSimplex *temp = find_KSimplex(id);
+        if(!temp)
+            return nullptr;
+        sTemp.insert(temp);
+    }
+    return find_vertices(sTemp);
+}
+
+
+// #####################################################################
+// Reconstructing the neighbor relations between simplices in a complex:
+// #####################################################################
+
+// If all simplices have known vertex-neighbors, reconstruct all other neighbor relations
+//
+// IMPORTANT NOTE: This function works under the assumption that all simplices in the
+// complex have appropriate vertex neighbors, i.e., neighbors->elements[0] is prefilled
+// correctly, for every simplex. There is no easy way to validate this assumption within
+// the function itself, so no validation is done --- you must take care yourself to
+// satisfy this assumption before invoking the function. Otherwise its behavior is
+// undefined --- the function *will do something*, but probably not what you expect.
+// You have been warned...
+//
+// (this simply calls KSimplex::reconstruct_neighbors_from_vertices() for all simplices
+// in the complex, see the corresponding KSimplex class function for further details)
+bool SimpComp::reconstruct_neighbors_from_vertices(){
+    for(int k = 0; k <= D; k++){
+        for(auto &kSimplex : elements[k]){
+            bool success = kSimplex->reconstruct_neighbors_from_vertices(this);
+            if(!success)
+	        return false;
+        }
+    }
+    return true;
+}
+
+
+// ###################
+// Printing functions:
+// ###################
+
+// Rudimentary printing of the complex structure to stdout
+// (probably will be deprecated soon --- use print_detailed() instead)
+// TODO: ja bih ovo prepravio u wrapper za print_detailed() ili sl.
 void SimpComp::print(string space){
     cout << space << "Printing SimpComp " << name << ", topology = " << topology << ", D = " << D << endl;
     for(size_t i = 0; i < elements.size(); i++){
@@ -73,124 +349,92 @@ void SimpComp::print(string space){
     }
 }
 
-// Check if all K-simplices on a given level have unique IDs:
-bool SimpComp::all_uniqueID(int level){
-    size_t i = 0;
-    if(level > D)
-        return false;
-    while( (i < elements[level].size()) && (elements[level][i]->get_uniqueID()) )
-        i++;
-    return i == elements[level].size();
-}
 
-// Collects neighboring vertices into a set<int>:
-void SimpComp::collect_vertices(set<KSimplex*> &s){
-    for(auto &kSimplex : elements[0]){
-        s.insert(kSimplex);
+// Prints a total number of simplices at each level in a complex to stdout
+// (probably will be deprecated soon --- use print_detailed() instead)
+// TODO: mislim da nam ova f-ja ni za sta ne treba, obrisao bih je...
+void SimpComp::print_sizes(){
+    cout << endl << " --- Number of elements in " << name << " for each dimension ---" << endl;
+    for(int i = 0; i <= D; i++){
+        int n = count_number_of_simplices(i);
+        if(n){
+            cout << "Number of KSimplices at level " << i << ": " << n << endl; // counting edges
+        }else{
+            //cout << "Nothing on level " << i << "." << endl;
+        }
     }
+    cout << endl;
 }
 
-// Collects neighboring vertices IDs into a set<int>:
-void SimpComp::collect_vertices_IDs(set<int> &s){
-    for(auto &it : elements[0]){
-        Color *pColor = it->get_uniqueID();
-        if(pColor)
-            s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+
+// Constructs a string with HTML code for printing all simplices in a complex,
+// with the HTML syntax appropriate for the GUI
+// (it is heavily used by the GUI, not useful otherwise)
+string SimpComp::print_html(){
+    string s = "";
+    for(size_t k = 0; k < elements.size(); k++){
+        s = s + "<b>Level " + to_string(k) + ":</b><br>";
+        if(!elements[k].empty()){
+            for(size_t i = 0; i < elements[k].size(); i++){
+                s = s + " " + elements[k][i]->print_html();
+            }
+        }
+        s = s + "<br>";
     }
+    return s;
 }
 
-// Finds a k-simplex with given vertices, if exists:
-KSimplex* SimpComp::find_vertices(set<KSimplex*> &s){
-	int kFound = s.size() - 1;
-	if(kFound > D)
-		return nullptr;
-    for(auto &it : elements[kFound]){
-		set<KSimplex*> sTemp;
-        it->collect_vertices(sTemp);
-        if(sTemp == s)
-        	return it;
+
+// Detailed printing of the whole simplicial complex structure, in a nice
+// human-readable tabular format, to stdout
+// Prints the name, dimension, topology and list of simplices at each level,
+// and then for each simplex prints all colors with their values, and a list
+// of neighbors of that simplex
+// Relies on print_compact(), and works best if the entire complex is colored
+// with UniqueIDColor (see UniqueIDColor::colorize_entire_complex() for details)
+void SimpComp::print_detailed(){
+    cout << endl;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=======   _____________________________________________   =======" << endl;
+    cout << "=======  /                                             \\  =======" << endl;
+    cout << "=======  | Detailed printing of the simplicial complex |  =======" << endl;
+    cout << "=======  \\_____________________________________________/  =======" << endl;
+    cout << "=======                                                   =======" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << endl;
+    cout << "Name of the complex: " << name << endl;
+    cout << "Dimension:           " << D << endl;
+    cout << "Topology:            " << topology << endl;
+    cout << "List of elements:" << endl;
+    cout << "---------------------------------------------" << endl;
+    print_compact();
+    cout << "---------------------------------------------" << endl;
+    cout << endl;
+    for(size_t k = 0; k < elements.size(); k++){
+        cout << "==============================================================" << endl;
+        cout << "Printing details of simplices at level k = " << k << " of the complex" << endl;
+        cout << "==============================================================" << endl << endl;
+        for(size_t i = 0; i < elements[k].size(); i++) elements[k][i]->print_detailed();
+        cout << endl;
     }
-    return nullptr;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=======   _____________________________________________   =======" << endl;
+    cout << "=======  /                                             \\  =======" << endl;
+    cout << "=======  | Finished printing of the simplicial complex |  =======" << endl;
+    cout << "=======  \\_____________________________________________/  =======" << endl;
+    cout << "=======                                                   =======" << endl;
+    cout << "=================================================================" << endl;
+    cout << "=================================================================" << endl;
+    cout << endl;
 }
 
-bool SimpComp::reconstruct_neighbors_from_vertices(){
-	for(int k = 1; k <= D; k++){
-		for(auto &kSimplex : elements[k]){
-			bool success = kSimplex->reconstruct_neighbors_from_vertices();
-			if(!success)
-				return false;
-		}
-	}
-	return true;
-}
 
-// Finds a k-simplex with given ID, if exists:
-KSimplex* SimpComp::find_KSimplex(size_t id){
-    for (auto &lvl: elements)
-        for(auto &it : lvl)
-            for(auto pColor : it->colors)
-                if(pColor->type == TYPE_UNIQUE_ID)
-                    if((static_cast<UniqueIDColor*>(pColor))->id == id)
-                        return it;
-    
-    return nullptr;
-}
-
-// Finds a k-simplex with given IDs, if exists:
-KSimplex* SimpComp::find_KSimplex(set<int> IDs){
-	set<KSimplex*> sTemp;
-    for(auto &id : IDs){
-        KSimplex *temp = find_KSimplex(id);
-        if(!temp)
-            return nullptr;
-        sTemp.insert(temp);
-    }
-
-	return find_vertices(sTemp);
-}
-
-// Deletes a k-simplex with given IDs, if exists:
-void SimpComp::delete_KSimplex(set<int> IDs){
-    int kFound = IDs.size() - 1;
-	if(kFound > D)
-		return;
-
-    KSimplex* toDelete = find_KSimplex(IDs);
-    if(!toDelete) error("No KSimplex to delete!");
-
-    toDelete->delete_all_neighbors();
-
-    auto &vec = elements[kFound];
-    vec.erase(std::remove(vec.begin(), vec.end(), toDelete), vec.end());    
-
-    delete(toDelete);
-    toDelete = nullptr;
-}
-
-// Printing set elements (IDs) and later "Simplex" for elements[0],
-// with "-" as a delimiter
-// (not checking whether s IDs belong to elements[0]):
-void SimpComp::print_set(set<int> &s){
-    int nNotUniqueID = elements[0].size() - s.size();
-    cout << "(";
-    bool first = true;
-    for(auto itr = s.begin(); itr != s.end(); itr++){
-        if(!first)
-            cout << "-";
-        first = false;
-        cout << *itr;
-    }
-    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
-        cout << "-Simplex";
-    cout << ")";
-}
-
-void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
-    collect_vertices_IDs(s);
-    if(s.size())
-        print_set(s);
-}
-
+// Prints a table of simplices in a complex, in a human-readable tabular
+// format, to stdout
+// Works best if the entire complex is colored with UniqueIDColor
 void SimpComp::print_compact(){
   //    cout << endl << "Printing SimpComp " << name << ", D = " << D << endl;
     if(elements.empty())
@@ -274,149 +518,34 @@ void SimpComp::print_compact(){
     }
 }
 
-void SimpComp::print_detailed(){
-    cout << endl;
-    cout << "=================================================================" << endl;
-    cout << "=================================================================" << endl;
-    cout << "=======   _____________________________________________   =======" << endl;
-    cout << "=======  /                                             \\  =======" << endl;
-    cout << "=======  | Detailed printing of the simplicial complex |  =======" << endl;
-    cout << "=======  \\_____________________________________________/  =======" << endl;
-    cout << "=======                                                   =======" << endl;
-    cout << "=================================================================" << endl;
-    cout << "=================================================================" << endl;
-    cout << endl;
-    cout << "Name of the complex: " << name << endl;
-    cout << "Dimension:           " << D << endl;
-    cout << "Topology:            " << topology << endl;
-    cout << "List of elements:" << endl;
-    cout << "---------------------------------------------" << endl;
-    print_compact();
-    cout << "---------------------------------------------" << endl;
-    cout << endl;
-    for(size_t k = 0; k < elements.size(); k++){
-      cout << "==============================================================" << endl;
-      cout << "Printing details of simplices at level k = " << k << " of the complex" << endl;
-      cout << "==============================================================" << endl << endl;
-      for(size_t i = 0; i < elements[k].size(); i++) elements[k][i]->print_detailed();
-      cout << endl;
-    }
-    cout << "=================================================================" << endl;
-    cout << "=================================================================" << endl;
-    cout << "=======   _____________________________________________   =======" << endl;
-    cout << "=======  /                                             \\  =======" << endl;
-    cout << "=======  | Finished printing of the simplicial complex |  =======" << endl;
-    cout << "=======  \\_____________________________________________/  =======" << endl;
-    cout << "=======                                                   =======" << endl;
-    cout << "=================================================================" << endl;
-    cout << "=================================================================" << endl;
-    cout << endl;
-}
 
-string SimpComp::print_html(){
-  string s = "";
-            for(size_t k = 0; k < elements.size(); k++){
-	      s = s + "<b>Level " + to_string(k) + ":</b><br>";
-                if(!elements[k].empty()){
-                    for(size_t i = 0; i < elements[k].size(); i++){
-                        s = s + " ";
-                        s = s + elements[k][i]->print_html();
-                    }
-                }
-                s = s + "<br>";
-            }
-	    return s;
+// Helper function used by print_compact()
+// Given a set of vertices, prints their UniqueID numbers in parentheses, to stdout
+// The output format looks like "(2-4-15-39)" or "(2-4-Simplex-Simplex)" or similar
+// (it makes sense to apply it only to the neighbor structure of a KSimplex object)
+void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
+    collect_vertices_IDs(s);
+    if(s.size())
+        print_set(s);
 }
 
 
-
-// Creating new KSimplex at level k:
-KSimplex* SimpComp::create_ksimplex(int k){
-  string s = "Creating KSimplex at level: " + to_string(k);
-    log_report(LOG_DEBUG, s);
-    if ( (k >= 0) && (k <= D) ){
-        // Creating new KSimplex at level k:
-        KSimplex *newKSimplex = new KSimplex(k, D);
-        // Add newly created k-simplex to the this simplicial complex elements:
-        elements[k].push_back(newKSimplex);
-        return newKSimplex;
-    }else{
-    	cout << "k = " << k << "?!?" << endl;
-        log_report(LOG_ERROR, "Adding KSimplex failed...");
-        return nullptr;
+// Helper function used by print_vertices_IDs_in_parentheses()
+// Given a set of UniqueID numbers, prints them in parentheses to stdout, padding
+// them with the word "-Simplex" if some of the vertices do not have UniqueIDColor
+// (it makes sense to apply it only to the neighbor structure of a KSimplex object)
+void SimpComp::print_set(set<int> &s){
+    int nNotUniqueID = elements[0].size() - s.size();
+    cout << "(";
+    bool first = true;
+    for(auto itr = s.begin(); itr != s.end(); itr++){
+        if(!first)
+            cout << "-";
+        first = false;
+        cout << *itr;
     }
-}
-
-// Creates new KSimplex given a set of vertices:
-KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
-    KSimplex *kSimplex = create_ksimplex((int) s.size()-1);
-    for(auto &tempKSimplex : s){
-        kSimplex->neighbors->elements[0].push_back(tempKSimplex);
-    }
-
-
-
-
-//TODO: Populate neighbor->elements[1], [2], ...
-
-
-
-
-/*
-	collect_vertices(s);
-	for(int tempK = 0; tempK < k; tempK++){
-		for(auto &tempKSimplex : neighbors->elements[tempK]){
-			set<KSimplex*> tempS;
-			tempKSimplex->collect_vertices(tempS);
-			if(subset(tempS, s))
-				add_neighbor(tempKSimplex);
-		}
-	}
-*/
-	return kSimplex;
-}
-
-// Remove given simplex after disconnecting neighbors:
-void SimpComp::remove_simplex(KSimplex *kSimplex){
-    if(!kSimplex)
-        error("remove_simplex: nullptr given.");
-    int k = kSimplex->k;
-    if(k > D)
-        error("remove_simplex: k("+to_string(k)+")>D("+to_string(D)+")");
-
-    // Find the position of kSimplex in neighbors->elements[k]:
-    unsigned int i = 0;
-    while( (i < elements[k].size()) && (elements[k][i] != kSimplex) )
-        i++;
-    if(i == elements[k].size())
-        error("remove_simplex: kSimplex not found on level "+to_string(k));
-
-    // If not last:
-    if(i < elements[k].size() - 1){
-        // Copy the pointer of the last kSimplex onto position i:
-        elements[k][i] = elements[k][ elements[k].size() - 1 ];
-    }
-
-    // Remove the last element:
-    elements[k].pop_back();
-
-    // Delete all neigbhors from kSimplex:
-    kSimplex->delete_all_neighbors();
-
-    // Free the memory reserved by kSimplex:
-    delete kSimplex;
-}
-
-void SimpComp::print_sizes(){
-    cout << endl << " --- Number of elements in " << name << " for each dimension ---" << endl;
-    for(int i = 0; i <= D; i++){
-        int n = count_number_of_simplexes(i);
-        if(n){
-            cout << "Number of KSimplexes at level " << i << ": " << n << endl; // counting edges
-        }else{
-            //cout << "Nothing on level " << i << "." << endl;
-        }
-    }
-    cout << endl;
+    for(int iSimp = 0; iSimp < nNotUniqueID; iSimp++)
+        cout << "-Simplex";
+    cout << ")";
 }
 

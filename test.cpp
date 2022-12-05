@@ -14,37 +14,34 @@ void test(){
 
     /*
 	cout << endl << "Testing function reconstruct_neighbors_from_vertices" << endl;
-	
-    SimpComp *simpComp = seed_single_simplex(3, "sphere");
-    UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
-    simpComp->print_compact();
 
-    // Print random k-simplex:
-	cout << endl;
-    simpComp->elements[1][0]->print("");
-	cout << endl;
-
-    // Delete neighbors except vertices:
-	for(int k = 1; k <= simpComp->D; k++)
-		for(auto &kSimplex : simpComp->elements[k])
-			for(int tempK = 1; tempK <= simpComp->D; tempK++)
-				kSimplex->neighbors->elements[tempK].clear();
-
-    // Print the same k-simplex:
-	cout << endl;
-    simpComp->elements[1][0]->print("");
-	cout << endl;
-
-	simpComp->reconstruct_neighbors_from_vertices();
-
-    // Print the same k-simplex:
-	cout << endl;
-    simpComp->elements[1][0]->print("");
-	cout << endl;
-
-	cout << endl;
-    simpComp->print_compact();
-    //*/
+ SimpComp *simpComp = seed_single_simplex(3, "tetraedar");
+ UniqueIDColor::colorize_simplices_at_level(simpComp, 0);
+ simpComp->print_compact();
+ // Print random k-simplex:
+ cout << endl;
+ int n=2;
+ int m=3;
+ simpComp->elements[n][m]->neighbors->print_compact();
+ cout << endl;
+ // Delete neighbors except vertices:
+ for(int k = 0; k <= simpComp->D; k++)
+   for(auto &kSimplex : simpComp->elements[k])
+     for(int tempK = 1; tempK <= simpComp->D; tempK++)
+       kSimplex->neighbors->elements[tempK].clear();
+ // Print the same k-simplex:
+ cout << endl;
+ simpComp->elements[n][m]->neighbors->print_compact();
+ cout << endl;
+ simpComp->elements[n][m]->reconstruct_neighbors_from_vertices(simpComp);
+ // simpComp->reconstruct_neighbors_from_vertices();
+ // Print the same k-simplex:
+ cout << endl;
+ simpComp->elements[n][m]->neighbors->print_compact();
+ cout << endl;
+ cout << endl;
+ // simpComp->print_detailed();
+    */
 
     /*
     SimpComp *simpComp = seed_sphere(3, "simpCompFindByIDs");
@@ -71,7 +68,7 @@ void test(){
     simpCompDeleteKSimplex->print_compact();
 
     set<int> s = {1, 2, 3, 4};
-    simpCompDeleteKSimplex->delete_KSimplex(s);
+    simpCompDeleteKSimplex->remove_simplex(s);
     simpCompDeleteKSimplex->print_compact();
     //*/
     
