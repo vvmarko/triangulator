@@ -40,17 +40,17 @@ std::ostream &operator<<(std::ostream &os, set<int> &s) {
 SimpComp::SimpComp(string SimpCompName, int dim):
         name {SimpCompName}, topology{""}, D{dim}{
     if (D<1){
-      log_report(LOG_ERROR, "SimpComp constructor called for dimension less than 1!! Probably a bug in seed function.");
-      log_report(LOG_ERROR, "If you see this message, the rest of the code will probably fail, fix your code!");
+      log_report(LOG_ERROR, "SimpComp(): SimpComp constructor called for dimension less than 1!! Probably a bug in seed function.");
+      log_report(LOG_ERROR, "SimpComp(): If you see this message, the rest of the code will probably fail, fix your code!");
     }
 // Grow vector "elements" to size D+1, containing vectors of pointers to simplices, for each level k = 0,...,D:
     for(int i = 0; i <= D; i++){
         vector<KSimplex*> listOfKSimplices;
         elements.push_back(listOfKSimplices);
     }
-    log_report(LOG_DEBUG, "Default constructor: initializing a new simplicial complex object");
-    log_report(LOG_DEBUG, "Name of the complex: "+name);
-    log_report(LOG_DEBUG, "Dimension of the complex: "+to_string(D));
+    log_report(LOG_DEBUG, "SimpComp(): Default constructor: initializing a new simplicial complex object");
+    log_report(LOG_DEBUG, "SimpComp(): Name of the complex: " + SimpCompName);
+    log_report(LOG_DEBUG, "SimpComp(): Dimension of the complex: "+to_string(D));
 }
 
 
@@ -93,13 +93,15 @@ SimpComp::SimpComp(const SimpComp& simpComp){
 
 // Default destructor
 SimpComp::~SimpComp(){
-    log_report(LOG_DEBUG, "Default destructor: deallocating an existing simplicial complex object");
-    log_report(LOG_DEBUG, "Name of the complex: "+name);
-    log_report(LOG_DEBUG, "Dimension of the complex: "+to_string(D));
+    log_report(LOG_DEBUG, "~SimpComp(): Default destructor: deallocating an existing simplicial complex object");
+    log_report(LOG_DEBUG, "~SimpComp(): Name of the complex: "+name);
+    log_report(LOG_DEBUG, "~SimpComp(): Dimension of the complex: "+to_string(D));
     for(int i = 0; i <= D; i++){
-        for(auto pKSimplex : elements[i]){
-            delete(pKSimplex);
-        }
+      //        for(auto pKSimplex : elements[i]){
+      //            delete(pKSimplex);
+      //        }
+      while(elements[i].size())
+	    remove_simplex(elements[i][0]);
     }
 }
 
@@ -111,7 +113,7 @@ SimpComp::~SimpComp(){
 
 // Creates a new simplex of level k, and adds it to the complex
 KSimplex* SimpComp::create_ksimplex(int k){
-    log_report(LOG_DEBUG, "Creating KSimplex at level " + to_string(k) + " in complex "+ this->name );
+    log_report(LOG_DEBUG, "create_ksimplex(): Creating KSimplex at level " + to_string(k) + " in complex "+ this->name );
     if ( (k >= 0) && (k <= D) ){
         // Creating new KSimplex at level k:
         KSimplex *newKSimplex = new KSimplex(k, D);
@@ -119,8 +121,8 @@ KSimplex* SimpComp::create_ksimplex(int k){
         elements[k].push_back(newKSimplex);
         return newKSimplex;
     }else{
-        log_report(LOG_ERROR, "You have attempted to create a simplex of level " + to_string(k) + ", which is outside the [0,...,D] range.");
-        log_report(LOG_ERROR, "This is not allowed, since the dimension of the complex is " + to_string(D) + ". Nullptr created instead, fix your code!");
+        log_report(LOG_ERROR, "create_ksimplex(): You have attempted to create a simplex of level " + to_string(k) + ", which is outside the [0,...,D] range.");
+        log_report(LOG_ERROR, "create_ksimplex(): This is not allowed, since the dimension of the complex is " + to_string(D) + ". Nullptr created instead, fix your code!");
         return nullptr;
     }
 }
@@ -129,7 +131,7 @@ KSimplex* SimpComp::create_ksimplex(int k){
 // and assigns those vertices as its neighbors
 KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
   int level= (int) s.size()-1;
-  log_report(LOG_DEBUG, "Creating KSimplex using a set of vertices as its neighbors, at level " + to_string(level) + " in complex "+ this->name );
+  log_report(LOG_DEBUG, "create_ksimplex_from_vertices(): Creating KSimplex using a set of vertices as its neighbors, at level " + to_string(level) + " in complex "+ this->name );
   if (level > 0){
     KSimplex *kSimplex = create_ksimplex((int) s.size()-1);
     for(auto &tempKSimplex : s){
@@ -138,12 +140,12 @@ KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
     return kSimplex;
   }
   if (level = 0){
-    log_report(LOG_ERROR, "You have attempted to create a simplex from a set of vertices, which contains only one vertex.");
-    log_report(LOG_ERROR, "This does not make sense. Nullptr created instead, fix your code!");
+    log_report(LOG_ERROR, "create_ksimplex_from_vertices(): You have attempted to create a simplex from a set of vertices, which contains only one vertex.");
+    log_report(LOG_ERROR, "create_ksimplex_from_vertices(): This does not make sense. Nullptr created instead, fix your code!");
   }
   if (level < 0) {
-    log_report(LOG_ERROR, "You have attempted to create a simplex from a set of vertices, which is apparently empty.");
-    log_report(LOG_ERROR, "This does not make sense. Nullptr created instead, fix your code!");
+    log_report(LOG_ERROR, "create_ksimplex_from_vertices(): You have attempted to create a simplex from a set of vertices, which is apparently empty.");
+    log_report(LOG_ERROR, "create_ksimplex_from_vertices(): This does not make sense. Nullptr created instead, fix your code!");
   }
   return nullptr;  
 }
@@ -152,14 +154,14 @@ KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
 // from all of its neighbors and then deleting it
 void SimpComp::remove_simplex(KSimplex *kSimplex){
     if(!kSimplex){
-      log_report(LOG_WARN, "You have tried to remove a simplex from complex " + name + ", but provided a nullptr instead of the simplex.");
-      log_report(LOG_WARN, "I am skipping this, but you should not be removing nonexistent simplices, check your code.");
+      log_report(LOG_WARN, "remove_simplex(): You have tried to remove a simplex from complex " + name + ", but provided a nullptr instead of the simplex.");
+      log_report(LOG_WARN, "remove_simplex(): I am skipping this, but you should not be removing nonexistent simplices, check your code.");
       return;
     }
     int level = kSimplex->k;
     if(level > D){
-      log_report(LOG_ERROR, "You have tried to remove a simplex of level " + to_string(level) + " from complex " + name + " of dimension " + to_string(D) + ".");
-      log_report(LOG_ERROR, "This simplex either does not belong to that complex, or the structure of the complex is corrupted. Fix your code!");
+      log_report(LOG_ERROR, "remove_simplex(): You have tried to remove a simplex of level " + to_string(level) + " from complex " + name + " of dimension " + to_string(D) + ".");
+      log_report(LOG_ERROR, "remove_simplex(): This simplex either does not belong to that complex, or the structure of the complex is corrupted. Fix your code!");
       return;
     }
     // Find the position of kSimplex in elements[level]:
@@ -168,11 +170,11 @@ void SimpComp::remove_simplex(KSimplex *kSimplex){
         i++;
     // If not an element:
     if(i == elements[level].size()){
-      log_report(LOG_WARN, "You have tried to remove a simplex from complex " + name + ", but apparently it is not an element of the complex.");
-      log_report(LOG_WARN, "I am skipping this, but you should not be removing simplices that belong to other complexes from this complex, check your code.");
+      log_report(LOG_WARN, "remove_simplex(): You have tried to remove a simplex from complex " + name + ", but apparently it is not an element of the complex.");
+      log_report(LOG_WARN, "remove_simplex(): I am skipping this, but you should not be removing simplices that belong to other complexes from this complex, check your code.");
       return;
     }
-    log_report(LOG_DEBUG, "Removing the simplex of level " + to_string(level) + " from complex "+ this->name );
+    log_report(LOG_DEBUG, "remove_simplex(): Removing the simplex of level " + to_string(level) + " from complex "+ this->name );
     // If not last:
     if(i < elements[level].size() - 1){
         // Copy the pointer of the last kSimplex onto position i:
@@ -188,29 +190,23 @@ void SimpComp::remove_simplex(KSimplex *kSimplex){
 
 // Removes a simplex with given UniqueIDs of its vertices, if it exists,
 // by disconnecting it from all of its neighbors and then deleting it
-// TODO: ova f-ja treba da se preimenuje kao prethodna, i da se
-//       popravi da bude wrapper za prethodnu, a ne da implementira svoj
-//       algoritam za brisanje simpleksa
- 
-// Deletes a k-simplex with given IDs, if exists:
-//void SimpComp::delete_KSimplex(set<int> IDs)
 void SimpComp::remove_simplex(set<int> IDs){
     int kFound = IDs.size() - 1;
     if(kFound > D){
-      log_report(LOG_ERROR, "You have provided a set of " + to_string(kFound+1) + " UniqueIDs for vertices which should uniquely specify a");
-      log_report(LOG_ERROR, "simplex of level " + to_string(kFound) + ", in order to remove it from complex " + name + " of dimension " + to_string(D) + ".");
-      log_report(LOG_ERROR, "This simplex either does not belong to that complex, or the structure of the complex is corrupted. Skipping, fix your code!");
+      log_report(LOG_ERROR, "remove_simplex(): You have provided a set of " + to_string(kFound+1) + " UniqueIDs for vertices which should uniquely specify a");
+      log_report(LOG_ERROR, "remove_simplex(): simplex of level " + to_string(kFound) + ", in order to remove it from complex " + name + " of dimension " + to_string(D) + ".");
+      log_report(LOG_ERROR, "remove_simplex(): This simplex either does not belong to that complex, or the structure of the complex is corrupted. Skipping, fix your code!");
       return;
     }
     if(kFound < 0){
-      log_report(LOG_WARN, "You have provided an empty set of UniqueIDs for vertices which should uniquely specify a simplex, in order to remove it from a complex.");
-      log_report(LOG_WARN, "A simplex cannot be specified with an empty set of vertices. Skipping, fix your code!");
+      log_report(LOG_ERROR, "remove_simplex(): You have provided an empty set of UniqueIDs for vertices which should uniquely specify a simplex, in order to remove it from a complex.");
+      log_report(LOG_ERROR, "remove_simplex(): A simplex cannot be specified with an empty set of vertices. Skipping, fix your code!");
       return;
     }
     KSimplex* toDelete = find_KSimplex(IDs);
     if(!toDelete){
-      log_report(LOG_ERROR, "You have provided a set of UniqueIDs for vertices which should uniquely specify a simplex, in order to remove it from a complex.");
-      log_report(LOG_ERROR, "But such a simplex could not be found. I am skipping this, but you should not generate empty sets of UniqueID's, check your code.");
+      log_report(LOG_WARN, "remove_simplex(): You have provided a set of UniqueIDs for vertices which should uniquely specify a simplex, in order to remove it from a complex.");
+      log_report(LOG_WARN, "remove_simplex(): But such a simplex could not be found. I am skipping this, but you should not generate empty sets of UniqueID's, check your code.");
       return;
     }
     remove_simplex(toDelete);
@@ -484,12 +480,7 @@ void SimpComp::print_compact(){
                             if(!first)
                                 cout << ", ";
                             first = false;
-
-                            set<int> s; // empty ordered set container
-                            UniqueIDColor* pColor = elements[k][i]->get_uniqueID();
-                            if(pColor)
-                                s.insert( static_cast<UniqueIDColor*>(pColor)->id );
-                            elements[k][i]->neighbors->print_vertices_IDs_in_parentheses(s);
+                            elements[k][i]->neighbors->print_vertices_IDs_in_parentheses();
                         }
                         cout << endl;
                     }
@@ -520,11 +511,12 @@ void SimpComp::print_compact(){
 
 
 // Helper function used by print_compact()
-// Given a set of vertices, prints their UniqueID numbers in parentheses, to stdout
+// Collect all vertices in a complex, and print their UniqueID numbers in parentheses, to stdout
 // The output format looks like "(2-4-15-39)" or "(2-4-Simplex-Simplex)" or similar
 // (it makes sense to apply it only to the neighbor structure of a KSimplex object)
-void SimpComp::print_vertices_IDs_in_parentheses(set<int> &s){
-    collect_vertices_IDs(s);
+void SimpComp::print_vertices_IDs_in_parentheses(){
+  set<int> s;
+  collect_vertices_IDs(s);
     if(s.size())
         print_set(s);
 }

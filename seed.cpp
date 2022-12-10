@@ -197,8 +197,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
         return nullptr;
     }
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
-    SimpComp *simpComp = new SimpComp(D);
-    simpComp->name = name;
+    SimpComp *simpComp = new SimpComp(name,D);
     simpComp->topology = sphere ? "sphere" : "linear";
     KSimplex *small = simpComp->create_ksimplex(0);
 
@@ -234,22 +233,24 @@ SimpComp* seed_sphere_intuitively(int D, string name){
         return nullptr;
     }
     // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
-    SimpComp *simpComp = new SimpComp(D+1);
-    simpComp = seed_single_simplex(D+1, name);
+    SimpComp *simpComp = seed_single_simplex(D+1, name);
     simpComp->name = name;
     simpComp->topology = "sphere";
 
     // Delete the last created k-simplex after disconnecting neighbors:
     simpComp->remove_simplex(simpComp->elements[D+1][0]);
     // Remove BoundaryColor, as sphere doesn't have them:
-	for(auto &kSimplex : simpComp->elements[D])
-		kSimplex->colors.pop_back();
+    for(auto &kSimplex : simpComp->elements[D]){
+        for(auto pColor : kSimplex->colors)
+            delete pColor;
+        kSimplex->colors.pop_back();
+    }
 
     // For each k-simplex from elements:
     for(unsigned i = 0; i < simpComp->elements.size()-1; i++){
         for(auto &kSimplex : simpComp->elements[i]){
             // Decrease the length of matrix kSimplex->neighbors->elements:
-            //kSimplex->neighbors->elements[D+1].empty(); // already disconnected
+            // kSimplex->neighbors->elements[D+1].empty(); // already disconnected
             kSimplex->neighbors->elements.pop_back();
 
             // Decrease the dimension of kSimplex:

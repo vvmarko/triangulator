@@ -35,13 +35,14 @@ public:
   // ##########################################
   // Data structures of the simplicial complex:
   // ##########################################
-  // - name of the complex (user-specified):
+
+  // Name of the complex (user-specified):
     string name;
-  // - topology of the complex (specified automatically):
+  // Topology of the complex (specified automatically):
     string topology;
-  // - dimension of the complex (user-specified):
+  // Dimension of the complex (user-specified):
     int D;
-  // vectors of pointers to k-simplices, arranged into
+  // Vectors of pointers to k-simplices, arranged into
   // a vector of levels k = 0,...,D:
     vector< vector<KSimplex *> > elements;
 
@@ -81,7 +82,6 @@ public:
   // Removes a simplex with given UniqueIDs of its vertices, if it exists,
   // by disconnecting it from all of its neighbors and then deleting it
     void remove_simplex(set<int> IDs);
-  //    void delete_KSimplex(set<int> IDs);
 
   
   // #################################
@@ -175,10 +175,10 @@ public:
     void print_compact();
 
   // Helper function used by print_compact()
-  // Given a set of vertices, prints their UniqueID numbers in parentheses, to stdout
+  // Collect all vertices in a complex, and print their UniqueID numbers in parentheses, to stdout
   // The output format looks like "(2-4-15-39)" or "(2-4-Simplex-Simplex)" or similar
   // (it makes sense to apply it only to the neighbor structure of a KSimplex object)
-    void print_vertices_IDs_in_parentheses(set<int> &s);
+    void print_vertices_IDs_in_parentheses();
 
   // Helper function used by print_vertices_IDs_in_parentheses()
   // Given a set of UniqueID numbers, prints them in parentheses to stdout, padding
