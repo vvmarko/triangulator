@@ -35,9 +35,9 @@ KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp){
 		// For old elements from previous level:
 		for(size_t i = 0; i < oldLength; i++){
 			// Take k-simplex:
-			KSimplex* &small = simpComp->elements[kTemp-1][i];
+			KSimplex* &simpsmall = simpComp->elements[kTemp-1][i];
 			// Append vertex to it, and save it at current level:
-			build_simplex_one_level_up_with_vertex(simpComp, small, vertex);
+			build_simplex_one_level_up_with_vertex(simpComp, simpsmall, vertex);
 		}
 		// Update the old length from current level:
 		oldLength = nextLength;
@@ -162,11 +162,11 @@ cout << endl << "for k == 2, add (2-3-4):" << endl << endl;
         }
 
         /*
-        KSimplex *small = simpComp->create_ksimplex(0);
+        KSimplex *simpsmall = simpComp->create_ksimplex(0);
         // Progress to further dimensions by adding new vertex and conntecting it:
         for(int k = 1; k <= D+sphere; k++){
             // Seed a KSimplex of level k based on KSimplex of level k-1:
-            small = build_simplex_one_level_up(simpComp, small);
+            simpsmall = build_simplex_one_level_up(simpComp, simpsmall);
         }
         */
         //cout << "Printing KSimplex:" << endl;

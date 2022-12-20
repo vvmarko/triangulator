@@ -12,5 +12,5 @@ SimpComp* seed_sphere(int D, string name);
 // by seeding a simplex of dimension d+1, and deleting only it:
 SimpComp* seed_sphere_intuitively(int D, string name);
 
-KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* small, KSimplex *vertex);
+KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* simpsmall, KSimplex *vertex);
 
