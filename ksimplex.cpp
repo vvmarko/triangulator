@@ -169,7 +169,7 @@ void KSimplex::delete_neighbor(KSimplex* kSimplex){
 // NOTE: This function calls delete_neighbor() for all simplices in my list of neighbors, so
 // the same caveats apply here as for the above function
 void KSimplex::delete_all_neighbors(){
-    for(int i = 0; i < neighbors->elements.size(); i++){
+    for(long unsigned int i = 0; i < neighbors->elements.size(); i++){
       //        for(auto &it : neighbors->elements[i]){ // TODO: FIXME: Ovo mozda nece da obrise bas sve susede?
       //	  delete_neighbor(it); // Iterator prolazi kroz skup ciji elementi se menjaju u petlji, moze da preskoci neke od njih...
       //        }
@@ -225,7 +225,7 @@ void KSimplex::print(string space){
     cout << space << "Printing KSimplex: " << " k = " << k << ", D = " << D << endl;
     cout << space << "Printing colors:" << endl;
     for(auto &c : colors){
-        c->print(space + "  ");
+        c->print();
     }
 	// Recursively prints neighbors:
     cout << space << "  Printing neighbors:" << endl;

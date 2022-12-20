@@ -139,7 +139,7 @@ KSimplex* SimpComp::create_ksimplex_from_vertices(set<KSimplex*> &s){
     }
     return kSimplex;
   }
-  if (level = 0){
+  if (level == 0){
     log_report(LOG_ERROR, "create_ksimplex_from_vertices(): You have attempted to create a simplex from a set of vertices, which contains only one vertex.");
     log_report(LOG_ERROR, "create_ksimplex_from_vertices(): This does not make sense. Nullptr created instead, fix your code!");
   }

@@ -158,7 +158,7 @@ public:
 
   // Verify if a set s1 of simplices is a subset of the set s2 of simplices
   // (an empty set s1 is a subset of any s2, even if s2 is also empty)
-  bool subset(set<KSimplex*> &s1, set<KSimplex*> &s2);
+    bool subset(set<KSimplex*> &s1, set<KSimplex*> &s2);
 
 };
 

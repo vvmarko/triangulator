@@ -36,7 +36,10 @@ class SimpComp;
 // Colors define features of K-simplices:
 class Color{
 public:
-    virtual void print(string space = "");
+
+    virtual ~Color();
+
+    virtual void print();
     virtual void print_compact();
 
     virtual string get_color_value_as_str() const;
@@ -52,7 +55,8 @@ string get_color_name_from_type(int color_type);
 class BoundaryColor : public Color{
 public:
     BoundaryColor();
-    void print(string space = "");
+    ~BoundaryColor();
+    void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
 };
@@ -61,6 +65,7 @@ public:
 class UniqueIDColor : public Color{
 public:
     UniqueIDColor();
+    ~UniqueIDColor();
     UniqueIDColor(unsigned long uid);
     void print(string space = "");
     void print_compact();
@@ -79,9 +84,9 @@ public:
 class ScreenCoordinateColor : public Color{
 public:
     ScreenCoordinateColor();
+    ~ScreenCoordinateColor();
     ScreenCoordinateColor(int x, int y);
-    void print(string space = "");
-
+    void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source);
 

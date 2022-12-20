@@ -9,13 +9,13 @@ void log_report(int type, string message){
       if(type == LOG_INFO) cerr << "INFO:    " << message << endl;
       if(type == LOG_DEBUG) cerr << "DEBUG:   " << message << endl;
     }
-};
+}
 
 void error(string message){
     cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nERROR:   " << message
             << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
     exit(1); //TODO: Free all resources
-};
+}
 
 /**
  * @brief Saves given simplicial complex to .xml file for later reading.
@@ -264,7 +264,6 @@ SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
     SimpComp* sc = new SimpComp(sc_name, sc_dimension);
     sc->topology = sc_topology;
     
-    vector<size_t>* simplices;
     for (current_node = current_node->next_sibling();       // Read all other nodes
          current_node != 0;
          current_node = current_node->next_sibling())
