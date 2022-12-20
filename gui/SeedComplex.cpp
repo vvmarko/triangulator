@@ -1,3 +1,6 @@
+
+#include "triangulator.hpp"
+
 #include "SeedComplex.h"
 #include "PrintComplex.h"
 #include "SimpCompTableModel.h"
@@ -6,15 +9,30 @@
 void SeedComplex::handleAccepted() {			
 	SimpCompItem i;
 
-	i.name = ui.leName->text().toStdString();
-	i.d = atoi(ui.leDimension->text().toStdString().c_str());    
+    std::string name = ui.leName->text().toStdString();
+    int D = atoi(ui.leDimension->text().toStdString().c_str());
+    if (ui.cbType->itemText(ui.cbType->currentIndex()) == "Line")
+    {
+        i.simpComp = seed_single_simplex(1, name);
+    }
+    else if (ui.cbType->itemText(ui.cbType->currentIndex()) == "Triangle")
+    {
+        i.simpComp = seed_single_simplex(2, name);
+    }
+    else if (ui.cbType->itemText(ui.cbType->currentIndex()) == "Tetrahedron")
+    {
+        i.simpComp = seed_single_simplex(3, name);
+    }
+    else if (ui.cbType->itemText(ui.cbType->currentIndex()) == "D-Simplex")
+    {
+        i.simpComp = seed_single_simplex(D, name);
+    }
+    else if (ui.cbType->itemText(ui.cbType->currentIndex()) == "D-Sphere")
+    {
+        i.simpComp = seed_sphere(D, name);
+    }
+    UniqueIDColor::colorize_entire_complex(i.simpComp);
     items->push_back(i);
-
-    //PrintComplex* print = new PrintComplex(mainWnd, ui.cbType->currentText(), false, (&items->back()), NULL);
-
-    //items->back().printComplex = print;
-
-    //print->show();
 
     mainWnd->updateSimpCompTableModel();
 
@@ -26,7 +44,7 @@ void SeedComplex::handleRejected() {
 	this->close();
 }
 
-SeedComplex::SeedComplex(MainWindow *mainWnd, vector<SimpCompItem> *items, QTableView *table, QWidget *parent)
+SeedComplex::SeedComplex(MainWindow *mainWnd, std::vector<SimpCompItem> *items, QTableView *table, QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);

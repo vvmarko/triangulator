@@ -2,7 +2,7 @@
 
 #include <QWidget>
 #include "ui_PrintComplex.h"
-using namespace std;
+//using namespace std;
 
 class MainWindow;
 class SimpCompItem;
@@ -12,7 +12,7 @@ class PrintComplex : public QWidget
 	Q_OBJECT
 
 public:
-    PrintComplex(MainWindow *mainWnd, QString displayStr, bool displayLink, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
+    PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
 	~PrintComplex();
 
     SimpCompItem *item;    

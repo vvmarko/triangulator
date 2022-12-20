@@ -15,18 +15,13 @@ void PrintComplex::anchorClicked(const QUrl &url) {
     inspector->show();
 }
 
-PrintComplex::PrintComplex(MainWindow *mainWnd, QString displayStr, bool displayLink, SimpCompItem *item, QWidget *parent)
+PrintComplex::PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem *item, QWidget *parent)
 	: QWidget(parent)
 {
 	ui.setupUi(this);
 
-    if (!displayLink)
-    {
-        ui.textBrowser->setHtml(displayStr + "\n[<a href=\"http://abc.com/123.html\">123</a>]\n123\n12345678901234567890 12345678901234567890 1234567890 123456789012345 678901234567890");
-    } else
-    {
-        ui.textBrowser->setHtml(displayStr);
-    }
+    // links must be like <a href=\"http://abc.com/123.html\">123</a>
+    ui.textBrowser->setHtml(displayStr);
 
     ui.textBrowser->setOpenLinks(false);    
     ui.textBrowser->setTextInteractionFlags(ui.textBrowser->textInteractionFlags() | Qt::LinksAccessibleByMouse);    
