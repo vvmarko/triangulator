@@ -4,22 +4,40 @@
 
 int main(){
 
-  //    test();
+    //    test();
 
-  cout << endl << "#######################################################" << endl;
-  cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
-  cout         << "#######################################################" << endl << endl;
+    cout << endl << "#######################################################" << endl;
+    cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
+    cout         << "#######################################################" << endl << endl;
 
-  /*  
+    /*  
     SimpComp *g1 = seed_sphere(3,"obicna 2-sfera");
     UniqueIDColor::colorize_entire_complex(g1);
     g1->print_detailed();
-  */
+    */
+
+    // Vector of all instantiated simplicial complexes:
+    vector<SimpComp*> seededComplexes;
 
     SimpComp *simpComp = seed_sphere(3, "3-sfera");
     UniqueIDColor::colorize_entire_complex(simpComp);
-    simpComp->print_detailed();
-    delete simpComp;
+    
+    seededComplexes.push_back(simpComp);
+    //seededComplexes[0]->print_detailed();
+
+    SimpComp *simpComp2 = seed_sphere(2, "2-sfera");
+    UniqueIDColor::colorize_entire_complex(simpComp2);
+
+    seededComplexes.push_back(simpComp2);
+    //seededComplexes[1]->print_detailed();
+
+    seededComplexes[0]->print_detailed();
+
+    //delete simpComp;
+    for(auto &it : seededComplexes){
+        delete it;
+    }
+    
     //    save_complex_to_xml_file(simpComp,"proba.xml");
     //    SimpComp *sc2 = read_complex_from_xml_file("proba.xml");
     //    save_complex_to_xml_file(sc2,"proba2.xml");
@@ -117,11 +135,9 @@ cout << endl << "Testing boundaries..." << endl << "seed_single_simplex(3,...);"
 
 
 
-  cout << endl << "#################################################" << endl;
-  cout         << "############ END OF THE MAIN FUNCTION ###########" << endl;
-  cout         << "#################################################" << endl << endl;
-	
-	
-	
+    cout << endl << "#################################################" << endl;
+    cout         << "############ END OF THE MAIN FUNCTION ###########" << endl;
+    cout         << "#################################################" << endl << endl;
+
     return 0;
 }
