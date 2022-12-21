@@ -21,3 +21,8 @@ using namespace std;
 #include "input-and-output.hpp"
 #include "pachner.hpp"
 
+namespace triangulator_global{
+    // Vector of all instantiated simplicial complexes:
+    static vector<SimpComp*> seededComplexes;
+}
+

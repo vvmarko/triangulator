@@ -216,11 +216,18 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
 }
 
 SimpComp* seed_single_simplex(int D, string name){
-    return seed_single_simplex_or_sphere(D, 0, name);
+    SimpComp *simpComp = seed_single_simplex_or_sphere(D, 0, name);
+    triangulator_global::seededComplexes.push_back(simpComp);
+    return simpComp;
 }
 
 SimpComp* seed_sphere(int D, string name){
-    return seed_single_simplex_or_sphere(D, 1, name);
+    SimpComp *simpComp = seed_single_simplex_or_sphere(D, 1, name);
+    triangulator_global::seededComplexes.push_back(simpComp);
+
+cout << "Seed: " << triangulator_global::seededComplexes.size() << endl;
+
+    return simpComp;
 }
 
 // Seed a single sphere of dimension d
@@ -264,7 +271,40 @@ SimpComp* seed_sphere_intuitively(int D, string name){
     // Decrease the dimension of simpComp:
     simpComp->D--;
 
+    triangulator_global::seededComplexes.push_back(simpComp);
     return simpComp;
 }
 
+//Unseed a specific complex - delete it from the memory and update pointers in seededComplexes vector
+void unseed_complex(SimpComp *simpComp){
+    if(!simpComp){
+        log_report(LOG_ERROR, "Not possible to unseed a nullptr complex");
+        return;
+    }
+
+    int i = 0; // index of simpComp in seededComplexes
+    auto &vec = triangulator_global::seededComplexes;
+    // Find simpComp in seededComplexes:
+    while( (i < vec.size()) && (vec[i] != simpComp) )
+        i++;
+    if(i < vec.size()){ // found
+        delete vec[i]; // delete it
+        // Remove it from vec:
+        while(i < vec.size())
+             vec[i] = vec[++i];
+        vec.pop_back();
+    }else{ // not found
+        log_report(LOG_ERROR, "Not possible to unseed a complex");
+    }
+}
+
+//Unseed all complexes - delete them from the memory and empty seededComplexes vector
+void unseed_everything(){
+    auto &vec = triangulator_global::seededComplexes;
+    // Free memory occupied by each seeded complex:
+    for(auto &it : vec)
+        if(it)
+            delete it;
+    vec.clear(); // delete all pointers
+}
 
