@@ -271,7 +271,6 @@ SimpComp* seed_sphere_intuitively(int D, string name){
     // Decrease the dimension of simpComp:
     simpComp->D--;
 
-    triangulator_global::seededComplexes.push_back(simpComp);
     return simpComp;
 }
 

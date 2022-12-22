@@ -7,8 +7,8 @@ echo " "
 echo "Compiling component .cpp files..."
 
 #g++ -c -g simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
-#g++ -std=c++11 -c -g -Wpedantic -Wall -Wextra -Wshadow -Wformat=2 -Wunused triangulator.cpp simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
-g++ -std=c++11 -c -g -Wformat=2 triangulator.cpp simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
+#g++ -std=c++11 -c -g -Wpedantic -Wall -Wextra -Wshadow -Wformat=2 -Wunused global-vars.cpp simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
+g++ -std=c++11 -c -g -Wformat=2 global-vars.cpp simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
 
 echo "... done."
 echo " "
@@ -19,7 +19,7 @@ echo " "
 echo "Creating triangulator-library.a from component object files..."
 
 rm -f triangulator-library.a
-ar rcs triangulator-library.a triangulator.o simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
+ar rcs triangulator-library.a global-vars.o simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "
 echo " "
@@ -29,7 +29,7 @@ echo " "
 
 echo "Cleaning up temporary object files..."
 
-rm triangulator.o simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
+rm global-vars.o simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "
 echo " "
