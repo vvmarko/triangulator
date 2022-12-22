@@ -23,6 +23,6 @@ using namespace std;
 
 namespace triangulator_global{
     // Vector of all instantiated simplicial complexes:
-    static vector<SimpComp*> seededComplexes;
+    extern vector<SimpComp*> seededComplexes;
 }
 

@@ -7,7 +7,8 @@ echo " "
 echo "Compiling component .cpp files..."
 
 #g++ -c -g simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
-g++ -std=c++11 -c -g -Wpedantic -Wall -Wextra -Wshadow -Wformat=2 -Wunused simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
+#g++ -std=c++11 -c -g -Wpedantic -Wall -Wextra -Wshadow -Wformat=2 -Wunused triangulator.cpp simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
+g++ -std=c++11 -c -g -Wformat=2 triangulator.cpp simpcomp.cpp ksimplex.cpp color.cpp input-and-output.cpp seed.cpp pachner.cpp
 
 echo "... done."
 echo " "
@@ -18,7 +19,7 @@ echo " "
 echo "Creating triangulator-library.a from component object files..."
 
 rm -f triangulator-library.a
-ar rcs triangulator-library.a simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
+ar rcs triangulator-library.a triangulator.o simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "
 echo " "
@@ -28,7 +29,7 @@ echo " "
 
 echo "Cleaning up temporary object files..."
 
-rm simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
+rm triangulator.o simpcomp.o ksimplex.o color.o input-and-output.o seed.o pachner.o
 
 echo "... done. "
 echo " "
@@ -44,7 +45,8 @@ echo " "
 echo "Compiling main.cpp and linking it to triangulator-library.a..."
 
 #g++ main.cpp -g -O0 -L . -l :triangulator-library.a -o execute-me
-g++ -std=c++11 -Wpedantic -Wall -Wextra -Wshadow -Wformat=2 -Wunused main.cpp -g -O0 -L . -l :triangulator-library.a -o execute-me
+#g++ -std=c++11 -Wpedantic -Wall -Wextra -Wshadow -Wformat=2 -Wunused main.cpp -g -O0 -L . -l :triangulator-library.a -o execute-me
+g++ -std=c++11 -Wformat=2 main.cpp -g -O0 -L . -l :triangulator-library.a -o execute-me
 
  
 
