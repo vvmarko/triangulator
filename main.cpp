@@ -2,9 +2,72 @@
 #include "triangulator.hpp"
 #include "test.cpp"
 
+void test1(){
+    SimpComp *simpCompTest = seed_sphere(1, "1-sfera");
+    UniqueIDColor::colorize_entire_complex(simpCompTest);
+
+    // Redirect cout:
+    streambuf* oldCoutStreamBuf = cout.rdbuf();
+    std::ostringstream testStr;
+    cout.rdbuf( testStr.rdbuf() );
+
+    // All cout output is redirected to testStr:
+    triangulator_global::seededComplexes[0]->print();
+
+    // Restoring original cout:
+    cout.rdbuf( oldCoutStreamBuf );
+
+    string expectedStr = R""""(Printing SimpComp 1-sfera, topology = sphere, D = 1
+  Printing SimpComp 1-sfera elements, level = 0:
+    Printing KSimplex:  k = 0, D = 1
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   4(1-2), 5(1-3)
+    Printing KSimplex:  k = 0, D = 1
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   4(1-2), 6(2-3)
+    Printing KSimplex:  k = 0, D = 1
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   5(1-3), 6(2-3)
+  Printing SimpComp 1-sfera elements, level = 1:
+    Printing KSimplex:  k = 1, D = 1
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   1, 2
+Simplices at level k = 1:   
+    Printing KSimplex:  k = 1, D = 1
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   1, 3
+Simplices at level k = 1:   
+    Printing KSimplex:  k = 1, D = 1
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   2, 3
+Simplices at level k = 1:   
+)"""";
+
+    // Printing all redirected cout output:
+    //cout << testStr.str();
+    //cout << expectedStr;
+
+    if(expectedStr == testStr.str()){
+        cout << "Ok." << endl;
+    }else{
+        cout << "Failed!" << endl;
+    }
+
+}
+
 int main(){
 
-    //    test();
+test1();
+
 
     cout << endl << "#######################################################" << endl;
     cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
@@ -20,6 +83,10 @@ int main(){
     UniqueIDColor::colorize_entire_complex(simpComp);
     //triangulator_global::seededComplexes[0]->print_detailed();
 
+
+
+
+
 cout << "main: " << triangulator_global::seededComplexes.size() << endl;
 
     SimpComp *simpComp2 = seed_sphere(2, "2-sfera");
@@ -27,7 +94,7 @@ cout << "main: " << triangulator_global::seededComplexes.size() << endl;
 
 cout << "main: " << triangulator_global::seededComplexes.size() << endl;
 
-//    triangulator_global::seededComplexes[1]->print_detailed();
+    //triangulator_global::seededComplexes[1]->print_detailed();
 
     unseed_everything();
     
