@@ -27,14 +27,6 @@ KSimplex::KSimplex(int level, int dim){
     neighbors = new SimpComp(dim);
 }
 
-// Dummy constructor
-// TODO: FIXME: Ovo ne bi smelo nigde i nikad da se koristi, predlazem da ga obrisemo...
-KSimplex::KSimplex(){
-    this->k = 0;
-    this->D = 1;
-    neighbors = new SimpComp(1);
-}
-
 // Default destructor
 KSimplex::~KSimplex(){
   //  cout << "Deleting KSimplex... " << endl;
