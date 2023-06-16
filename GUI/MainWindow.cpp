@@ -39,7 +39,7 @@ void MainWindow::openFile() {
 void MainWindow::openLogFile() {    
     if (!viewLogFileVisible)
     {
-        logViewerDialog = new LogViewer(this, "");
+        logViewerDialog = new LogViewer(this);
 
         Utils::openWindowOnRandomPos(logViewerDialog);
 
@@ -55,7 +55,7 @@ void MainWindow::openLogFile() {
 }
 
 void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
-    for (int i = 0; i < items.size(); i++)
+    for (unsigned long i = 0; i < items.size(); i++)
     {
         if (items[i].drawComplex == wnd) {
             items[i].drawComplex = NULL;            
@@ -64,7 +64,7 @@ void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
 }
 
 void MainWindow::printComplexWndClosed(PrintComplex *wnd) {
-    for (int i = 0; i < items.size(); i++)
+    for (unsigned long i = 0; i < items.size(); i++)
     {
         if (items[i].printComplex == wnd) {
             items[i].printComplex = NULL;            
@@ -111,77 +111,87 @@ void MainWindow::tblItemPrintComplexClick() {
     }
 }
 
-void MainWindow::tblItemSaveComplexAsClick() {
+void MainWindow::tblItemOpenToolsClick(int index) {
+
+    QComboBox *btn = (QComboBox *)sender();
+    int row = ui.tblComplexes->indexAt(btn->pos()).row();
+
+    btn->setCurrentIndex(0); // reset the status of the ComboBox
+
+    if (index==0) return;
+    if (index==1) return;
+    if (index==2) tblItemSaveComplexAsClick(row);
+    if (index==3) tblItemRenameComplexClick(row);
+    if (index==4) tblItemDeleteRowClick(row);
+}
+
+void MainWindow::tblItemOpenActionsClick(int index) {
+
+    QComboBox *btn = (QComboBox *)sender();
+    int row = ui.tblComplexes->indexAt(btn->pos()).row();
+
+    btn->setCurrentIndex(0); // reset the status of the ComboBox
+
+    if (index==0) return;
+    if (index==1) return;
+    if (index==2) return; // call Pachner grow
+    if (index==3) return; // call Boundary grow
+    if (index==4) return; // call Random grow
+}
+
+void MainWindow::tblItemSaveComplexAsClick(int row) {
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save Simplicial Complex"), "", tr("SimpComp Files (*.xml)"));
-    QPushButton *btn = (QPushButton *)sender();
-    int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
     if (fileName.lastIndexOf('.') != -1)
     {
         QString extension;
 
         extension = fileName.right(fileName.length() - fileName.lastIndexOf('.') - 1);
-        if (extension != "xml") {
-            QMessageBox msgBox(QMessageBox::Critical, "Error", "File extension must be .xml",
-                               QMessageBox::Ok);
-
-            msgBox.exec();
-
-            return;
-        }
+        if (extension != "xml") fileName += ".xml";
     }
-        else
-        {
-            fileName += ".xml";
-        }
-
-    save_complex_to_xml_file(items[i].simpComp, fileName.toStdString());
-
-    //QFile *f = new QFile(fileName);
-    //f->open(QIODeviceBase::NewOnly);
-    //QTextStream t(f);
-
-    //t << "aaa\n";
-    //f->close();
+    else
+    {
+        fileName+=".xml";
+    }
+    save_complex_to_xml_file(items[row].simpComp, fileName.toStdString());
 }
 
-void MainWindow::tblItemDeleteRowClick() {
-    QPushButton *btn = (QPushButton *)sender();
-    int i = ui.tblComplexes->indexAt(btn->pos()).row();    
+void MainWindow::tblItemRenameComplexClick(int row) {
+}
 
+
+
+void MainWindow::tblItemDeleteRowClick(int row) {
     QMessageBox msgBox(QMessageBox::Question, "Confirm", "Are you sure?", QMessageBox::Yes | QMessageBox::No);
 
-    if (msgBox.exec() == QMessageBox::No)
-    {
-        return;
-    }
+    if (msgBox.exec() == QMessageBox::No) return;
 
-    items[i].removeWindowFromChildWindowsOnClose = false;
+    items[row].removeWindowFromChildWindowsOnClose = false;
 
     int j = 0;
 
-    for (QWidget *w : items[i].childWindows)
+    for (QWidget *w : items[row].childWindows)
     {
         w->close();
-        if (items[i].printComplex == w)
+        if (items[row].printComplex == w)
         {            
-            delete items[i].printComplex;
+            delete items[row].printComplex;
         }
-        else if (items[i].drawComplex == w)
+        else if (items[row].drawComplex == w)
         {            
-            delete items[i].drawComplex;
+            delete items[row].drawComplex;
         }
         else
         {
             delete (Inspector *)w;
         }
-        items[i].childWindows[j] = NULL;
+        items[row].childWindows[j] = NULL;
         j++;
 
     }
 
-    items.erase(items.begin() + i);
+    items.erase(items.begin() + row);
 
     updateSimpCompTableModel();
 
@@ -190,19 +200,32 @@ void MainWindow::tblItemDeleteRowClick() {
 
 void MainWindow::createItemWidget(int row) {
     QPushButton *btnPrintComplex = new QPushButton("List elements");
-    QPushButton *btnDrawComplex = new QPushButton("Crtaj");
-    QPushButton *btnSaveComplexAs = new QPushButton("Save as");
-    QPushButton *btnDeleteRow = new QPushButton("Obriši");
+    QPushButton *btnDrawComplex = new QPushButton("Draw");
+    QComboBox *cmbTools = new QComboBox();
+    QComboBox *cmbActions = new QComboBox();
+
+    cmbTools->addItem("Tools...");
+    cmbTools->insertSeparator(1);
+    cmbTools->addItem("Save as");
+    cmbTools->addItem("Rename");
+    cmbTools->addItem("Delete");
+
+    cmbActions->addItem("Actions...");
+    cmbActions->insertSeparator(1);
+    cmbActions->addItem("Pachner grow");
+    cmbActions->addItem("Bounday grow");
+    cmbActions->addItem("Random grow");
 
     connect(btnPrintComplex, &QPushButton::released, this, &MainWindow::tblItemPrintComplexClick);
     connect(btnDrawComplex, &QPushButton::released, this, &MainWindow::tblItemDrawComplexClick);    
-    connect(btnSaveComplexAs, &QPushButton::released, this, &MainWindow::tblItemSaveComplexAsClick);
-    connect(btnDeleteRow, &QPushButton::released, this, &MainWindow::tblItemDeleteRowClick);
+    connect(cmbTools, SIGNAL(activated(int)), this, SLOT(tblItemOpenToolsClick(int)));
+    connect(cmbActions, SIGNAL(activated(int)), this, SLOT(tblItemOpenActionsClick(int)));
 
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 3), btnPrintComplex);
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 4), btnDrawComplex);
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 5), btnSaveComplexAs);
-    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 6), btnDeleteRow);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 5), cmbTools);
+    ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 6), cmbActions);
+
 }
 
 void MainWindow::quit()
@@ -229,7 +252,7 @@ MainWindow::MainWindow(QWidget *parent)
     logViewerDialog = NULL;
 }
 
-void MainWindow::closeEvent(QCloseEvent *e)
+void MainWindow::closeEvent(QCloseEvent *event)
 {
     QApplication::quit();
 }
@@ -246,7 +269,7 @@ void MainWindow::updateSimpCompTableModel()
 
     delete prevModel;
 
-    for (int i = 0; i < items.size(); i++)
+    for (unsigned long i = 0; i < items.size(); i++)
     {
         createItemWidget(i);
     }

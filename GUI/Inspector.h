@@ -4,6 +4,8 @@
 #include <QWidget>
 
 class SimpCompItem;
+class SimpComp;
+class KSimplex;
 
 namespace Ui {
 class Inspector;
@@ -14,10 +16,12 @@ class Inspector : public QWidget
     Q_OBJECT
 
 public:
-    explicit Inspector(QString text, QString coords, SimpCompItem *item, QWidget *parent = nullptr);
+    explicit Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent = nullptr);
     ~Inspector();
 
     SimpCompItem *item;
+    SimpComp *simpComp;
+    KSimplex *simplex;
 
 private:
     Ui::Inspector *ui;

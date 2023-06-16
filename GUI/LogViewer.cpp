@@ -35,12 +35,12 @@ void LogViewer::logFileChanged(const QString &path) {
    //ui.textEdit->moveCursor()   
    f->close();
    //ui.textEdit->moveCursor(QTextCursor::End);
-   ui.textEdit->insertPlainText(QString::fromUtf8(data));
+   ui.textEdit->setHtml(QString::fromUtf8(data));
    ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
    fileAccessed = 0;
 }
 
-LogViewer::LogViewer(MainWindow *mainWnd, QString displayStr, QWidget *parent)
+LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
@@ -66,7 +66,7 @@ LogViewer::LogViewer(MainWindow *mainWnd, QString displayStr, QWidget *parent)
         data = f->read(f->size());
         //ui.textEdit->moveCursor()
         f->close();
-        ui.textEdit->insertPlainText(QString::fromUtf8(data));
+        ui.textEdit->setHtml(QString::fromUtf8(data));
         ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
         initialLogFileReadInProgress = false;
     }

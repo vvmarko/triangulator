@@ -22,6 +22,10 @@ public:
 
     void updateSimpCompTableModel();
 
+public slots:
+    void tblItemOpenToolsClick(int index);
+    void tblItemOpenActionsClick(int index);
+
 private:
 	Ui::MainWindow ui;
 
@@ -35,8 +39,10 @@ private:
 
     void tblItemPrintComplexClick();    
     void tblItemDrawComplexClick();    
-    void tblItemSaveComplexAsClick();
-    void tblItemDeleteRowClick();
+    void tblItemSaveComplexAsClick(int row);
+    void tblItemRenameComplexClick(int row);
+    void tblItemDeleteRowClick(int row);
+
 
     std::vector<SimpCompItem> items;
 

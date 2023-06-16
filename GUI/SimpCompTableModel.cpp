@@ -26,7 +26,7 @@ int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const
 
 int SimpCompTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 7; // name, dimension, topology, print complex, draw complex, save as, delete row
+    return 7; // name, dimension, topology, print complex, draw complex, tools, actions
 }
 
 QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const

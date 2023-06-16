@@ -57,7 +57,7 @@ void DrawComplex::closeEvent (QCloseEvent* event)
 
     if (ui.openGLWidget->item->removeWindowFromChildWindowsOnClose)
     {
-      for (int i = 0; i < ui.openGLWidget->item->childWindows.size() && !erased; i++)
+      for (unsigned int i = 0; i < ui.openGLWidget->item->childWindows.size() && !erased; i++)
       {
          if (ui.openGLWidget->item->childWindows[i] == ui.openGLWidget)
          {

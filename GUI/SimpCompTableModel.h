@@ -13,8 +13,7 @@ class PrintComplex;
 class SimpCompItem
 {
 public:
-    SimpCompItem();
-    SimpCompItem(std::string name, int d);
+    SimpCompItem();    
 
     DrawComplex *drawComplex; // each simplicial complex has its own table item
     PrintComplex *printComplex; // each simplicial complex has its own table item

@@ -12,7 +12,7 @@ class LogViewer : public QWidget
     Q_OBJECT
 
 public:
-    LogViewer(MainWindow *mainWnd, QString displayStr, QWidget *parent = Q_NULLPTR);
+    LogViewer(MainWindow *mainWnd, QWidget *parent = Q_NULLPTR);
     ~LogViewer();
 
 private:

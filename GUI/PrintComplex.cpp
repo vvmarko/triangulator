@@ -3,12 +3,15 @@
 #include "Inspector.h"
 #include "Utils.h"
 
-using namespace std;
+#include "triangulator.hpp"
 
 void PrintComplex::anchorClicked(const QUrl &url) {
-    QString str1 = url.fileName().left(url.fileName().indexOf(".html"));
+    QString str1 = url.fileName().right(url.fileName().indexOf("http://triangulatorgui.com/"));
+    QString str2 = str1.left(str1.indexOf(".html"));
 
-    Inspector *inspector = new Inspector("123", "123", item);
+    KSimplex *simplex = item->simpComp->find_KSimplex(str2.toInt());
+
+    Inspector *inspector = new Inspector(simplex, item);
 
     Utils::openWindowOnRandomPos(inspector);
 
@@ -20,7 +23,8 @@ PrintComplex::PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem
 {
 	ui.setupUi(this);
 
-    // links must be like <a href=\"http://abc.com/123.html\">123</a>
+    // links must be like <a href=\"http://triangulatorgui.com/123.html\">123</a>
+
     ui.textBrowser->setHtml(displayStr);
 
     ui.textBrowser->setOpenLinks(false);    
@@ -42,7 +46,7 @@ void PrintComplex::closeEvent (QCloseEvent* event)
 
     if (item->removeWindowFromChildWindowsOnClose)
     {
-      for (int i = 0; i < item->childWindows.size() && !erased; i++)
+      for (unsigned long i = 0; i < item->childWindows.size() && !erased; i++)
         if (item->childWindows[i] == this)
         {
             item->childWindows.erase(item->childWindows.begin() + i);
