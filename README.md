@@ -23,9 +23,8 @@ The development of this code is supported by the Science Fund of the Republic of
 For any additional details, contact the project leader (Marko Vojinovic).
 
 
-===================
-Build instructions:
-===================
+
+# Build instructions:
 
 (1) git pull
 
@@ -38,5 +37,4 @@ Build instructions:
 (5) cmake --build my_build_dir
 
 That's it. The appropriate binaries can be found in their respective directories inside my_build_dir.
-
 
