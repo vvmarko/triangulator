@@ -1,20 +1,13 @@
 
+#include "triangulator.hpp"
+
 #include "SimpCompTableModel.h"
 
 using namespace std;
 
 SimpCompItem::SimpCompItem()
-{    
-    d = 0;
-    drawComplex = NULL;
-    printComplex = NULL;
-    removeWindowFromChildWindowsOnClose = true;
-}
-
-SimpCompItem::SimpCompItem(string name, int d)
 {
-    this->name = name;
-    this->d = d;
+    simpComp = NULL;
     drawComplex = NULL;
     printComplex = NULL;
     removeWindowFromChildWindowsOnClose = true;
@@ -42,11 +35,11 @@ QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
         switch (index.column())
         {
             case 0 :
-              return QString::fromStdString(items->at(index.row()).name);
+              return QString::fromStdString(items->at(index.row()).simpComp->name);
             case 1 :
-              return QString::number(items->at(index.row()).d);
+              return QString::number(items->at(index.row()).simpComp->D);
             case 2 :
-              return QString("");
+              return QString::fromStdString(items->at(index.row()).simpComp->topology);
             case 3 :
               return QString("");
             case 4 :

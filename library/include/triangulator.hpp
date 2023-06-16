@@ -20,4 +20,6 @@ using namespace std;
 #include "seed.hpp"
 #include "input_and_output.hpp"
 #include "pachner.hpp"
+#include "global-vars.hpp"
+
 

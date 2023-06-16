@@ -1,6 +1,6 @@
 # Adding test executables.
 list(APPEND tests
-     test1.cpp
+     main.cpp
     )
 
 # Enabling testing.

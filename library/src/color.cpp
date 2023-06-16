@@ -3,8 +3,12 @@
 
 unsigned long UniqueIDColor::next_free_uid_number = 1;
 
-void Color::print(string space){
-//    cout << space << "Color type = " << type << endl;
+Color::~Color()
+{
+}
+
+void Color::print(){
+//    cout << "Color type = " << type << endl;
 }
 
 void Color::print_compact(){
@@ -70,9 +74,12 @@ BoundaryColor::BoundaryColor(){
     type = TYPE_BOUNDARY;
 }
 
-void BoundaryColor::print(string space){
-    Color::print(space);
-    cout << space << "Boundary = true" << endl;
+BoundaryColor::~BoundaryColor(){
+}
+
+void BoundaryColor::print(){
+  //    Color::print();
+    cout << "Boundary = true" << endl;
 }
 
 string BoundaryColor::get_color_value_as_str() const
@@ -80,13 +87,17 @@ string BoundaryColor::get_color_value_as_str() const
     return "true";
 }
 
-void BoundaryColor::set_color_value_from_str(const string& source) {
-  //    boundary = stoi(source);
+void BoundaryColor::set_color_value_from_str(const string& source)
+{
+  if (source=="true") return; // This is a dummy command, do not remove
 }
 
 UniqueIDColor::UniqueIDColor(){
     type = TYPE_UNIQUE_ID;
     id = next_free_uid_number++;
+}
+
+UniqueIDColor::~UniqueIDColor(){
 }
 
 UniqueIDColor::UniqueIDColor(unsigned long uid){
@@ -131,15 +142,18 @@ ScreenCoordinateColor::ScreenCoordinateColor(){
     type = TYPE_SCREEN_COORDINATE;
 }
 
-ScreenCoordinateColor::ScreenCoordinateColor(int x, int y){
-    type = TYPE_SCREEN_COORDINATE;
-    this->x = x;
-    this->y = y;
+ScreenCoordinateColor::~ScreenCoordinateColor(){
 }
 
-void ScreenCoordinateColor::print(string space){
-    Color::print(space);
-    cout << space << "coordinate(" << x << ", " << y << ")" << endl;
+ScreenCoordinateColor::ScreenCoordinateColor(int xx, int yy){
+    type = TYPE_SCREEN_COORDINATE;
+    this->x = xx;
+    this->y = yy;
+}
+
+void ScreenCoordinateColor::print(){
+  //    Color::print();
+    cout << "coordinate(" << x << ", " << y << ")" << endl;
 }
 
 string ScreenCoordinateColor::get_color_value_as_str() const

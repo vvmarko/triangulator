@@ -1,3 +1,4 @@
+
 #include "MainWindow.h"
 #include "SeedComplex.h"
 #include "DrawComplex.h"
@@ -8,6 +9,8 @@
 #include <QFileDialog>
 #include "Utils.h"
 #include <QMessageBox>
+
+#include "triangulator.hpp"
 
 void MainWindow::newFile() {
     SeedComplex* seedDialog = new SeedComplex(this, &items, ui.tblComplexes);
@@ -23,18 +26,7 @@ void MainWindow::openFile() {
     {
         SimpCompItem i;
 
-        int pos = fileName.lastIndexOf('\\');
-
-        if (pos == -1) {
-            pos = fileName.lastIndexOf('/');
-        }
-
-        QString fileName1 = fileName.right(fileName.length() - pos - 1);
-
-        int end = fileName1.lastIndexOf('.');
-
-        i.name = fileName1.left(end).toStdString();
-        i.d = 1;
+        i.simpComp = read_complex_from_xml_file(fileName.toStdString());
 
         items.push_back(i);
     }
@@ -107,7 +99,9 @@ void MainWindow::tblItemPrintComplexClick() {
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
     if (items[i].printComplex == NULL) {
-        items[i].printComplex = new PrintComplex(this, "", false, &(items[i]));
+        items[i].printComplex = new PrintComplex(this, QString::fromStdString(items[i].simpComp->print_html()),
+                                                 &(items[i]));
+        items[i].printComplex->setWindowTitle(QString::fromStdString("Elements of complex " + items[i].simpComp->name));
         Utils::openWindowOnRandomPos(items[i].printComplex);
         items[i].printComplex->show();
     } else {
@@ -120,6 +114,8 @@ void MainWindow::tblItemPrintComplexClick() {
 void MainWindow::tblItemSaveComplexAsClick() {
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save Simplicial Complex"), "", tr("SimpComp Files (*.xml)"));
+    QPushButton *btn = (QPushButton *)sender();
+    int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
     if (fileName.lastIndexOf('.') != -1)
     {
@@ -140,12 +136,14 @@ void MainWindow::tblItemSaveComplexAsClick() {
             fileName += ".xml";
         }
 
-    QFile *f = new QFile(fileName);
-    f->open(QIODeviceBase::NewOnly);
-    QTextStream t(f);
+    save_complex_to_xml_file(items[i].simpComp, fileName.toStdString());
 
-    t << "aaa\n";
-    f->close();
+    //QFile *f = new QFile(fileName);
+    //f->open(QIODeviceBase::NewOnly);
+    //QTextStream t(f);
+
+    //t << "aaa\n";
+    //f->close();
 }
 
 void MainWindow::tblItemDeleteRowClick() {
@@ -191,7 +189,7 @@ void MainWindow::tblItemDeleteRowClick() {
 }
 
 void MainWindow::createItemWidget(int row) {
-    QPushButton *btnPrintComplex = new QPushButton("Listaj");
+    QPushButton *btnPrintComplex = new QPushButton("List elements");
     QPushButton *btnDrawComplex = new QPushButton("Crtaj");
     QPushButton *btnSaveComplexAs = new QPushButton("Save as");
     QPushButton *btnDeleteRow = new QPushButton("Obriši");

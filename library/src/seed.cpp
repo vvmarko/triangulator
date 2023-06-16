@@ -128,62 +128,62 @@ std::ostream &operator<<(std::ostream &os, KSimplex &k) {
 // k=1: 1-2, 1-3, 2-3, / 1-4, 2-4, 3-4.
 // k=2: 1-2-3, / 1-2-4, 1-3-4, 2-3-4.
 // k=3: / 1-2-3-4.
-KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* small, KSimplex *vertex){
-    int k = (small ? small->k + 1 : 0);
+KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* simpsmall, KSimplex *vertex){
+    int k = (simpsmall ? simpsmall->k + 1 : 0);
 	set<KSimplex*> s;
-	small->collect_vertices(s);
+	simpsmall->collect_vertices(s);
     s.insert(vertex);
 
 	KSimplex *find = simpComp->find_vertices(s);
 	if(find)
 		return find;
 
-    // Create big KSimplex that is by 1 dimension higher than small,
-    // and is constructed by appending vertex to small:
+    // Create big KSimplex that is by 1 dimension higher than simpsmall,
+    // and is constructed by appending vertex to simpsmall:
 	KSimplex* big = nullptr;
 	if(k <= simpComp->D){
 		big = simpComp->create_ksimplex(k);
-		big->add_neighbor(small);
+		big->add_neighbor(simpsmall);
 		big->add_neighbor(vertex);
 	}
 	if(k == 1)
 		return big;
 
     // Populate neighbors of simplex at level k
-    // by adding new vertex to old k-1 vertices belonging to small.
-    // Store the size of k-1 vertices of small:
-    int oldSize = small->neighbors->elements[0].size();
+    // by adding new vertex to old k-1 vertices belonging to simpsmall.
+    // Store the size of k-1 vertices of simpsmall:
+    int oldSize = simpsmall->neighbors->elements[0].size();
 
     // As vertex V is already added, continue from level 1 to k:
     for(int kTemp = 1; kTemp <= k; kTemp++){ // for each level
         // Before adding k-simplices at level kTemp,
         // store the number of old k-simplices at level kTemp:
-        int nextOldSize = small->neighbors->elements[kTemp].size();
+        int nextOldSize = simpsmall->neighbors->elements[kTemp].size();
         // Initiate new kTemp-eders based on
         // old kTemp-1-eders and the new vertex v:
         for(int iKSimplex = 0; iKSimplex < oldSize; iKSimplex++){
             // Create temporary KSimplex by appending vertex to one of old k-simplices at level kTemp-1
-            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, small->neighbors->elements[kTemp-1][iKSimplex], vertex);
+            KSimplex* newKSimplex = build_simplex_one_level_up_with_vertex(simpComp, simpsmall->neighbors->elements[kTemp-1][iKSimplex], vertex);
 			if(k <= simpComp->D)
 	        	big->add_neighbor(newKSimplex);
         }
         // For next kTemp, use initial number of k-simplices at level kTemp:
         oldSize = nextOldSize;
     }
-    // Return resulting KSimplex* that is small advanced by vertex:
+    // Return resulting KSimplex* that is simpsmall advanced by vertex:
     return big;
 }
 
-KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* small){
+KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* simpsmall){
     // Seed a KSimplex of level k based on KSimplex of level k-1:
-    int k = (small ? small->k + 1 : 0);
+    int k = (simpsmall ? simpsmall->k + 1 : 0);
     // Create a new vertex, i.e. KSimplex(0):
     KSimplex *vertex = simpComp->create_ksimplex(0);
     if(k == 0)
         return vertex;
 
-    // Connect new vertex with k-simplex small:
-    return build_simplex_one_level_up_with_vertex(simpComp, small, vertex);
+    // Connect new vertex with k-simplex simpsmall:
+    return build_simplex_one_level_up_with_vertex(simpComp, simpsmall, vertex);
 }
 
 // Seed a single simplex or sphere of dimension d:
@@ -197,14 +197,14 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
         return nullptr;
     }
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
-    SimpComp *simpComp = new SimpComp(D);
-    simpComp->name = name;
-    KSimplex *small = simpComp->create_ksimplex(0);
+    SimpComp *simpComp = new SimpComp(name,D);
+    simpComp->topology = sphere ? "sphere" : "linear";
+    KSimplex *simpsmall = simpComp->create_ksimplex(0);
 
     // Progress to further dimensions by adding new vertex and conntecting it:
     for(int k = 1; k <= D+sphere; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
-        small = build_simplex_one_level_up(simpComp, small);
+        simpsmall = build_simplex_one_level_up(simpComp, simpsmall);
     }
 
     // If seeding simplicial complex, add boundary color:
@@ -216,11 +216,18 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
 }
 
 SimpComp* seed_single_simplex(int D, string name){
-    return seed_single_simplex_or_sphere(D, 0, name);
+    SimpComp *simpComp = seed_single_simplex_or_sphere(D, 0, name);
+    triangulator_global::seededComplexes.push_back(simpComp);
+    return simpComp;
 }
 
 SimpComp* seed_sphere(int D, string name){
-    return seed_single_simplex_or_sphere(D, 1, name);
+    SimpComp *simpComp = seed_single_simplex_or_sphere(D, 1, name);
+    triangulator_global::seededComplexes.push_back(simpComp);
+
+cout << "Seed: " << triangulator_global::seededComplexes.size() << endl;
+
+    return simpComp;
 }
 
 // Seed a single sphere of dimension d
@@ -233,21 +240,24 @@ SimpComp* seed_sphere_intuitively(int D, string name){
         return nullptr;
     }
     // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
-    SimpComp *simpComp = new SimpComp(D+1);
-    simpComp = seed_single_simplex(D+1, name);
+    SimpComp *simpComp = seed_single_simplex(D+1, name);
     simpComp->name = name;
+    simpComp->topology = "sphere";
 
     // Delete the last created k-simplex after disconnecting neighbors:
     simpComp->remove_simplex(simpComp->elements[D+1][0]);
     // Remove BoundaryColor, as sphere doesn't have them:
-	for(auto &kSimplex : simpComp->elements[D])
-		kSimplex->colors.pop_back();
+    for(auto &kSimplex : simpComp->elements[D]){
+        for(auto pColor : kSimplex->colors)
+            delete pColor;
+        kSimplex->colors.pop_back();
+    }
 
     // For each k-simplex from elements:
     for(unsigned i = 0; i < simpComp->elements.size()-1; i++){
         for(auto &kSimplex : simpComp->elements[i]){
             // Decrease the length of matrix kSimplex->neighbors->elements:
-            //kSimplex->neighbors->elements[D+1].empty(); // already disconnected
+            // kSimplex->neighbors->elements[D+1].empty(); // already disconnected
             kSimplex->neighbors->elements.pop_back();
 
             // Decrease the dimension of kSimplex:
@@ -264,4 +274,36 @@ SimpComp* seed_sphere_intuitively(int D, string name){
     return simpComp;
 }
 
+//Unseed a specific complex - delete it from the memory and update pointers in seededComplexes vector
+void unseed_complex(SimpComp *simpComp){
+    if(!simpComp){
+        log_report(LOG_ERROR, "Not possible to unseed a nullptr complex");
+        return;
+    }
+
+    int i = 0; // index of simpComp in seededComplexes
+    auto &vec = triangulator_global::seededComplexes;
+    // Find simpComp in seededComplexes:
+    while( (i < vec.size()) && (vec[i] != simpComp) )
+        i++;
+    if(i < vec.size()){ // found
+        delete vec[i]; // delete it
+        // Remove it from vec:
+        while(i < vec.size())
+             vec[i] = vec[++i];
+        vec.pop_back();
+    }else{ // not found
+        log_report(LOG_ERROR, "Not possible to unseed a complex");
+    }
+}
+
+//Unseed all complexes - delete them from the memory and empty seededComplexes vector
+void unseed_everything(){
+    auto &vec = triangulator_global::seededComplexes;
+    // Free memory occupied by each seeded complex:
+    for(auto &it : vec)
+        if(it)
+            delete it;
+    vec.clear(); // delete all pointers
+}
 
