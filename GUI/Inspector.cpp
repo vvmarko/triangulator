@@ -40,8 +40,8 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
 //    this->simpComp = simpComp;
     this->simplex = simplex;
 
-    UniqueIDColor* idColor = simplex->get_uniqueID();
-    std::string simplexMark =  idColor->get_color_value_as_str();
+//    UniqueIDColor* idColor = simplex->get_uniqueID();
+    std::string simplexMark =  simplex->print_non_html();
     ui->lSimplexMark->setText (QString::fromStdString(simplexMark));
     std::string level = to_string(simplex->k);
     std::string complexName = simpComp->name;

@@ -289,6 +289,36 @@ string KSimplex::print_html(){
     return str;
 }
 
+// Constructs a string for printing the non-HTML name for a simplex,
+// with the syntax appropriate for the GUI
+// (it is heavily used by the GUI, not useful otherwise)
+string KSimplex::print_non_html(){
+  string str = "";
+    set<int> s;
+    UniqueIDColor* pColor = get_uniqueID();
+    if(!pColor){
+      log_report(LOG_ERROR,"print_non_html(): HTML-like printing requires all simplices to have a UniqueID color! Apply UniqueIDColor::colorize_entire_complex() to your data.");
+    }else{
+    str = str + "[";
+      if (k==0) {
+	s.insert( static_cast<UniqueIDColor*>(pColor)->id );
+      } else {
+        neighbors->collect_vertices_IDs(s);
+      }
+      bool first = true;
+      for(auto itr = s.begin(); itr != s.end(); itr++){
+          if(!first)
+              str = str + "-";
+          first = false;
+          str = str + to_string(*itr);
+      }
+      str = str + "]";
+    }
+    return str;
+}
+
+
+
 // ##########################
 // General support functions:
 // ##########################

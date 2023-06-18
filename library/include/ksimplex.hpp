@@ -152,6 +152,12 @@ public:
   // (it is heavily used by the GUI, not useful otherwise)
     string print_html();
 
+  // Constructs a string for printing the non-HTML name for a simplex,
+  // with the syntax appropriate for the GUI
+  // (it is heavily used by the GUI, not useful otherwise)
+    string print_non_html();
+
+
   // ##########################
   // General support functions:
   // ##########################
