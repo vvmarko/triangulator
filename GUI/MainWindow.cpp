@@ -1,6 +1,7 @@
 
 #include "MainWindow.h"
 #include "SeedComplex.h"
+#include "RenameComplex.h"
 #include "DrawComplex.h"
 #include <QPushButton>
 #include "SimpCompTableModel.h"
@@ -140,8 +141,9 @@ void MainWindow::tblItemOpenActionsClick(int index) {
 }
 
 void MainWindow::tblItemSaveComplexAsClick(int row) {
+    QString simpcompname=QString::fromStdString(items[row].simpComp->name);
     QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Save Simplicial Complex"), "", tr("SimpComp Files (*.xml)"));
+        tr("Save Simplicial Complex"), simpcompname, tr("SimpComp Files (*.xml)"));
 
     if (fileName.lastIndexOf('.') != -1)
     {
@@ -158,8 +160,10 @@ void MainWindow::tblItemSaveComplexAsClick(int row) {
 }
 
 void MainWindow::tblItemRenameComplexClick(int row) {
-}
+    RenameComplex* renameDialog = new RenameComplex(this, items[row], ui.tblComplexes);
 
+    renameDialog->show();
+}
 
 
 void MainWindow::tblItemDeleteRowClick(int row) {

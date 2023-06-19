@@ -6,7 +6,7 @@
 #include "SimpCompTableModel.h"
 #include "MainWindow.h"
 
-void SeedComplex::handleAccepted() {			
+void SeedComplex::handleAccepted() {
 	SimpCompItem i;
 
     std::string name = ui.leName->text().toStdString();
@@ -31,12 +31,15 @@ void SeedComplex::handleAccepted() {
     {
         i.simpComp = seed_sphere(D, name);
     }
-    UniqueIDColor::colorize_entire_complex(i.simpComp);
-    items->push_back(i);
 
-    mainWnd->updateSimpCompTableModel();
 
-	table->show();
+    if (ui.cbType->itemText(ui.cbType->currentIndex()) != "Please select...")
+    {
+        UniqueIDColor::colorize_entire_complex(i.simpComp);
+        items->push_back(i);
+        mainWnd->updateSimpCompTableModel();
+        table->show();
+    }
 	this->close();   
 }
 
@@ -48,15 +51,17 @@ SeedComplex::SeedComplex(MainWindow *mainWnd, std::vector<SimpCompItem> *items, 
 	: QWidget(parent)
 {
 	ui.setupUi(this);
-	ui.cbType->addItem("");
-	ui.cbType->addItem("Line");
+    ui.cbType->addItem("Please select...");
+    ui.cbType->insertSeparator(1);
+    ui.cbType->addItem("Line");
 	ui.cbType->addItem("Triangle");
 	ui.cbType->addItem("Tetrahedron");
 	ui.cbType->addItem("D-Simplex");
 	ui.cbType->addItem("D-Sphere");
-	
-	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &SeedComplex::handleAccepted);
-	connect(ui.buttonBox, &QDialogButtonBox::rejected, this, &SeedComplex::handleRejected);
+
+
+    connect(ui.btnOK, &QPushButton::clicked, this, &SeedComplex::handleAccepted);
+    connect(ui.btnCancel, &QPushButton::clicked, this, &SeedComplex::handleRejected);
 
     this->mainWnd = mainWnd;
 	this->items = items;
