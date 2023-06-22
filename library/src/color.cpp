@@ -31,28 +31,57 @@ string Color::get_color_value_as_str() const
  * @param color_type Type of the colour to be created.
  * @param color_value Value of the colour to be created.
  */
-void Color::colorize_node_from_string(KSimplex* ks, const int color_type, const string& color_value)
+
+
+
+
+bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, const string& color_value)
 {
-    // This is a horrible solution. We should think of some other way of doing this
+    bool outcome;
     Color* color;
-    // NOTE: This seems as a bad solution.
+
+    // This is a horrible solution. We should think of some other way of doing this
     switch(color_type) {
     case TYPE_BOUNDARY:
-        color = new BoundaryColor();
-        ks->colors.push_back(static_cast<BoundaryColor*>(color));
-        break;
+        return BoundaryColor::colorize_single_simplex(simp);
     case TYPE_UNIQUE_ID:
-        ks->colors.push_back(new UniqueIDColor());
-        break;
-    case TYPE_SCREEN_COORDINATE:
+        return UniqueIDColor::colorize_single_simplex(simp);
+    case TYPE_SCREEN_COORDINATE: // Fix this case
         color = new ScreenCoordinateColor();
+        if (color == nullptr) outcome = false;
         static_cast<ScreenCoordinateColor *>(color) -> set_color_value_from_str(color_value);
-        ks->colors.push_back(color);
-        break;
+        simp->colors.push_back(color);
+        return outcome;
     default:
-        return;
-        // TODO: Color not implemented.
+      log_report(LOG_ERROR,"Color::colorize_node_from_string : Color type " + to_string(color_type) + " not recognized! Fix your code!");
+      return false;
     }
+}
+
+bool Color::is_colorized_with_type(KSimplex* simp, int typecode)
+{
+    for(auto &color : simp->colors)
+        if(color->type == typecode)
+            return true;
+    return false;
+}
+
+bool Color::remove_color_type_from_simplex(KSimplex* simp, int typecode)
+{
+  bool outcome=true;
+  int i;
+  int size;
+
+  while( Color::is_colorized_with_type(simp,typecode) ){
+    i = 0;
+    while( simp->colors[i]->type != typecode )
+      i++;
+    delete simp->colors[i];
+    size = simp->colors.size(); 
+    if(i < size - 1) simp->colors[i] = simp->colors[size-1];
+    simp->colors.pop_back();
+  }
+  return outcome;
 }
 
 string get_color_name_from_type(int color_type)
@@ -69,13 +98,41 @@ switch(color_type) {
     }
 }
 
-
 BoundaryColor::BoundaryColor(){
     type = TYPE_BOUNDARY;
 }
 
 BoundaryColor::~BoundaryColor(){
 }
+
+bool BoundaryColor::colorize_single_simplex(KSimplex* simp)
+{
+  bool outcome = true;
+  BoundaryColor* color = new BoundaryColor();
+  if (color==nullptr) {
+    outcome = false;
+    log_report(LOG_PANIC,"BoundaryColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
+  }
+  else simp->colors.push_back(color);
+  return outcome;
+}
+
+bool BoundaryColor::colorize_simplices_at_level(SimpComp* G, int level)
+{
+  bool outcome = true;
+  bool temp;
+  for (auto simplex : G->elements[level]) {
+    temp = BoundaryColor::colorize_single_simplex(simplex);
+    if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
+bool BoundaryColor::remove_color_from_simplex(KSimplex* simp)
+{
+  return Color::remove_color_type_from_simplex(simp, TYPE_BOUNDARY);
+}
+
 
 void BoundaryColor::print(){
   //    Color::print();
@@ -113,21 +170,76 @@ void UniqueIDColor::print_compact(){
     cout << id;
 }
 
+
+bool UniqueIDColor::colorize_single_simplex(KSimplex* simp)
+{
+  bool outcome = true;
+  UniqueIDColor* color = new UniqueIDColor();
+  if (color==nullptr) {
+    outcome = false;
+    log_report(LOG_PANIC,"UniqueIDColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
+  }
+  else simp->colors.push_back(color);
+  return outcome;
+}
+
 bool UniqueIDColor::colorize_simplices_at_level(SimpComp* G, int level)
 {
-    for (auto simplex : G->elements[level]) {
-        simplex->colors.push_back(new UniqueIDColor());
+  bool outcome = true;
+  bool temp;
+  for (auto simplex : G->elements[level]) {
+    temp = UniqueIDColor::colorize_single_simplex(simplex);
+    if (!temp) outcome = false;
     }
-    return true;
+  return outcome;
 }
 
 bool UniqueIDColor::colorize_entire_complex(SimpComp* G)
 {
-    for (int level = 0; level <= G->D; level++) {
-        UniqueIDColor::colorize_simplices_at_level(G, level);
+  bool outcome=true;
+  bool temp;
+  for (int level = 0; level <= G->D; level++) {
+       temp = UniqueIDColor::colorize_simplices_at_level(G, level);
+       if (!temp) outcome = false;
     }
-    return true;
+  return outcome;
 }
+
+bool UniqueIDColor::is_colorized(KSimplex* simp)
+{
+  return Color::is_colorized_with_type(simp,TYPE_UNIQUE_ID);
+}
+
+bool UniqueIDColor::append_color_to_single_simplex(KSimplex* simp)
+{
+  bool outcome=true;
+  if (UniqueIDColor::is_colorized(simp)) return true;
+  else outcome = UniqueIDColor::colorize_single_simplex(simp);
+  return outcome;
+}
+
+bool UniqueIDColor::append_color_to_simplices_at_level(SimpComp* G, int level)
+{
+  bool outcome = true;
+  bool temp;
+  for (auto simplex : G->elements[level]) {
+    temp = UniqueIDColor::append_color_to_single_simplex(simplex);
+    if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
+bool UniqueIDColor::append_color_to_entire_complex(SimpComp* G)
+{
+  bool outcome=true;
+  bool temp;
+  for (int level = 0; level <= G->D; level++) {
+       temp = UniqueIDColor::append_color_to_simplices_at_level(G, level);
+       if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
 
 string UniqueIDColor::get_color_value_as_str() const
 {

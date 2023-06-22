@@ -1,6 +1,7 @@
 # Adding test executables.
 list(APPEND tests
-     main.cpp
+  main.cpp
+  attach-simplex.cpp
     )
 
 # Enabling testing.

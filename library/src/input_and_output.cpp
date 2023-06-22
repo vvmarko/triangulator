@@ -4,6 +4,7 @@ int logLevel = LOG_WARN; // default logLevel
 
 void log_report(int type, string message){
     if(type <= logLevel){
+      if(type == LOG_PANIC) cerr << "\033[31;1mPANIC:   " << message << "\033[0m" << endl;
       if(type == LOG_ERROR) cerr << "\033[31;1mERROR:   " << message << "\033[0m" << endl;
       if(type == LOG_WARN) cerr << "\033[1mWARNING: " << message << "\033[0m" << endl;
       if(type == LOG_INFO) cerr << "INFO:    " << message << endl;
@@ -152,7 +153,11 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
     // We are done with temporary UniqueIDColors, so we delete them:
     for (auto lvl : simpComp->elements) {
         for (auto ks : lvl) {
-            Color* toBeDeleted = ks->colors.back();
+          // The following assumes that colors are added at the end of the ks->colors vector
+          // by the funtion UniqueIDColor::colorize_entire_complex(simpComp) from the beginning
+	  // of the function. This code can be hardened to explicitly find the UniqueID colors
+	  // that have id above currentMaxid, and delete those, whereever they are in the vector.
+	    Color* toBeDeleted = ks->colors.back();
             ks->colors.pop_back();
             delete toBeDeleted;
         }
@@ -335,7 +340,7 @@ void read_ksimplex_node(rapidxml::xml_node<>* node, SimpComp* sc, string delimit
 /**
  * @brief Uses color node to add a color to KSimplex.
  * 
- * @details Actually just a wrapper for Color::colorize_node_from_string().
+ * @details Actually just a wrapper for Color::colorize_simplex_from_string().
  * 
  * @param ks KSimplex to be written into.
  * @param color_node Colour node to be read from.
@@ -345,7 +350,7 @@ void colorize_node(KSimplex* ks, rapidxml::xml_node<>* color_node)
     int color_type = stoi(color_node->first_attribute()->value());
     string color_val = color_node->value();
 
-    Color::colorize_node_from_string(ks, color_type, color_val);
+    Color::colorize_simplex_from_string(ks, color_type, color_val);
 }
 
 /**

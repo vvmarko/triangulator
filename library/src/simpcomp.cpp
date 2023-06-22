@@ -297,6 +297,26 @@ KSimplex* SimpComp::find_KSimplex(set<int> IDs){
     return find_vertices(sTemp);
 }
 
+// Verifies if a given simplex is an element of the complex or not
+bool SimpComp::is_an_element(KSimplex* simp){
+
+    if(simp==nullptr){
+        log_report(LOG_WARN, "SimpComp::is_an_element(): You have provided a nullptr as a simplex, in order to verify if it belongs to a given complex. Nullptr is never an element of a complex.");
+        log_report(LOG_WARN, "SimpComp::is_an_element(): I am skipping this, and answering that this simplex is not an element of the complex, but this input should never appear, check your code.");
+        return false;
+    }
+    int level=simp->k;
+    if( level > (this->D)){
+        log_report(LOG_WARN, "SimpComp::is_an_element(): The level of the given simplex is greater than the dimension of the complex, so it cannot be an element of that complex.");
+        log_report(LOG_WARN, "SimpComp::is_an_element(): I am skipping this, and answering that this simplex is not an element of the complex, but this should rarely happen (if ever), check your code.");
+        return false;
+    }    
+    for(auto &it : this->elements[level])
+        if( it == simp ) return true;
+
+    return false;
+}
+
 
 // #####################################################################
 // Reconstructing the neighbor relations between simplices in a complex:

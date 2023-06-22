@@ -8,10 +8,11 @@
 // #####################
 
 #define LOG_QUIET 0 // quiet
-#define LOG_ERROR 1 // errors
-#define LOG_WARN 2 // errors and warnings
-#define LOG_INFO 3 // errors, warnings and info
-#define LOG_DEBUG 4 // errors, warnings, info and debug
+#define LOG_PANIC 1 // terrible errors (like out of memory and such)
+#define LOG_ERROR 2 // errors
+#define LOG_WARN 3 // errors and warnings
+#define LOG_INFO 4 // errors, warnings and info
+#define LOG_DEBUG 5 // errors, warnings, info and debug
 
 #endif
 

@@ -14,6 +14,10 @@ SimpComp* seed_sphere_intuitively(int D, string name);
 
 KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* simpsmall, KSimplex *vertex);
 
+KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* simpsmall);
+
+KSimplex* attach_new_simplex_to_boundary( KSimplex *boundsimp , SimpComp *G);
+
 //Unseed a specific complex - delete it from the memory and update pointers in seededComplexes vector
 void unseed_complex(SimpComp *simpComp);
 

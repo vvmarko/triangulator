@@ -186,6 +186,59 @@ KSimplex* build_simplex_one_level_up(SimpComp *simpComp, KSimplex* simpsmall){
     return build_simplex_one_level_up_with_vertex(simpComp, simpsmall, vertex);
 }
 
+KSimplex* attach_new_simplex_to_boundary( KSimplex *boundsimp , SimpComp *G){
+  // (1) Test for all the conditions that must be satisfied for succesfully attaching a new simplex
+  // legality of the complex pointer:
+  if(G==nullptr){
+    log_report(LOG_ERROR,"The provided complex is nullptr, it does not exist!!");
+    return nullptr;
+  }
+  // legality of the simplex pointer:
+    if(boundsimp==nullptr){
+    log_report(LOG_ERROR,"The provided simplex is nullptr, it does not exist!!");
+    return nullptr;
+  }
+  // whether this simplex is an element of this complex:
+  if(!(G->is_an_element(boundsimp))){
+    log_report(LOG_ERROR,"This simplex does not belong to the given complex!!");
+    return nullptr;
+  }
+  // whether the simplex has dimension D-1:
+  int D = boundsimp->D;
+  int k = boundsimp->k;
+  if( k != D-1 ){
+    log_report(LOG_ERROR,"This simplex does not have the dimension D-1, so I cannot attach another D-simplex to it!!");
+    return nullptr;
+  }
+  // whether the simplex is part of the boundary of the complex:
+  if(boundsimp->is_a_boundary() != true){
+    log_report(LOG_ERROR,"This simplex is not on the boundary of the complex, cannot attach another D-simplex to it!!");
+    return nullptr;
+  }
+  
+  // (2) If all is well, attach a new D-simplex to this (D-1)-simplex, and verify that it was done
+  KSimplex* newsimplex = build_simplex_one_level_up( G , boundsimp );
+  if(newsimplex==nullptr){
+    log_report(LOG_ERROR,"Something went wrong during the build, the result is nullptr. This should not happen, something is very wrong!!");
+    return nullptr;
+  }
+  
+  // (3) Colorize all (D-1)-simplices of the new D-simplex with the BoundaryColor, except for the old (D-1)-simplex
+  bool test = true;
+  for(auto &simp : newsimplex->neighbors->elements[D-1])
+    if (simp!=boundsimp) test = BoundaryColor::colorize_single_simplex(simp);
+  if(!test) log_report(LOG_ERROR,"I could not label the boundary of the attached D-simplex properly. This is very very bad, the structure of the complex is inconsistent. Fix your code!!");
+  
+  // (4) Remove the BoundaryColor from the old (D-1)-simplex
+  test = true;
+  test = BoundaryColor::remove_color_from_simplex(boundsimp);
+  if(!test) log_report(LOG_ERROR,"I could not remove the boundary label of the old (D-1)-simplex properly. This is very very bad, the structure of the complex is inconsistent. Fix your code!!");
+  
+  // (5) Finally, return the pointer to the newly built D-simpleks
+  return newsimplex;
+}
+
+
 // Seed a single simplex or sphere of dimension d:
 SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
     string s = "Creating general ";
@@ -208,9 +261,7 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
     }
 
     // If seeding simplicial complex, add boundary color:
-	if(!sphere)
-		for(auto &kSimplex : simpComp->elements[D-1])
-			kSimplex->colors.push_back(new BoundaryColor());
+    if(!sphere) BoundaryColor::colorize_simplices_at_level(simpComp, D-1);
     
     return simpComp;
 }
@@ -281,7 +332,7 @@ void unseed_complex(SimpComp *simpComp){
         return;
     }
 
-    int i = 0; // index of simpComp in seededComplexes
+    unsigned long i = 0; // index of simpComp in seededComplexes
     auto &vec = triangulator_global::seededComplexes;
     // Find simpComp in seededComplexes:
     while( (i < vec.size()) && (vec[i] != simpComp) )
@@ -289,9 +340,11 @@ void unseed_complex(SimpComp *simpComp){
     if(i < vec.size()){ // found
         delete vec[i]; // delete it
         // Remove it from vec:
-        while(i < vec.size())
-             vec[i] = vec[++i];
-        vec.pop_back();
+        while(i < vec.size()-1){
+	  vec[i] = vec[i+1];
+	  i++;
+	}
+	vec.pop_back();
     }else{ // not found
         log_report(LOG_ERROR, "Not possible to unseed a complex");
     }

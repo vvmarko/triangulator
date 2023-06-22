@@ -121,6 +121,9 @@ public:
   // Finds a simplex whose vertices are colored with UniqueIDs from a given set, if it exists
     KSimplex* find_KSimplex(set<int> IDs);
 
+  // Verifies if a given simplex is an element of the complex or not
+    bool is_an_element(KSimplex* simp);
+
 
   // #####################################################################
   // Reconstructing the neighbor relations between simplices in a complex:

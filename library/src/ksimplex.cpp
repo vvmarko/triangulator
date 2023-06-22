@@ -79,10 +79,7 @@ UniqueIDColor* KSimplex::get_uniqueID(){
 // Verify if I live on the boundary of a complex
 // (i.e. if the BoundaryColor is assigned to me)
 bool KSimplex::is_a_boundary(){
-    for(auto &color : colors)
-        if(color->type == TYPE_BOUNDARY)
-            return true;
-    return false;
+  return Color::is_colorized_with_type(this,TYPE_BOUNDARY);
 }
 
 

@@ -44,8 +44,10 @@ public:
 
     virtual string get_color_value_as_str() const;
     virtual void set_color_value_from_str(const string& source) = 0;
-    static void colorize_node_from_string(KSimplex* ks, const int color_type, const string& color_value);
-
+    static bool colorize_simplex_from_string(KSimplex* simp, const int color_type, const string& color_value);
+    static bool is_colorized_with_type(KSimplex* simp, int typecode);
+    static bool remove_color_type_from_simplex(KSimplex* simp, int typecode);
+  
     int type;
 };
 
@@ -59,6 +61,9 @@ public:
     void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
+    static bool colorize_single_simplex(KSimplex* simp);
+    static bool colorize_simplices_at_level(SimpComp* G, int level);
+    static bool remove_color_from_simplex(KSimplex* simp);
 };
 
 // Unique ID of KSimplex:
@@ -70,14 +75,19 @@ public:
     void print(string space = "");
     void print_compact();
 
+    static bool colorize_single_simplex(KSimplex* simplex);
     static bool colorize_simplices_at_level(SimpComp* G, int level);
     static bool colorize_entire_complex(SimpComp* G);
-
+    static bool is_colorized(KSimplex* simp);
+    static bool append_color_to_single_simplex(KSimplex* simp);
+    static bool append_color_to_simplices_at_level(SimpComp* G, int level);
+    static bool append_color_to_entire_complex(SimpComp* G);
+  
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
 
     static unsigned long next_free_uid_number;
-    unsigned long id; // whether the KSimplex of this color represents a boundary
+    unsigned long id;
 };
 
 // Drawing coordinates:
