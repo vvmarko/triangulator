@@ -24,7 +24,7 @@
 KSimplex::KSimplex(int level, int dim){
     this->k = level;
     this->D = dim;
-    neighbors = new SimpComp(dim);
+    neighbors = new(nothrow) SimpComp(dim);
 }
 
 // Default destructor

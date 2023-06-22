@@ -47,7 +47,7 @@ bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, c
     case TYPE_UNIQUE_ID:
         return UniqueIDColor::colorize_single_simplex(simp);
     case TYPE_SCREEN_COORDINATE: // Fix this case
-        color = new ScreenCoordinateColor();
+        color = new(nothrow) ScreenCoordinateColor();
         if (color == nullptr) outcome = false;
         static_cast<ScreenCoordinateColor *>(color) -> set_color_value_from_str(color_value);
         simp->colors.push_back(color);
@@ -108,7 +108,7 @@ BoundaryColor::~BoundaryColor(){
 bool BoundaryColor::colorize_single_simplex(KSimplex* simp)
 {
   bool outcome = true;
-  BoundaryColor* color = new BoundaryColor();
+  BoundaryColor* color = new(nothrow) BoundaryColor();
   if (color==nullptr) {
     outcome = false;
     log_report(LOG_PANIC,"BoundaryColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
@@ -174,7 +174,7 @@ void UniqueIDColor::print_compact(){
 bool UniqueIDColor::colorize_single_simplex(KSimplex* simp)
 {
   bool outcome = true;
-  UniqueIDColor* color = new UniqueIDColor();
+  UniqueIDColor* color = new(nothrow) UniqueIDColor();
   if (color==nullptr) {
     outcome = false;
     log_report(LOG_PANIC,"UniqueIDColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");

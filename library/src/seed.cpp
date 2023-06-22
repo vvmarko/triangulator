@@ -17,7 +17,7 @@ void seed_KSimplices(SimpComp* simpComp, int k){
     if(!k){
         // If k == 0, create a KSimplex(0):
         KSimplex *v = simpComp->create_ksimplex(0);
-Color *c = new UniqueIDColor();
+Color *c = new(nothrow) UniqueIDColor();
 v->colors.push_back(c);
 cout << "+addV0+" << endl;
         return;
@@ -29,10 +29,10 @@ cout << "---- Seeding seed_KSimplices " << k-1 << " finished" << endl;
     
     // Make a copy of old simpComp, 
     // so that old vertices, edges, triangles,... can be found:
-    SimpComp *original = new SimpComp(*simpComp);
+    SimpComp *original = new(nothrow) SimpComp(*simpComp);
     // Adding vertex:
     KSimplex *v = simpComp->create_ksimplex(0);
-Color *c = new UniqueIDColor();
+Color *c = new(nothrow) UniqueIDColor();
 v->colors.push_back(c);
 cout << "+addV" << k << "+" << endl;
     // new k-1-eders:
@@ -71,7 +71,7 @@ cout << "kTemp = " << kTemp << endl;
                 // Add k-aeder:
                 KSimplex *newKSimplex = simpComp->create_ksimplex(kTemp);
 cout << "+add+" << endl;
-Color *c = new UniqueIDColor();
+Color *c = new(nothrow) UniqueIDColor();
 newKSimplex->colors.push_back(c);
                 newKSimplices.push_back(newKSimplex);
                 nAdded++;
@@ -250,7 +250,11 @@ SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
         return nullptr;
     }
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
-    SimpComp *simpComp = new SimpComp(name,D);
+    SimpComp *simpComp = new(nothrow) SimpComp(name,D);
+    if(simpComp==nullptr){
+      log_report(LOG_PANIC,"PANIC!!! Cannot allocate memory!!!");
+      return nullptr;
+    }
     simpComp->topology = sphere ? "sphere" : "linear";
     KSimplex *simpsmall = simpComp->create_ksimplex(0);
 

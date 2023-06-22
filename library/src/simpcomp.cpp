@@ -116,7 +116,11 @@ KSimplex* SimpComp::create_ksimplex(int k){
     log_report(LOG_DEBUG, "create_ksimplex(): Creating KSimplex at level " + to_string(k) + " in complex "+ this->name );
     if ( (k >= 0) && (k <= D) ){
         // Creating new KSimplex at level k:
-        KSimplex *newKSimplex = new KSimplex(k, D);
+        KSimplex *newKSimplex = new(nothrow) KSimplex(k, D);
+	if(newKSimplex==nullptr){
+	  log_report(LOG_PANIC, "create_ksimplex(): PANIC!!! Cannot allocate memory!!");
+          return nullptr;
+	}
         // Add newly created k-simplex to the k-th list of elements of this simplicial complex:
         elements[k].push_back(newKSimplex);
         return newKSimplex;

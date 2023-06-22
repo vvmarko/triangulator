@@ -266,7 +266,7 @@ SimpComp* read_complex_from_xml_file( rapidxml::xml_document<>& doc )
     string sc_topology = current_node->value();             // Complex topology.
     //    std::cout << "Complex topology: " << sc_topology << "." << std::endl;
     
-    SimpComp* sc = new SimpComp(sc_name, sc_dimension);
+    SimpComp* sc = new(nothrow) SimpComp(sc_name, sc_dimension);
     sc->topology = sc_topology;
     
     for (current_node = current_node->next_sibling();       // Read all other nodes
@@ -308,7 +308,7 @@ void read_level_node(rapidxml::xml_node<>* node, SimpComp* sc, int level, string
     for (auto id: *ids) {
         if (sc->find_KSimplex(id)) throw -1; //TODO: Exception handling.
         sc->create_ksimplex(level);
-        sc->elements[level].back()->colors.push_back(new UniqueIDColor(id));
+        sc->elements[level].back()->colors.push_back(new(nothrow) UniqueIDColor(id));
     }
 
     delete ids;
@@ -362,7 +362,7 @@ void colorize_node(KSimplex* ks, rapidxml::xml_node<>* color_node)
  */
 vector<unsigned long>* parse_level(rapidxml::xml_node<>* node, string delimiter)
 {
-    vector<unsigned long>* ids = new vector<unsigned long>();
+    vector<unsigned long>* ids = new(nothrow) vector<unsigned long>();
     string elements = node->value();
     std::size_t pos;
 

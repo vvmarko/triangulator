@@ -8,6 +8,7 @@ using namespace std;
 #include <set>
 #include <vector>
 #include <list>
+#include <new>
 
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"
