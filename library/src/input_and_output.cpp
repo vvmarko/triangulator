@@ -1,22 +1,47 @@
 
 #include "triangulator.hpp"
-int logLevel = LOG_WARN; // default logLevel
+
+// int logLevel = LOG_WARN; // default logLevel
 
 void log_report(int type, string message){
-    if(type <= logLevel){
-      if(type == LOG_PANIC) cerr << "\033[31;1mPANIC:   " << message << "\033[0m" << endl;
-      if(type == LOG_ERROR) cerr << "\033[31;1mERROR:   " << message << "\033[0m" << endl;
-      if(type == LOG_WARN) cerr << "\033[1mWARNING: " << message << "\033[0m" << endl;
-      if(type == LOG_INFO) cerr << "INFO:    " << message << endl;
-      if(type == LOG_DEBUG) cerr << "DEBUG:   " << message << endl;
+  ofstream logf;
+  
+  if(type <= triangulator_global::logLevel){
+    if(triangulator_global::logFilename!=""){
+      logf.open(triangulator_global::logFilename, ios::app);
+      if(!logf) logf.open(triangulator_global::logFilename, ios::out);
+      if(!logf){
+	log_report_to_cerr(LOG_PANIC,"log_report(): I cannot open the log file for append or write!! Falling back to stderr output!");
+	triangulator_global::logFilename="";
+      }
+      if(logf){
+        if(type == LOG_PANIC) logf << "<span style=\"color:white; background-color:red;\">PANIC:   " << message << "</span><br>" << endl;
+        if(type == LOG_ERROR) logf << "<span style=\"color:red;\">ERROR:   " << message << "</span><br>" << endl;
+        if(type == LOG_WARN)  logf << "<span><b>WARNING: " << message << "</b></span><br>" << endl;
+        if(type == LOG_INFO)  logf << "<span>INFO:    " << message << "</span><br>" << endl;
+        if(type == LOG_DEBUG) logf << "<span style=\"color:blue;\">DEBUG:   " << message << "</span><br>" << endl;
+	logf.close();
+      }
+      else log_report_to_cerr(type, message);
     }
+    else log_report_to_cerr(type, message);
+  }
 }
 
-void error(string message){
-    cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nERROR:   " << message
-            << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-    exit(1); //TODO: Free all resources
+void log_report_to_cerr(int type, string message){
+    if(type == LOG_PANIC) cerr << "\033[37;41;1mPANIC:   " << message << "\033[0m" << endl;
+    if(type == LOG_ERROR) cerr << "\033[31;1mERROR:   " << message << "\033[0m" << endl;
+    if(type == LOG_WARN) cerr << "\033[1mWARNING: " << message << "\033[0m" << endl;
+    if(type == LOG_INFO) cerr << "INFO:    " << message << endl;
+    if(type == LOG_DEBUG) cerr << "\033[96mDEBUG:   " << message << "\033[0m" << endl;
 }
+
+
+//void error(string message){
+//    cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nERROR:   " << message
+//            << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
+//    exit(1); //TODO: Free all resources
+//}
 
 /**
  * @brief Saves given simplicial complex to .xml file for later reading.

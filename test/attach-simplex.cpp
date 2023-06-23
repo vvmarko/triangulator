@@ -16,6 +16,16 @@ int main(){
     UniqueIDColor::append_color_to_entire_complex(g);
     g->print_compact();
     unseed_complex(g);
+
+    triangulator_global::logLevel=LOG_DEBUG;
+    triangulator_global::logFilename="logfile.html";
+
+    log_report(LOG_PANIC,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_ERROR,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_WARN,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_INFO,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_DEBUG,"Testing the log reporting facility, to see if it works and if it is readable...");
+
     
     /*  
     SimpComp *g1 = seed_sphere(3,"obicna 2-sfera");
