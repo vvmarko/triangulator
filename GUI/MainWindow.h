@@ -26,6 +26,9 @@ public slots:
     void tblItemOpenToolsClick(int index);
     void tblItemOpenActionsClick(int index);
 
+protected:
+    void closeEvent(QCloseEvent *e) override;
+
 private:
 	Ui::MainWindow ui;
 
@@ -43,8 +46,5 @@ private:
     void tblItemRenameComplexClick(int row);
     void tblItemDeleteRowClick(int row);
 
-
     std::vector<SimpCompItem> items;
-
-    void closeEvent(QCloseEvent *e) override;    
 };

@@ -2,6 +2,7 @@
 #include "ui_Inspector.h"
 #include "SimpCompTableModel.h"
 #include "Utils.h"
+#include "MainWindow.h"
 
 #include "triangulator.hpp"
 
@@ -15,6 +16,19 @@ void Inspector::anchorClicked(const QUrl &url) {
     Utils::openWindowOnRandomPos(inspector);
 
     inspector->show();    
+}
+
+void Inspector::activateBtnAttachNewSimplex() {
+    KSimplex* newSimplex = attach_new_simplex_to_boundary(simplex , simpComp);
+    UniqueIDColor::append_color_to_entire_complex(simpComp);
+
+    //    w->updateSimpCompTableModel();
+
+    if(newSimplex!=nullptr){
+        Inspector *newinspector = new Inspector(newSimplex, item);
+        Utils::openWindowOnRandomPos(newinspector);
+        newinspector->show();
+    }
 }
 
 void resizeLabelToFitContents(QLabel *label) {
@@ -37,7 +51,7 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
     resizeLabelToFitContents(ui->lDimensionLbl);
 
     SimpComp *simpComp = item->simpComp;
-//    this->simpComp = simpComp;
+    this->simpComp = simpComp;
     this->simplex = simplex;
 
 //    UniqueIDColor* idColor = simplex->get_uniqueID();
@@ -72,6 +86,8 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
 
     ui->tbNeighbors->setOpenLinks(false);
     connect(ui->tbNeighbors, &QTextBrowser::anchorClicked, this, &Inspector::anchorClicked);
+    connect(ui->btnAttachNewSimplex,  &QPushButton::clicked, this, &Inspector::activateBtnAttachNewSimplex);
+
 
     item->childWindows.push_back(this);
 
@@ -95,5 +111,4 @@ void Inspector::closeEvent (QCloseEvent* event)
             erased = true;
         }
     }
-
 }

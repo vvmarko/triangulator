@@ -1,8 +1,6 @@
 
 #include "triangulator.hpp"
 
-// int logLevel = LOG_WARN; // default logLevel
-
 void log_report(int type, string message){
   ofstream logf;
   
@@ -28,6 +26,7 @@ void log_report(int type, string message){
   }
 }
 
+
 void log_report_to_cerr(int type, string message){
     if(type == LOG_PANIC) cerr << "\033[37;41;1mPANIC:   " << message << "\033[0m" << endl;
     if(type == LOG_ERROR) cerr << "\033[31;1mERROR:   " << message << "\033[0m" << endl;
@@ -36,12 +35,6 @@ void log_report_to_cerr(int type, string message){
     if(type == LOG_DEBUG) cerr << "\033[96mDEBUG:   " << message << "\033[0m" << endl;
 }
 
-
-//void error(string message){
-//    cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nERROR:   " << message
-//            << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-//    exit(1); //TODO: Free all resources
-//}
 
 /**
  * @brief Saves given simplicial complex to .xml file for later reading.

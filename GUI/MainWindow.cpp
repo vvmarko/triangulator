@@ -192,9 +192,8 @@ void MainWindow::tblItemDeleteRowClick(int row) {
         }
         items[row].childWindows[j] = NULL;
         j++;
-
     }
-
+    unseed_complex(items[row].simpComp);
     items.erase(items.begin() + row);
 
     updateSimpCompTableModel();
@@ -258,7 +257,20 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    QApplication::quit();
+    triangulator_global::logLevel=LOG_INFO;
+
+    QString qendMessage = "<b>Triangulator GUI session, finished on: ";
+
+    QDateTime dt = QDateTime::currentDateTime();
+    QString formattedTime = dt.toString("dd.MM.yyyy hh:mm:ss");
+    qendMessage = qendMessage + formattedTime + "</b><br>";
+    std::string endMessage = qendMessage.toStdString();
+
+    log_report(LOG_INFO,endMessage);
+
+    unseed_everything();
+
+    event->accept();
 }
 
 void MainWindow::updateSimpCompTableModel()

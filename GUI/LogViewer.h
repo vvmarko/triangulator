@@ -18,7 +18,7 @@ public:
 private:
     MainWindow *mainWnd;
 
-    const std::string logFilePath = "logfajl.log";
+//    const std::string logFilePath = triangulator_global::logFilename;
     static int lastFileSize;
     static int initialLogFileReadInProgress;
 

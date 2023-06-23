@@ -27,6 +27,7 @@ private:
     Ui::Inspector *ui;
 
     void anchorClicked(const QUrl &url);
+    void activateBtnAttachNewSimplex();
 
     void closeEvent(QCloseEvent* event) override;
 
