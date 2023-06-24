@@ -4,6 +4,8 @@
 #include <QSpinBox>
 #include "SimpCompTableModel.h"
 
+#include "triangulator.hpp"
+
 DrawComplex::DrawComplex(MainWindow *mainWnd, SimpCompItem *item, QWidget *parent)
 	: QWidget(parent)
 {    
@@ -16,6 +18,7 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpCompItem *item, QWidget *paren
     statusBar->showMessage("0, 0");
 
     this->mainWnd = mainWnd;
+    this->item = item;
     ui.openGLWidget->item = item;
 
     ui.openGLWidget->setDrawComplexStatusBar(statusBar);    
@@ -51,6 +54,9 @@ DrawComplexGLWidget *DrawComplex::getGLWidget()
 
 void DrawComplex::closeEvent (QCloseEvent* event)
 {    
+    item->drawComplexXcoordinate = this->x();
+    item->drawComplexYcoordinate = this->y();
+
     mainWnd->drawComplexWndClosed(this);
 
     bool erased = false;

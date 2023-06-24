@@ -22,6 +22,9 @@ public:
 
     void updateSimpCompTableModel();
 
+    int logWindowXcoordinate = -1;
+    int logWindowYcoordinate = -1;
+
 public slots:
     void tblItemOpenToolsClick(int index);
     void tblItemOpenActionsClick(int index);

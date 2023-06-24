@@ -40,6 +40,9 @@ PrintComplex::PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem
 
 void PrintComplex::closeEvent (QCloseEvent* event)
 {
+    item->printComplexXcoordinate = this->x();
+    item->printComplexYcoordinate = this->y();
+
     bool erased = false;
 
     mainWnd->printComplexWndClosed(this);

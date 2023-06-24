@@ -47,6 +47,10 @@ LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)
 {
     ui.setupUi(this);
 
+    this->x();
+
+    setWindowTitle("Triangulator log");
+
     this->mainWnd = mainWnd;
 
     watcher = new QFileSystemWatcher();
@@ -77,6 +81,9 @@ LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)
 
 void LogViewer::closeEvent(QCloseEvent *e)
 {
+    mainWnd->logWindowXcoordinate = this->x();
+    mainWnd->logWindowYcoordinate = this->y();
+
     QWidget::closeEvent(e);
     if (watcher) {
         delete watcher;

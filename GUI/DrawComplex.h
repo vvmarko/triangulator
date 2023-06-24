@@ -22,6 +22,7 @@ private:
 	Ui::DrawComplex ui;
 
     MainWindow *mainWnd;
+    SimpCompItem *item;
 
     QStatusBar *statusBar;   
 

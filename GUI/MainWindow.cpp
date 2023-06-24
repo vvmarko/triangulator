@@ -42,9 +42,13 @@ void MainWindow::openLogFile() {
     {
         logViewerDialog = new LogViewer(this);
 
-        Utils::openWindowOnRandomPos(logViewerDialog);
+        if( (logWindowXcoordinate!=-1)||(logWindowYcoordinate!=-1) )
+            logViewerDialog->move(logWindowXcoordinate,logWindowYcoordinate);
+        else Utils::openWindowOnRandomPos(logViewerDialog);
 
         logViewerDialog->show();
+
+
         viewLogFileVisible = true;
     } else
     {
@@ -86,7 +90,12 @@ void MainWindow::tblItemDrawComplexClick() {
 
     if (items[i].drawComplex == NULL) {
         items[i].drawComplex = new DrawComplex(this, &(items[i]));        
-        Utils::openWindowOnRandomPos(items[i].drawComplex);
+        items[i].drawComplex->setWindowTitle(QString::fromStdString("Triangulator visualizer for complex: " + items[i].simpComp->name));
+
+        if( (items[i].drawComplexXcoordinate!=-1)||(items[i].drawComplexYcoordinate!=-1) )
+            items[i].drawComplex->move(items[i].drawComplexXcoordinate,items[i].drawComplexYcoordinate);
+        else Utils::openWindowOnRandomPos(items[i].drawComplex);
+
         items[i].drawComplex->show();
     } else {        
         items[i].drawComplex->close();
@@ -102,8 +111,12 @@ void MainWindow::tblItemPrintComplexClick() {
     if (items[i].printComplex == NULL) {
         items[i].printComplex = new PrintComplex(this, QString::fromStdString(items[i].simpComp->print_html()),
                                                  &(items[i]));
-        items[i].printComplex->setWindowTitle(QString::fromStdString("Elements of complex " + items[i].simpComp->name));
-        Utils::openWindowOnRandomPos(items[i].printComplex);
+        items[i].printComplex->setWindowTitle(QString::fromStdString("Triangulator catalogue for complex: " + items[i].simpComp->name));
+
+        if( (items[i].printComplexXcoordinate!=-1)||(items[i].printComplexYcoordinate!=-1) )
+            items[i].printComplex->move(items[i].printComplexXcoordinate,items[i].printComplexYcoordinate);
+        else Utils::openWindowOnRandomPos(items[i].printComplex);
+
         items[i].printComplex->show();
     } else {
         items[i].printComplex->close();
@@ -202,8 +215,8 @@ void MainWindow::tblItemDeleteRowClick(int row) {
 }
 
 void MainWindow::createItemWidget(int row) {
-    QPushButton *btnPrintComplex = new QPushButton("List elements");
-    QPushButton *btnDrawComplex = new QPushButton("Draw");
+    QPushButton *btnPrintComplex = new QPushButton("Catalogue");
+    QPushButton *btnDrawComplex = new QPushButton("Visualizer");
     QComboBox *cmbTools = new QComboBox();
     QComboBox *cmbActions = new QComboBox();
 
@@ -240,6 +253,8 @@ MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
+
+    setWindowTitle("Triangulator GUI");
 
 	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::newFile);
     connect(ui.actionOpen, &QAction::triggered, this, &MainWindow::openFile);   

@@ -45,6 +45,8 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
 {
     ui->setupUi(this);    
 
+    setWindowTitle("Triangulator inspector");
+
     resizeLabelToFitContents(ui->lSimplexNameLbl);
     resizeLabelToFitContents(ui->lLevelLbl);
     resizeLabelToFitContents(ui->lElementOfComplexLbl);

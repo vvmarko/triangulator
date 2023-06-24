@@ -1,6 +1,5 @@
 #pragma once
 
-// mymodel.h
 #include <QAbstractTableModel>
 
 class SimpComp;
@@ -16,7 +15,11 @@ public:
     SimpCompItem();    
 
     DrawComplex *drawComplex; // each simplicial complex has its own table item
+    int drawComplexXcoordinate = -1;
+    int drawComplexYcoordinate = -1;
     PrintComplex *printComplex; // each simplicial complex has its own table item
+    int printComplexXcoordinate = -1;
+    int printComplexYcoordinate = -1;
 
     SimpComp *simpComp;
 
