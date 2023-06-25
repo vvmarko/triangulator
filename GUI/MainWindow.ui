@@ -35,6 +35,10 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_session"/>
+    <addaction name="actionSave_session"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -56,8 +60,18 @@
     <addaction name="actionDocumentation"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>Actions</string>
+    </property>
+    <addaction name="actionRelabel_UniqueID_colors"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind_simplices_with_color_type"/>
+    <addaction name="actionFind_simplices_with_color_value"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
+   <addaction name="menuActions"/>
    <addaction name="menuSettings"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -72,7 +86,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionNew">
    <property name="text">
-    <string>New</string>
+    <string>Seed new complex</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -92,7 +106,7 @@
   </action>
   <action name="actionOpen">
    <property name="text">
-    <string>Open</string>
+    <string> Open complex from file</string>
    </property>
   </action>
   <action name="actionSave_As">
@@ -113,6 +127,36 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionOpen_session">
+   <property name="text">
+    <string>Open session from file</string>
+   </property>
+  </action>
+  <action name="actionSave_session">
+   <property name="text">
+    <string>Save current session</string>
+   </property>
+  </action>
+  <action name="actionnesto">
+   <property name="text">
+    <string>nesto</string>
+   </property>
+  </action>
+  <action name="actionRelabel_UniqueID_colors">
+   <property name="text">
+    <string>Relabel UniqueID colors</string>
+   </property>
+  </action>
+  <action name="actionFind_simplices_with_color_type">
+   <property name="text">
+    <string>Find simplices with color type</string>
+   </property>
+  </action>
+  <action name="actionFind_simplices_with_color_value">
+   <property name="text">
+    <string>Find simplices with color value</string>
    </property>
   </action>
  </widget>

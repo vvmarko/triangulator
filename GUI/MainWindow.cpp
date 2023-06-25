@@ -151,6 +151,8 @@ void MainWindow::tblItemOpenActionsClick(int index) {
     if (index==2) return; // call Pachner grow
     if (index==3) return; // call Boundary grow
     if (index==4) return; // call Random grow
+    if (index==5) return; // call Colorize simplices at level
+    if (index==6) return; // call Colorize entire complex
 }
 
 void MainWindow::tblItemSaveComplexAsClick(int row) {
@@ -231,6 +233,8 @@ void MainWindow::createItemWidget(int row) {
     cmbActions->addItem("Pachner grow");
     cmbActions->addItem("Bounday grow");
     cmbActions->addItem("Random grow");
+    cmbActions->addItem("Colorize simplices at level");
+    cmbActions->addItem("Colorize entire complex");
 
     connect(btnPrintComplex, &QPushButton::released, this, &MainWindow::tblItemPrintComplexClick);
     connect(btnDrawComplex, &QPushButton::released, this, &MainWindow::tblItemDrawComplexClick);    
