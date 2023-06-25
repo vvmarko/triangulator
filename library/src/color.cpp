@@ -240,6 +240,25 @@ bool UniqueIDColor::append_color_to_entire_complex(SimpComp* G)
   return outcome;
 }
 
+bool UniqueIDColor::relabel_everything( void )
+{
+  bool outcome = true;
+  unsigned long N=1;
+  for (auto simpComp : triangulator_global::seededComplexes) {
+    for (auto scelem : simpComp->elements) {
+      for (auto ksimplex : scelem) {
+	for (auto col : ksimplex->colors) {
+	  if (col->type == TYPE_UNIQUE_ID) {
+	    static_cast<UniqueIDColor*>(col)->id = N;
+	    N++;
+	  }
+        }
+      }
+    }
+  }
+  UniqueIDColor::next_free_uid_number = N;
+  return outcome;
+}
 
 string UniqueIDColor::get_color_value_as_str() const
 {

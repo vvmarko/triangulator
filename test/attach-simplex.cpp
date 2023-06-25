@@ -7,6 +7,61 @@ int main(){
     cout         << "#######################################################" << endl << endl;
 
 
+   SimpComp* sc1 = seed_sphere_intuitively(2,"prvi");
+   UniqueIDColor::colorize_entire_complex(sc1);
+   SimpComp* sc2 = seed_single_simplex(3,"drugi");
+   UniqueIDColor::colorize_entire_complex(sc2);
+   SimpComp* sc3 = seed_sphere(4,"treci");
+   UniqueIDColor::colorize_entire_complex(sc3);
+   cout << "===========================" << endl;
+   sc1->print_compact();
+   cout << "===========================" << endl;
+   sc2->print_compact();
+   cout << "===========================" << endl;
+   sc3->print_compact();
+   cout << "===========================" << endl;
+   cout << "next free uid number = " << UniqueIDColor::next_free_uid_number << endl;
+   cout << "Number of complexes = " << triangulator_global::seededComplexes.size();
+   
+   unseed_complex(sc2);
+
+   cout << endl << "Deleting complex 2..." << endl << endl;
+   
+   cout << "===========================" << endl;
+   sc1->print_compact();
+   cout << "===========================" << endl;
+   sc3->print_compact();
+   cout << "===========================" << endl;
+   cout << "next free uid number = " << UniqueIDColor::next_free_uid_number << endl;
+   cout << "Number of complexes = " << triangulator_global::seededComplexes.size();
+   
+   UniqueIDColor::relabel_everything();
+
+   cout << endl << "Relabeling UniqueID colors..." << endl << endl;
+   
+   cout << "===========================" << endl;
+   sc1->print_compact();
+   cout << "===========================" << endl;
+   sc3->print_compact();
+   cout << "===========================" << endl;
+   cout << "next free uid number = " << UniqueIDColor::next_free_uid_number << endl;
+   cout << "Number of complexes = " << triangulator_global::seededComplexes.size();
+   
+   unseed_everything();
+   
+    /*
+    triangulator_global::logLevel=LOG_DEBUG;
+    triangulator_global::logFilename="logfile.html";
+
+    log_report(LOG_PANIC,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_ERROR,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_WARN,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_INFO,"Testing the log reporting facility, to see if it works and if it is readable...");
+    log_report(LOG_DEBUG,"Testing the log reporting facility, to see if it works and if it is readable...");
+    */
+
+
+    /*
     SimpComp *g = seed_single_simplex(4,"simpleks");
     UniqueIDColor::colorize_entire_complex(g);
     g->print_compact();
@@ -16,15 +71,10 @@ int main(){
     UniqueIDColor::append_color_to_entire_complex(g);
     g->print_compact();
     unseed_complex(g);
+    */
 
-    triangulator_global::logLevel=LOG_DEBUG;
-    triangulator_global::logFilename="logfile.html";
 
-    log_report(LOG_PANIC,"Testing the log reporting facility, to see if it works and if it is readable...");
-    log_report(LOG_ERROR,"Testing the log reporting facility, to see if it works and if it is readable...");
-    log_report(LOG_WARN,"Testing the log reporting facility, to see if it works and if it is readable...");
-    log_report(LOG_INFO,"Testing the log reporting facility, to see if it works and if it is readable...");
-    log_report(LOG_DEBUG,"Testing the log reporting facility, to see if it works and if it is readable...");
+    
 
     
     /*  

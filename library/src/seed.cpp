@@ -279,9 +279,7 @@ SimpComp* seed_single_simplex(int D, string name){
 SimpComp* seed_sphere(int D, string name){
     SimpComp *simpComp = seed_single_simplex_or_sphere(D, 1, name);
     triangulator_global::seededComplexes.push_back(simpComp);
-
-cout << "Seed: " << triangulator_global::seededComplexes.size() << endl;
-
+    //cout << "Seed: " << triangulator_global::seededComplexes.size() << endl;
     return simpComp;
 }
 

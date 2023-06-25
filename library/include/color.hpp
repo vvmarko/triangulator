@@ -82,6 +82,7 @@ public:
     static bool append_color_to_single_simplex(KSimplex* simp);
     static bool append_color_to_simplices_at_level(SimpComp* G, int level);
     static bool append_color_to_entire_complex(SimpComp* G);
+    static bool relabel_everything(void);
   
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
