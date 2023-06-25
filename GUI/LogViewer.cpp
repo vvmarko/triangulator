@@ -47,8 +47,6 @@ LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)
 {
     ui.setupUi(this);
 
-    this->x();
-
     setWindowTitle("Triangulator log");
 
     this->mainWnd = mainWnd;
