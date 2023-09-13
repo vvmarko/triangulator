@@ -17,6 +17,7 @@
 #define MAX_USER_DEFINEED 65535
 
 #define TYPE_BOUNDARY 0
+#define TYPE_PACHNER 1
 #define TYPE_SCREEN_COORDINATE 128
 #define TYPE_UNIQUE_ID 129
 
@@ -46,7 +47,10 @@ public:
     virtual void set_color_value_from_str(const string& source) = 0;
     static bool colorize_simplex_from_string(KSimplex* simp, const int color_type, const string& color_value);
     static bool is_colorized_with_type(KSimplex* simp, int typecode);
-    static bool remove_color_type_from_simplex(KSimplex* simp, int typecode);
+    static Color* find_pointer_to_color_type(KSimplex* simp, int typecode);
+    static void remove_color_type_from_simplex(KSimplex* simp, int typecode);
+    static void remove_color_type_from_level(SimpComp* G, int level, int typecode);
+    static void remove_color_type_from_complex(SimpComp* G, int typecode);
   
     int type;
 };
@@ -58,13 +62,39 @@ class BoundaryColor : public Color{
 public:
     BoundaryColor();
     ~BoundaryColor();
+    static bool colorize_single_simplex(KSimplex* simp);
+    static bool colorize_simplices_at_level(SimpComp* G, int level);
+    static void remove_color_from_simplex(KSimplex* simp);
     void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
+};
+
+
+// The color used by the Pachner move algorithm:
+class PachnerColor : public Color{
+public:
+    PachnerColor();
+    ~PachnerColor();
+
     static bool colorize_single_simplex(KSimplex* simp);
     static bool colorize_simplices_at_level(SimpComp* G, int level);
-    static bool remove_color_from_simplex(KSimplex* simp);
+    static bool colorize_entire_complex(SimpComp* G);
+    static void remove_color_from_simplex(KSimplex* simp);
+    static void remove_color_from_level(SimpComp* G, int level);
+    static void remove_color_from_complex(SimpComp* G);
+    static bool is_colorized(KSimplex* simp);
+    static PachnerColor* find_pointer_to_color(KSimplex* simp);
+
+    string get_color_value_as_str() const;
+    void set_color_value_from_str(const string& source) override;
+  
+    KSimplex *matchingSimplex = nullptr;
+    bool internalSimplex = false;
+    bool externalSimplex = false;
+    bool immutable = false;
 };
+
 
 // Unique ID of KSimplex:
 class UniqueIDColor : public Color{

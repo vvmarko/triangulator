@@ -230,9 +230,7 @@ KSimplex* attach_new_simplex_to_boundary( KSimplex *boundsimp , SimpComp *G){
   if(!test) log_report(LOG_ERROR,"I could not label the boundary of the attached D-simplex properly. This is very very bad, the structure of the complex is inconsistent. Fix your code!!");
   
   // (4) Remove the BoundaryColor from the old (D-1)-simplex
-  test = true;
-  test = BoundaryColor::remove_color_from_simplex(boundsimp);
-  if(!test) log_report(LOG_ERROR,"I could not remove the boundary label of the old (D-1)-simplex properly. This is very very bad, the structure of the complex is inconsistent. Fix your code!!");
+  BoundaryColor::remove_color_from_simplex(boundsimp);
   
   // (5) Finally, return the pointer to the newly built D-simpleks
   return newsimplex;

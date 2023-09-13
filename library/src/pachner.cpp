@@ -7,6 +7,144 @@
 // ####################################
 
 
+
+KSimplex* Pachner_move(KSimplex *simp, SimpComp *simpComp){
+
+  bool outcome;
+  
+  // First we do some sanity check, whether simp is an element of simpComp...
+
+  if(simpComp==nullptr){
+    log_report(LOG_ERROR,"The provided complex is nullptr, it does not exist!!");
+    return nullptr;
+  }
+  if(simp==nullptr){
+    log_report(LOG_ERROR,"The provided simplex is nullptr, it does not exist!!");
+    return nullptr;
+  }
+  if(!(simpComp->is_an_element(simp))){
+    log_report(LOG_ERROR,"This simplex does not belong to the given complex!!");
+    return nullptr;
+  }
+
+  // Preparatory steps. Initialize the Pachner sphere, colorize simp and the sphere.
+
+  int D = simp->D;
+  int level = simp->k;
+
+  SimpComp *PachnerSphere = seed_sphere(D, "Pachner sphere");
+  if(PachnerSphere==nullptr){
+    log_report(LOG_ERROR,"Unable to seed the Pachner sphere, nullptr generated, aborting the Pachner move!!");
+    return nullptr;
+  }
+
+  outcome = PachnerColor::colorize_single_simplex(simp);
+  if(!outcome){
+    log_report(LOG_ERROR,"Unable to colorize the simplex, something is very wrong, aborting the Pachner move!!");
+    return nullptr;
+  }
+
+  outcome = PachnerColor::colorize_entire_complex(PachnerSphere);
+  if(!outcome){
+    log_report(LOG_ERROR,"Unable to colorize the Pachner sphere, something is very wrong, aborting the Pachner move!!");
+    PachnerColor::remove_color_from_simplex(simp);
+    return nullptr;
+  }
+  
+  // Connect simp to the first k-simplex of the Pachner sphere, and make the connection immutable.
+
+  PachnerColor *simpPachnerColor = PachnerColor::find_pointer_to_color( simp );
+  PachnerColor *sphereKSimplexColor = PachnerColor::find_pointer_to_color( PachnerSphere->elements[level][0] );
+  simpPachnerColor->matchingSimplex = PachnerSphere->elements[level][0];
+  simpPachnerColor->immutable = true;
+  sphereKSimplexColor->matchingSimplex = simp;
+  sphereKSimplexColor->immutable = true;
+  sphereKSimplexColor->internalSimplex = true;
+
+  // Split the Pachner sphere into internal and external parts, evaluate the antipode.
+
+  KSimplex *sphereAntipode = factorize_Pachner_sphere(PachnerSphere, level);
+  if(sphereAntipode==nullptr){
+    log_report(LOG_ERROR,"Received nullptr for the Pachner sphere antipode simplex, something is very broken, aborting the Pachner move!!");
+    PachnerColor::remove_color_from_complex(simpComp);
+    unseed_complex(PachnerSphere);
+    return nullptr;
+  }
+  
+  // Simplistic check of the compatibility --- simp must have the same number of
+  // neighbors as its matching simplex from the Pachner sphere.
+
+  outcome = simple_check_for_Pachner_compatibility(simp, PachnerSphere);
+  if (!outcome) {
+    log_report(LOG_WARN,"Pachner move cannot be performed on this simplex, skipping...");
+    PachnerColor::remove_color_from_simplex(simp);
+    unseed_complex(PachnerSphere);
+    return nullptr;
+  }
+
+  // In-depth recursive check of the compatibility --- establish the 1-to-1 correspondence
+  // between all neighbors of simp and the internal part of the Pachner sphere.
+
+  outcome = detailed_check_for_Pachner_compatibility(simp, PachnerSphere);
+  if (!outcome) {
+    log_report(LOG_WARN,"Pachner move cannot be performed on this simplex, skipping...");
+    PachnerColor::remove_color_from_complex(simpComp);
+    unseed_complex(PachnerSphere);
+    return nullptr;
+  }
+  
+  // If all checks have passed, Pachner move can be performed. Delete the old structure in
+  // simpComp, and recreate in its place a copy of the external structure of the Pachner sphere.
+
+  outcome = perform_the_Pachner_move(simpComp, simp, PachnerSphere);
+  if (!outcome) {
+    log_report(LOG_PANIC,"Pachner move operation failed, the complex is probably in an inconsistent state, panic!!");
+    PachnerColor::remove_color_from_complex(simpComp);
+    unseed_complex(PachnerSphere);
+    return nullptr;
+  }
+
+  // Pachner move is done. Evaluate the antipode, remove the PachnerColor from all simplices,
+  // and delete the Pachner sphere.
+
+  sphereKSimplexColor = PachnerColor::find_pointer_to_color( sphereAntipode );
+  KSimplex *antipode = sphereKSimplexColor->matchingSimplex;
+  PachnerColor::remove_color_from_complex(simpComp);
+  unseed_complex(PachnerSphere);
+  
+  // Return the antipode k-simplex.
+
+  return antipode;
+}
+
+KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level)
+{
+  KSimplex* simp = simpComp->elements[level][0];
+  int antipodeLevel = simpComp->D - level;
+  return nullptr;
+}
+
+bool simple_check_for_Pachner_compatibility(KSimplex *simp, SimpComp *PachnerSphere)
+{
+  return true;
+}
+
+bool detailed_check_for_Pachner_compatibility(KSimplex *simp, SimpComp *PachnerSphere)
+{
+  return true;
+}
+
+bool perform_the_Pachner_move(SimpComp *simpComp, KSimplex *simp, SimpComp *PachnerSphere)
+{
+  return true;
+}
+
+
+
+/*
+
+// Old code...
+  
 // Pachner move 1 to 4:
 // Input: 3-simplex (1-2-3-4)
 // Output: Created 0-simplex (5)
@@ -151,41 +289,41 @@ cout << endl << "for k == 2, add (2-3-4):" << endl << endl;
         
         if(std::includes(s.begin(), s.end(),
                          sKSimplex.begin(), sKSimplex.end())){
-            /*
-            for(auto &tempKSimplex : s){
-                tempKSimplex->print_compact(); cout << endl;
-            }
-            */
+            // 
+            // for(auto &tempKSimplex : s){
+            //     tempKSimplex->print_compact(); cout << endl;
+            // }
+            // 
             set_difference(begin(s), end(s),  
                            begin(sKSimplex), end(sKSimplex),  
                            inserter(hold, end(hold)));
         }
 
-        /*
-        KSimplex *simpsmall = simpComp->create_ksimplex(0);
+        // 
+        // KSimplex *simpsmall = simpComp->create_ksimplex(0);
         // Progress to further dimensions by adding new vertex and conntecting it:
-        for(int k = 1; k <= D+sphere; k++){
+        // for(int k = 1; k <= D+sphere; k++){
             // Seed a KSimplex of level k based on KSimplex of level k-1:
-            simpsmall = build_simplex_one_level_up(simpComp, simpsmall);
-        }
-        */
+        //     simpsmall = build_simplex_one_level_up(simpComp, simpsmall);
+        // }
+        // 
         //cout << "Printing KSimplex:" << endl;
         //it->print();
     }
 
-    //*
-    cout << "Printing hold colors:" << endl;
-    for(auto &tempHold : hold)
-        for(auto &color : tempHold->colors){
-            cout << (static_cast<UniqueIDColor*> (color)->id) << endl;
-        }
-    cout << "Printing hold colors end." << endl;
+    //
+    // cout << "Printing hold colors:" << endl;
+    // for(auto &tempHold : hold)
+    //    for(auto &color : tempHold->colors){
+    //        cout << (static_cast<UniqueIDColor*> (color)->id) << endl;
+    //    }
+    // cout << "Printing hold colors end." << endl;
+    // 
+    // KSimplex *result = simpComp->create_ksimplex_from_vertices(hold);
     
-    KSimplex *result = simpComp->create_ksimplex_from_vertices(hold);
-    
-cout << endl << "Printing simpComp..." << endl;
-simpComp->print_compact();
-    //*/
+// cout << endl << "Printing simpComp..." << endl;
+// simpComp->print_compact();
+    //
 
 
 cout << endl << "for k == 3, add (1-2-3-4), (2-3-4-5):" << endl;
@@ -216,5 +354,9 @@ simpComp->print_compact();
 
 return result;
 }
+
+
+*/
+
 
 

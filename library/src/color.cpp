@@ -32,9 +32,6 @@ string Color::get_color_value_as_str() const
  * @param color_value Value of the colour to be created.
  */
 
-
-
-
 bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, const string& color_value)
 {
     bool outcome;
@@ -44,6 +41,8 @@ bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, c
     switch(color_type) {
     case TYPE_BOUNDARY:
         return BoundaryColor::colorize_single_simplex(simp);
+    case TYPE_PACHNER:
+        return PachnerColor::colorize_single_simplex(simp);
     case TYPE_UNIQUE_ID:
         return UniqueIDColor::colorize_single_simplex(simp);
     case TYPE_SCREEN_COORDINATE: // Fix this case
@@ -66,9 +65,17 @@ bool Color::is_colorized_with_type(KSimplex* simp, int typecode)
     return false;
 }
 
-bool Color::remove_color_type_from_simplex(KSimplex* simp, int typecode)
+Color* Color::find_pointer_to_color_type(KSimplex* simp, int typecode)
 {
-  bool outcome=true;
+    for(auto &color : simp->colors)
+        if(color->type == typecode)
+            return color;
+    return nullptr;
+}
+
+
+void Color::remove_color_type_from_simplex(KSimplex* simp, int typecode)
+{
   int i;
   int size;
 
@@ -81,14 +88,27 @@ bool Color::remove_color_type_from_simplex(KSimplex* simp, int typecode)
     if(i < size - 1) simp->colors[i] = simp->colors[size-1];
     simp->colors.pop_back();
   }
-  return outcome;
 }
+
+void Color::remove_color_type_from_level(SimpComp* G, int level, int typecode)
+{
+  for (auto simp : G->elements[level]) Color::remove_color_type_from_simplex(simp, typecode);
+}
+
+void Color::remove_color_type_from_complex(SimpComp* G, int typecode)
+{
+  for (int level = 0; level <= G->D; level++) Color::remove_color_type_from_level(G, level, typecode);
+}
+
+
 
 string get_color_name_from_type(int color_type)
 {
 switch(color_type) {
     case TYPE_BOUNDARY:
       return "Boundary";
+    case TYPE_PACHNER:
+      return "Pachner";
     case TYPE_UNIQUE_ID:
       return "UniqueID";
     case TYPE_SCREEN_COORDINATE:
@@ -97,6 +117,9 @@ switch(color_type) {
       return "Unknown color name, type " + to_string(color_type);
     }
 }
+
+
+
 
 BoundaryColor::BoundaryColor(){
     type = TYPE_BOUNDARY;
@@ -128,9 +151,9 @@ bool BoundaryColor::colorize_simplices_at_level(SimpComp* G, int level)
   return outcome;
 }
 
-bool BoundaryColor::remove_color_from_simplex(KSimplex* simp)
+void BoundaryColor::remove_color_from_simplex(KSimplex* simp)
 {
-  return Color::remove_color_type_from_simplex(simp, TYPE_BOUNDARY);
+  Color::remove_color_type_from_simplex(simp, TYPE_BOUNDARY);
 }
 
 
@@ -148,6 +171,97 @@ void BoundaryColor::set_color_value_from_str(const string& source)
 {
   if (source=="true") return; // This is a dummy command, do not remove
 }
+
+
+
+
+
+
+
+
+
+PachnerColor::PachnerColor(){
+    type = TYPE_PACHNER;
+}
+
+PachnerColor::~PachnerColor(){
+}
+
+bool PachnerColor::colorize_single_simplex(KSimplex* simp)
+{
+  bool outcome = true;
+  PachnerColor* color = new(nothrow) PachnerColor();
+  if (color==nullptr) {
+    outcome = false;
+    log_report(LOG_PANIC,"PachnerColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
+  }
+  else simp->colors.push_back(color);
+  return outcome;
+}
+
+bool PachnerColor::colorize_simplices_at_level(SimpComp* G, int level)
+{
+  bool outcome = true;
+  bool temp;
+  for (auto simplex : G->elements[level]) {
+    temp = PachnerColor::colorize_single_simplex(simplex);
+    if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
+bool PachnerColor::colorize_entire_complex(SimpComp* G)
+{
+  bool outcome=true;
+  bool temp;
+  for (int level = 0; level <= G->D; level++) {
+       temp = PachnerColor::colorize_simplices_at_level(G, level);
+       if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
+void PachnerColor::remove_color_from_simplex(KSimplex* simp)
+{
+  Color::remove_color_type_from_simplex(simp, TYPE_PACHNER);
+}
+
+void PachnerColor::remove_color_from_level(SimpComp* G, int level)
+{
+  Color::remove_color_type_from_level(G, level, TYPE_PACHNER);
+}
+
+void PachnerColor::remove_color_from_complex(SimpComp* G)
+{
+  Color::remove_color_type_from_complex(G, TYPE_PACHNER);
+}
+
+bool PachnerColor::is_colorized(KSimplex* simp)
+{
+  return Color::is_colorized_with_type(simp,TYPE_PACHNER);
+}
+
+PachnerColor* PachnerColor::find_pointer_to_color(KSimplex* simp)
+{
+  Color *temp = Color::find_pointer_to_color_type(simp, TYPE_PACHNER);
+  return static_cast<PachnerColor*>(temp);
+}
+
+
+string PachnerColor::get_color_value_as_str() const
+{
+    return "PachnerColor";
+}
+
+void PachnerColor::set_color_value_from_str(const string& source)
+{
+  if (source=="true") return; // This is a dummy command, do not remove
+}
+
+
+
+
+
 
 UniqueIDColor::UniqueIDColor(){
     type = TYPE_UNIQUE_ID;
@@ -268,6 +382,15 @@ string UniqueIDColor::get_color_value_as_str() const
 void UniqueIDColor::set_color_value_from_str(const string& source) {
     id = stoi(source);
 }
+
+
+
+
+
+
+
+
+
 
 ScreenCoordinateColor::ScreenCoordinateColor(){
     type = TYPE_SCREEN_COORDINATE;
