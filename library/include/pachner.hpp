@@ -10,7 +10,7 @@ KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level);
 
 // Verifies if the numbers of neighbors at every level is the same between simp
 // and its matching simplex in the Pachner sphere
-bool simple_check_for_Pachner_compatibility(KSimplex *simp, SimpComp *PachnerSphere);
+bool simple_check_for_Pachner_compatibility(KSimplex *simp);
 
 // A detailed recursive algorithm that establishes 1-to-1 correspondence between
 // the neighborhood of simp and the internal piece of the sphere

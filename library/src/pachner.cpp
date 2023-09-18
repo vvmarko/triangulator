@@ -74,7 +74,7 @@ KSimplex* Pachner_move(KSimplex *simp, SimpComp *simpComp){
   // Simplistic check of the compatibility --- simp must have the same number of
   // neighbors as its matching simplex from the Pachner sphere.
 
-  outcome = simple_check_for_Pachner_compatibility(simp, PachnerSphere);
+  outcome = simple_check_for_Pachner_compatibility(simp);
   if (!outcome) {
     log_report(LOG_WARN,"Pachner move cannot be performed on this simplex, skipping...");
     PachnerColor::remove_color_from_simplex(simp);
@@ -136,9 +136,16 @@ KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level)
   //   subneighbors are called external.
   // A D-simplex is exclusively either internal or external,
   // while some simplices of lower level may be both.
+  //
+  // Note: if simp itself is a simplex of level D, the first
+  // point above will fail, since by convention a simplex is
+  // never a neighbor of itself. So level==D case must be treated
+  // specially: simp and its subneighbors should be labeled as
+  // internal, while all other D-simplices (and their subneighbors)
+  // as external.
   for(auto &it : simpComp->elements[D]){
     pcolor = PachnerColor::find_pointer_to_color(it);
-    if ( (simp->find_neighbor(it)) || (simp==it) ){ // note: simp == it covers the case level==D
+    if ( (simp->find_neighbor(it)) || (simp==it) ){ // Note: simp==it covers the case level==D
       pcolor->internalSimplex = true; // Colorize D-simplex as internal,
       for(k = 0; k <= D-1; k++){      // go through all of its subneighbors,
         for(auto &sub : it->neighbors->elements[k]){
@@ -160,7 +167,7 @@ KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level)
   
   // Determining the sphere antipode simplex:
   //
-  // The sphere antipode siplex is a unique simplex at level
+  // The sphere antipode simplex is a unique simplex at level
   //
   //        antipodeLevel = D - level of simp
   //
@@ -180,8 +187,22 @@ KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level)
   return nullptr;
 }
 
-bool simple_check_for_Pachner_compatibility(KSimplex *simp, SimpComp *PachnerSphere)
+bool simple_check_for_Pachner_compatibility(KSimplex *simp)
 {
+  // Detailed check for compatibility of the neighborhood of simp for a Pachner move
+  // can be implemented more simply if it can assume that both the simp and its match
+  // have identical number of neighbors, at every level. If this is not true, we know
+  // that compatibility fails, and a detailed check is unnecessary. So this test is
+  // very useful because it is simple and effective, and the algorithm for the
+  // detailed check of compatibility can assume that this test has passed.
+
+  int D = simp->D;
+  PachnerColor *pcolor = PachnerColor::find_pointer_to_color(simp);
+  KSimplex *match = pcolor->matchingSimplex;
+
+  for (int i = 0; i <= D; i++){
+    if( ( simp->neighbors->elements[i].size() ) != ( match->neighbors->elements[i].size() ) ) return false;
+  }
   return true;
 }
 
