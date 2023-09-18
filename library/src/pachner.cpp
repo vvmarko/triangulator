@@ -119,8 +119,64 @@ KSimplex* Pachner_move(KSimplex *simp, SimpComp *simpComp){
 
 KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level)
 {
+  int D = simpComp->D;
   KSimplex* simp = simpComp->elements[level][0];
-  int antipodeLevel = simpComp->D - level;
+  int antipodeLevel = D - level;
+  PachnerColor *pcolor;
+  int k;
+  PachnerColor *psubcolor;
+
+  // Factorization of the Pachner sphere:
+  //
+  // Label all simplices as internal or external (or both)
+  // according to their relation to simp:
+  // - if a D-simplex is a neighbor of simp, it and all its
+  //   subneighbors are called internal,
+  // - if a D-simplex is not a neighbor of simp, it and all its
+  //   subneighbors are called external.
+  // A D-simplex is exclusively either internal or external,
+  // while some simplices of lower level may be both.
+  for(auto &it : simpComp->elements[D]){
+    pcolor = PachnerColor::find_pointer_to_color(it);
+    if ( (simp->find_neighbor(it)) || (simp==it) ){ // note: simp == it covers the case level==D
+      pcolor->internalSimplex = true; // Colorize D-simplex as internal,
+      for(k = 0; k <= D-1; k++){      // go through all of its subneighbors,
+        for(auto &sub : it->neighbors->elements[k]){
+          psubcolor = PachnerColor::find_pointer_to_color(sub);
+          psubcolor->internalSimplex = true; // and colorize each as internal.
+        }
+      }
+    }
+    else{
+      pcolor->externalSimplex = true; // Colorize D-simplex as external,
+      for(k = 0; k <= D-1; k++){      // go through all of its subneighbors,
+        for(auto &sub : it->neighbors->elements[k]){
+          psubcolor = PachnerColor::find_pointer_to_color(sub);
+          psubcolor->externalSimplex = true; // and colorize each as external.
+        }
+      }
+    }
+  }
+  
+  // Determining the sphere antipode simplex:
+  //
+  // The sphere antipode siplex is a unique simplex at level
+  //
+  //        antipodeLevel = D - level of simp
+  //
+  // that is a subneighbor of only external D-simplices, or equivalently,
+  // that is labeled as an external but not as an internal simplex.
+  // The algorithm therefore tests for the appropriate coloring to find it.
+  for(auto &it : simpComp->elements[antipodeLevel]){
+    pcolor = PachnerColor::find_pointer_to_color(it);
+    if ( (pcolor->internalSimplex == false) && (pcolor->externalSimplex == true) )
+      return it;
+  }
+  // For every simp, the sphere antipode simplex is guaranteed to exist and be
+  // unique in the Pachner sphere (that is a theorem), so if we have finished the
+  // above for loop without exiting by "return"ing the sphere antipode, something
+  // went very very wrong. The code below should never ever execute:
+  log_report(LOG_ERROR,"The sphere antipode calculation failed when factorizing the Pachner sphere. This should never happen, something is very very wrong!!! Returning nullptr for the sphere antipode.");
   return nullptr;
 }
 

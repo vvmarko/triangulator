@@ -250,7 +250,14 @@ PachnerColor* PachnerColor::find_pointer_to_color(KSimplex* simp)
 
 string PachnerColor::get_color_value_as_str() const
 {
-    return "PachnerColor";
+  string s="internal: ";
+  if (internalSimplex) s = s + "true, external: ";
+  else s = s + "false, external: ";
+  if (externalSimplex) s = s + "true, immutable: ";
+  else s = s + "false, immutable: ";
+  if (immutable) s = s + "true.";
+  else s = s + "false.";
+  return s;
 }
 
 void PachnerColor::set_color_value_from_str(const string& source)
