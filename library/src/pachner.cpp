@@ -12,7 +12,7 @@ KSimplex* Pachner_move(KSimplex *simp, SimpComp *simpComp){
 
   bool outcome;
   
-  // First we do some sanity check, whether simp is an element of simpComp...
+  // First we do some sanity checks, whether simp is an element of simpComp, etc...
 
   if(simpComp==nullptr){
     log_report(LOG_ERROR,"The provided complex is nullptr, it does not exist!!");
@@ -27,6 +27,15 @@ KSimplex* Pachner_move(KSimplex *simp, SimpComp *simpComp){
     return nullptr;
   }
 
+  // Then we test whether simp is part of a boundary. If it is part of the boundary
+  // (i.e. if the test fails), Pachner move is forbidden.
+
+  outcome = not_on_boundary_check_for_Pachner_compatibility( simp );
+  if (!outcome) {
+    log_report(LOG_WARN,"Pachner move cannot be performed on a simplex that belongs to the boundary, skipping...");
+    return nullptr;
+  }
+  
   // Preparatory steps. Initialize the Pachner sphere, colorize simp and the sphere.
 
   int D = simp->D;
@@ -185,6 +194,17 @@ KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level)
   // went very very wrong. The code below should never ever execute:
   log_report(LOG_ERROR,"The sphere antipode calculation failed when factorizing the Pachner sphere. This should never happen, something is very very wrong!!! Returning nullptr for the sphere antipode.");
   return nullptr;
+}
+
+bool not_on_boundary_check_for_Pachner_compatibility(KSimplex *simp)
+{
+  int D = simp->D;  
+  if ( simp->k == D ) return true; // D-simplex is never part of a boundary, by definition.
+  if ( simp->is_a_boundary() ) return false; // simp may itself be a boundary if simp->k == D-1.
+  for (auto &it : simp->neighbors->elements[D-1] ){ // In cases when simp->k < D-1, simp may
+    if (it->is_a_boundary() ) return false;         // be a subneighbor of some boundary (D-1)-simplex.
+  }
+  return true; // If none of the above is the case, simp is not part of any boundary.
 }
 
 bool simple_check_for_Pachner_compatibility(KSimplex *simp)

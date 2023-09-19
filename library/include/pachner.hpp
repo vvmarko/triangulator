@@ -8,6 +8,11 @@ KSimplex* Pachner_move(KSimplex *simp, SimpComp *simpComp);
 // it into internal and external piece, with respect to the given level
 KSimplex* factorize_Pachner_sphere(SimpComp *simpComp, int level);
 
+// Tests if simp is a subneighbor or otherwise part of a boundary.
+// If it is, returns false (test passes if it is not on the boundary since
+// that is a necessary condition for a Pachner move...)
+bool not_on_boundary_check_for_Pachner_compatibility(KSimplex *simp);
+
 // Verifies if the numbers of neighbors at every level is the same between simp
 // and its matching simplex in the Pachner sphere
 bool simple_check_for_Pachner_compatibility(KSimplex *simp);

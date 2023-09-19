@@ -8,6 +8,33 @@ int main(){
     cout         << "#######################################################" << endl << endl;
 
 
+    int D = 2;
+    int level = 2;
+    int n = 0;
+    SimpComp *sfera = seed_sphere(D,"sfera");
+    SimpComp *tet = seed_single_simplex(D,"tet");
+    SimpComp *dvatet = seed_single_simplex(D, "dvatet");
+
+    
+    KSimplex *simpsf = sfera->elements[level][n];
+    KSimplex *simptet = tet->elements[level][n];
+    KSimplex *simpdvatet = dvatet->elements[D-1][n];
+    
+    attach_new_simplex_to_boundary( simpdvatet , dvatet);
+    
+    bool outcomesf = not_on_boundary_check_for_Pachner_compatibility(simpsf);
+    bool outcometet = not_on_boundary_check_for_Pachner_compatibility(simptet);
+    bool outcomedvatet = not_on_boundary_check_for_Pachner_compatibility(simpdvatet);
+    
+    cout << endl;
+    cout << "D = " << D << ", level = " << level << ", n = " << n << endl;
+    cout << endl;
+    cout << "Sphere test, should be true for all level and dimension:      " << outcomesf << endl;
+    cout << "Tet test, should be false for level<D, and true for level==D: " << outcometet << endl;
+    cout << "Dvatet test, should be true despite simpdvatet->k==D-1:       " << outcomedvatet << endl << endl;    
+
+
+    /*
     int D = 5;
     int level = 5;
     int n = 0;
@@ -48,7 +75,10 @@ int main(){
     cout << endl;
     cout << "Sphere test, should be true for all level and dimension:      " << outcomesf << endl;
     cout << "Tet test, should be false for level<D, and true for level==D: " << outcometet << endl << endl;
+    */
 
+
+    
     /*
     int level = 3;
     SimpComp *pahsfera =  seed_sphere(3,"sfera");
