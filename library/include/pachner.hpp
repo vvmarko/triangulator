@@ -21,6 +21,17 @@ bool simple_check_for_Pachner_compatibility(KSimplex *simp);
 // the neighborhood of simp and the internal piece of the sphere
 bool detailed_check_for_Pachner_compatibility(KSimplex *simp, SimpComp *PachnerSphere);
 
+// A recursive algorithm that tries to establish 1-to-1 matching between the simplices
+// in the manifoldlist and the simplices in the spherelist, according to the permutation
+// perm, and then do the same for appropriate lists of simplices one level below
+bool assign_matching_recursively( vector<KSimplex*> manifoldlist , vector<KSimplex*> spherelist, vector<int> perm );
+
+// Tests if an established 1-to-1 matching between neighborhood of simp and
+// the internal part of the PachnerSphere preserves all neighbor relations
+bool test_for_isomorphism( KSimplex *simp , SimpComp *PachnerSphere );
+
+
+
 // Once everything has been verified, this function actually deletes the old
 // neighborgood of simp and constructs a copy of the external piece of the
 // Pachner sphere in its place, thereby performing the Pachner move

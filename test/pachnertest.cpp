@@ -7,7 +7,27 @@ int main(){
     cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
     cout         << "#######################################################" << endl << endl;
 
+    int D = 2;
 
+    SimpComp *dvatet = seed_single_simplex(D, "dvatet");
+    
+    KSimplex *simpdvatet = dvatet->elements[D-1][0];
+    
+    attach_new_simplex_to_boundary( simpdvatet , dvatet );
+
+    //    UniqueIDColor::colorize_entire_complex(dvatet);
+    //    dvatet->print_detailed();
+    
+    cout << endl << "Prvi:" << endl;
+    Pachner_move(dvatet->elements[0][2], dvatet);
+    cout << endl << "Drugi:" << endl;
+    Pachner_move(dvatet->elements[1][1], dvatet);
+    cout << endl << "Treci:" << endl;
+    Pachner_move(dvatet->elements[2][0], dvatet);
+    cout << endl << "Cetvrti:" << endl;    
+    Pachner_move(simpdvatet, dvatet);
+
+    /*
     int D = 2;
     int level = 2;
     int n = 0;
@@ -31,7 +51,8 @@ int main(){
     cout << endl;
     cout << "Sphere test, should be true for all level and dimension:      " << outcomesf << endl;
     cout << "Tet test, should be false for level<D, and true for level==D: " << outcometet << endl;
-    cout << "Dvatet test, should be true despite simpdvatet->k==D-1:       " << outcomedvatet << endl << endl;    
+    cout << "Dvatet test, should be true despite simpdvatet->k==D-1:       " << outcomedvatet << endl << endl;
+    */
 
 
     /*

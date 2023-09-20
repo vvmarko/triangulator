@@ -228,11 +228,183 @@ bool simple_check_for_Pachner_compatibility(KSimplex *simp)
 
 bool detailed_check_for_Pachner_compatibility(KSimplex *simp, SimpComp *PachnerSphere)
 {
+  // Detailed check for compatibility is performed by constructing a 1-to-1 isomorphism
+  // between the internal part of the Pachner sphere and the corresponding wide
+  // neighborhood of simp, simplex for simplex. This is done in three main steps:
+  //
+  // (1) Construct a candidate 1-to-1 matching, compatible with the immutable flags.
+  // (2) Verify if this candidate matching is indeed an isomorphism, i.e. if all neighbors
+  //     match for each matching pair of simplices.
+  // (3) If step (2) is true we are done. If (2) is false we go back to (1) for another
+  //     candidate matching, until we exhaust all possible permutations.
+  //
+  // Note that this is in essence a backtracking algorithm. We traverse the space of all
+  // possible permutations of matching simplices, until we find one that is an isomorphism.
+  // Two outcomes are possible. Either an isomorphism exists, and we find one matching that
+  // establishes it (there may be many, we are happy with a first one found), or an isomorphism
+  // does not exist, and we traverse through the full permutation space and eventually fail.
+  //
+  // Immutable flags somewhat reduce the space of permutations, since any permutation that
+  // is not compatible with the preset match for simp must fail.
+  //
+  // Backtracking is slow and bulky, but it is the only algorithm (that I know of) which is
+  // certain to find an isomorphism if it exists, and works for simplicial complexes of
+  // arbitrary dimension.
+
+  bool outcome;
+  vector<KSimplex*> manifoldlist;
+  vector<KSimplex*> spherelist;
+  vector<int> perm;
+  
+  int D = simp->D;
+  int n = simp->neighbors->elements[D].size();
+  PachnerColor *pcolor = PachnerColor::find_pointer_to_color(simp);
+  KSimplex *simpmatch = pcolor->matchingSimplex;
+
+  // Initialize manifoldlist and spherelist with appropriate D-simplices, for the beginning
+  // of the recursive matching. Also initialize perm as a unit permutation to try first.
+
+  if(simp->k == D){ // Case when simp is itself a D-simplex
+    manifoldlist.push_back(simp);
+    spherelist.push_back(simpmatch);
+    perm.push_back(0);
+  } else { // Case when simp has D-simplices as neighbors
+    for (int i = 0; i < n; i++){
+      manifoldlist.push_back(simp->neighbors->elements[D][i]);
+      spherelist.push_back(simpmatch->neighbors->elements[D][i]);
+      perm.push_back(i);
+    }
+  }
+
+  // Perform steps (1)-(3) from above: construct recursively a candidate 1-to-1
+  // matching, test if it is an isomorphism, and if not try the next permutation
+  // of perm.
+
+  do{
+    outcome = assign_matching_recursively( manifoldlist , spherelist , perm );
+    if (outcome) outcome = test_for_isomorphism(simp,PachnerSphere);
+  } while ( ( !outcome ) && ( next_permutation(perm.begin(),perm.end()) ) );
+
+  if (outcome) return true; // We have either found an isomorphism,
+  else return false;        // or we have exhausted all permutations without
+                            // finding an isomorphism, so it does not exist.
+}
+
+bool assign_matching_recursively( vector<KSimplex*> manifoldlist , vector<KSimplex*> spherelist, vector<int> perm )
+{
+  // Two things are done. First, we establish the matching between simplices in manifoldlist
+  // and simplices in spherelist, 1-to-1, ordering them according to perm. This takes into
+  // account the possible immutable flags that may be set. If there is a clash with the immmutable
+  // flags, we fail to establish matching, otherwise we succeed.
+  //
+  // Second, if we are higher than level=0, we set up a newmanifoldlist and newspherelist, with
+  // accompanying newperm, and call ourself recursively for level-1.
+  //
+  // If all lower levels succeeded in matching, we are successful. If any of the lower levels
+  // fails in matching, we first try a next newperm, and after exhausting all permutations, we fail.
+
+  int level = manifoldlist[0]->k;
+  int n = perm.size();
+  PachnerColor *manifcolor;
+  PachnerColor *sphcolor;
+  int i;
+  bool outcome;
+
+  // Try to establish matching between i-th simplex in manifoldlist and perm[i]-th simplex
+  // in spherelist, while watching out for immutable flags.
+
+  for(i=0; i<n; i++){
+    manifcolor = PachnerColor::find_pointer_to_color(manifoldlist[i]);
+    if (manifcolor == nullptr){ // Maybe this simplex has not been colorized yet with PachnerColor
+      outcome = PachnerColor::colorize_single_simplex(manifoldlist[i]); // If so, colorize it.
+      if (!outcome){
+        log_report(LOG_ERROR,"Unable to colorize the simplex, something is very wrong, assign_matching_recursively() is failing, the Pachner move will probably fail!!");
+	return false;
+      } else {
+        manifcolor = PachnerColor::find_pointer_to_color(manifoldlist[i]);
+      }
+    }
+
+    // Simplices from the Pachner sphere have all already been colorized with PachnerColor,
+    // so there is no need to check and colorize as was done for manifold simplices above.
+    sphcolor = PachnerColor::find_pointer_to_color(spherelist[perm[i]]);
+    
+    // If either simplex is immutable and the other is not, matching is impossible and perm fails.
+    if( (manifcolor->immutable == true) && (sphcolor->immutable == false) ) return false;
+    if( (manifcolor->immutable == false) && (sphcolor->immutable == true) ) return false;
+    // If neither simplex is immutable, we match them to each other.
+    if( (manifcolor->immutable == false) && (sphcolor->immutable == false) ){
+      manifcolor->matchingSimplex = spherelist[perm[i]];
+      sphcolor->matchingSimplex = manifoldlist[i];
+    }
+    // If both simplices are immutable, matching has already been set, so we do nothing.
+  }
+
+  // At this point matching has been successfully performed. If we are at level==0,
+  // there is nothing more to do, recursion ends successfully.
+  if(level==0) return true;
+
+  // Otherwise, we set up for recursion to level-1.
+
+  vector<KSimplex*> newmanifoldlist;
+  vector<KSimplex*> newspherelist;
+  vector<int> newperm;
+  KSimplex *current;
+
+  // Build a newmanifoldlist from level-1 neighbors of all simplices in manifoldlist,
+  // skipping any duplicates.
+
+  for(auto &it : manifoldlist){
+    n = it->neighbors->elements[level-1].size();
+    for(i=0; i<n; i++){
+      current = it->neighbors->elements[level-1][i];
+      // If the current simplex is not already present in newmanifoldlist, add it in.
+      if( std::find(newmanifoldlist.begin(), newmanifoldlist.end(), current) == newmanifoldlist.end() ){
+        newmanifoldlist.push_back(current);
+      }
+    }
+  }
+
+  // Build a newspherelist from level-1 neighbors of all simplices in spherelist,
+  // skipping any duplicates.
+
+  for(auto &it : spherelist){
+    n = it->neighbors->elements[level-1].size();
+    for(i=0; i<n; i++){
+      current = it->neighbors->elements[level-1][i];
+      // If the current simplex is not already present in newspherelist, add it in.
+      if( std::find(newspherelist.begin(), newspherelist.end(), current) == newspherelist.end() ){
+        newspherelist.push_back(current);
+      }
+    }
+  }
+
+  // If the two lists have different number of elements, matching must fail
+  if( newmanifoldlist.size() != newspherelist.size() ) return false;
+
+  // And if they have the same number of elements, setup the initial newperm
+
+  n = newmanifoldlist.size();
+  for(i=0; i<n; i++) newperm.push_back(i);
+
+  // Finally, recurse one level below...
+
+  do{
+    outcome = assign_matching_recursively( newmanifoldlist , newspherelist , newperm );
+  } while ( ( !outcome ) && ( next_permutation(newperm.begin(),newperm.end()) ) );
+
+  if (outcome) return true; // We have either established a matching for all levels below,
+  else return false;        // or we have exhausted all permutations without managing to match.
+}
+
+bool test_for_isomorphism( KSimplex *simp , SimpComp *PachnerSphere )
+{
   return true;
 }
 
 bool perform_the_Pachner_move(SimpComp *simpComp, KSimplex *simp, SimpComp *PachnerSphere)
 {
+  cout << endl << "Performing the Pachner move..." << endl << endl;
   return true;
 }
 
