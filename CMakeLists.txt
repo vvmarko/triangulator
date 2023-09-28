@@ -1,3 +1,15 @@
+# - Enforce an out-of-source builds before anything else
+if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+  # The odd formatting of the string is needed to comply with CMake's display rules!
+  message(FATAL_ERROR
+"Triangulator in-source build detected.
+ Please remove these files from ${CMAKE_CURRENT_BINARY_DIR}:
+  \n  CMakeCache.txt
+  CMakeFiles
+ \n Once these files are removed, create a separate directory and run CMake from there")
+endif()
+
+
 # Setting minimum required version for CMake.
 cmake_minimum_required(VERSION 3.15)
 
@@ -6,12 +18,12 @@ project(TriangulatorProj VERSION 0.5)
 
 # Some options for build system generation.
 option(DEBUGGING "Toggle debugging mode for symbol generation etc."
-       ON)
+	   OFF)
 option(COMPILE_LIBRARY "Compile triangulator core library. If turned off, it is expected to put precompiled triangulator.<ext> library,
                         its headers and dependencies in precompiled/ folder in the uppermost source directory."
-       ON)
+	   ON)
 option(ENABLE_TESTING "Choose whether to compile test files."
-       ON)
+	   ON)
 option(COMPILE_GUI "Compile and use Qt GUI for triangulator."
        OFF)
 
@@ -52,15 +64,15 @@ if(COMPILE_LIBRARY)
   
   # Set up project-level installer.
   # For triangulator library:
-  install(TARGETS Triangulator
-          ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/precompiled/triangulator
-          )
-  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/library/include
-          DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/precompiled/triangulator)
+  #install(TARGETS Triangulator
+  #        ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/precompiled/triangulator
+  #        )
+  #install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/library/include
+  #        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/precompiled/triangulator)
   # For rapidxml:
-  install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/third_party_software
-          DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/precompiled
-          REGEX "CMakeLists" EXCLUDE)
+  #install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/third_party_software
+  #        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/precompiled
+  #        REGEX "CMakeLists" EXCLUDE)
 
 else()
 
@@ -79,5 +91,6 @@ if(COMPILE_GUI)
 endif()
 
 if(ENABLE_TESTING)
+  include(CTest)
   add_subdirectory(test)
 endif()
