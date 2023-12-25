@@ -176,12 +176,142 @@ Simplices at level k = 1:
 }
 
 
+
+
+
+
+
+
+
+
+void test_build_simplex_one_level_up(){
+    string name = "test";
+    int D = 1;
+    
+    // Initilize simplicial complex of dimension D, and an empty k-simplex:
+    SimpComp *simpComp = new(nothrow) SimpComp(name,D);
+
+    KSimplex *simpsmall = simpComp->create_ksimplex(0);
+    
+    KSimplex *newKSimplex = build_simplex_one_level_up(simpComp, simpsmall);    
+    
+    
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+    
+    
+}
+
+void test_attach_new_simplex_to_boundary(){
+
+    int D = 2;
+
+    SimpComp *dvatet = seed_single_simplex(D, "dvatet");
+    
+    KSimplex *simpdvatet = dvatet->elements[D-1][0];
+    
+    attach_new_simplex_to_boundary( simpdvatet , dvatet );
+
+    //    UniqueIDColor::colorize_entire_complex(dvatet);
+    //    dvatet->print_detailed();
+    
+    cout << endl << "Prvi:" << endl;
+    Pachner_move(dvatet->elements[0][2], dvatet);
+    cout << endl << "Drugi:" << endl;
+    Pachner_move(dvatet->elements[1][1], dvatet);
+    cout << endl << "Treci:" << endl;
+    Pachner_move(dvatet->elements[2][0], dvatet);
+    cout << endl << "Cetvrti:" << endl;    
+
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
+
+}
+
+void test_seed_single_simplex(){
+
+    int D = 1;
+    string name = "Test";
+    
+    // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
+    SimpComp *simpComp = seed_single_simplex(D+1, name);
+
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
+
+}
+
+
+
+void test_seed_sphere(){
+
+    int D = 2;
+
+    SimpComp *sphere = seed_sphere(D, "Test sphere");
+    if(sphere==nullptr){
+        log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
+    }
+
+
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
+
+}
+
+void test_seed_sphere_intuitively(){
+
+    int D = 2;
+
+    SimpComp *sphere = seed_sphere_intuitively(D, "Test sphere");
+    if(sphere==nullptr){
+        log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
+    }
+
+
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
+
+}
+
+
+void test_unseed_complex(){
+    string name = "test";
+    int D = 2;
+
+    // Initilize simplicial complex of dimension D, and an empty k-simplex:
+    SimpComp *simpComp = new(nothrow) SimpComp(name,D);
+
+    KSimplex *simpsmall = simpComp->create_ksimplex(0);
+    
+    KSimplex *newKSimplex = build_simplex_one_level_up(simpComp, simpsmall);    
+
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
+}
+
+
+void test_unseed_everything(){
+
+
+
+//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
+}
+
+
 void run_tests(){
     test_kSimplex_default_constructor();
     test_kSimplex_default_destructor();
     test_kSimplex_collect_vertices();
     test_kSimplex_find_neighbor();
     test_kSimplex_get_uniqueID();
+
+test_build_simplex_one_level_up();
+test_attach_new_simplex_to_boundary();
+test_seed_single_simplex();
+test_seed_sphere();
+test_seed_sphere_intuitively();
+test_unseed_complex();
+test_unseed_everything();
 
     test_printing();
 }
