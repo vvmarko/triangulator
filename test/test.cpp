@@ -129,39 +129,80 @@ void test_printing(){
     // Restoring original cout:
     cout.rdbuf( oldCoutStreamBuf );
 
-    string expectedStr = R""""(Printing SimpComp 1-sfera, topology = sphere, D = 1
-  Printing SimpComp 1-sfera elements, level = 0:
-    Printing KSimplex:  k = 0, D = 1
+    string expectedStr = R""""(Printing SimpComp dvatet, topology = linear, D = 2
+  Printing SimpComp dvatet elements, level = 0:
+    Printing KSimplex:  k = 0, D = 2
     Printing colors:
       Printing neighbors:
 Simplices at level k = 0:   
-Simplices at level k = 1:   4(1-2), 5(1-3)
-    Printing KSimplex:  k = 0, D = 1
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , 
+    Printing KSimplex:  k = 0, D = 2
     Printing colors:
       Printing neighbors:
 Simplices at level k = 0:   
-Simplices at level k = 1:   4(1-2), 6(2-3)
-    Printing KSimplex:  k = 0, D = 1
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , 
+    Printing KSimplex:  k = 0, D = 2
     Printing colors:
       Printing neighbors:
 Simplices at level k = 0:   
-Simplices at level k = 1:   5(1-3), 6(2-3)
-  Printing SimpComp 1-sfera elements, level = 1:
-    Printing KSimplex:  k = 1, D = 1
+Simplices at level k = 1:   , 
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 0, D = 2
     Printing colors:
       Printing neighbors:
-Simplices at level k = 0:   1, 2
-Simplices at level k = 1:   
-    Printing KSimplex:  k = 1, D = 1
+Simplices at level k = 0:   
+Simplices at level k = 1:   , 
+Simplices at level k = 2:   
+  Printing SimpComp dvatet elements, level = 1:
+    Printing KSimplex:  k = 1, D = 2
     Printing colors:
       Printing neighbors:
-Simplices at level k = 0:   1, 3
+Simplices at level k = 0:   Simplex, Simplex
 Simplices at level k = 1:   
-    Printing KSimplex:  k = 1, D = 1
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+  Printing SimpComp dvatet elements, level = 2:
+    Printing KSimplex:  k = 2, D = 2
     Printing colors:
       Printing neighbors:
-Simplices at level k = 0:   2, 3
-Simplices at level k = 1:   
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
 )"""";
 
     // Printing all redirected cout output:
@@ -186,19 +227,41 @@ Simplices at level k = 1:
 
 void test_build_simplex_one_level_up(){
     string name = "test";
-    int D = 1;
+    int D = 2;
     
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
-    SimpComp *simpComp = new(nothrow) SimpComp(name,D);
+    SimpComp *simpComp = new(nothrow) SimpComp(name, D);
 
     KSimplex *simpsmall = simpComp->create_ksimplex(0);
     
     KSimplex *newKSimplex = build_simplex_one_level_up(simpComp, simpsmall);    
     
-    
-//    TEST_FAILED_IF(!k, "KSimplex not constructed");
-    
-    
+    string expectedStr = R""""(Printing KSimplex:  k = 1, D = 2
+Printing colors:
+  Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   
+)"""";
+
+    // Redirect cout:
+    streambuf* oldCoutStreamBuf = cout.rdbuf();
+    std::ostringstream testStr;
+    cout.rdbuf( testStr.rdbuf() );
+
+    // All cout output is redirected to testStr:
+    newKSimplex->print();
+
+    // Restoring original cout:
+    cout.rdbuf( oldCoutStreamBuf );
+ 
+    // Printing all redirected cout output:
+    //cout << testStr.str();
+    //cout << expectedStr;
+
+    TEST_FAILED_IF(expectedStr != testStr.str(), "test_build_simplex_one_level_up");
+
+    test_ok("test_build_simplex_one_level_up");
 }
 
 void test_attach_new_simplex_to_boundary(){
@@ -209,22 +272,45 @@ void test_attach_new_simplex_to_boundary(){
     
     KSimplex *simpdvatet = dvatet->elements[D-1][0];
     
-    attach_new_simplex_to_boundary( simpdvatet , dvatet );
+    attach_new_simplex_to_boundary(simpdvatet, dvatet);
 
     //    UniqueIDColor::colorize_entire_complex(dvatet);
     //    dvatet->print_detailed();
     
-    cout << endl << "Prvi:" << endl;
+    //cout << endl << "Prvi:" << endl;
     Pachner_move(dvatet->elements[0][2], dvatet);
-    cout << endl << "Drugi:" << endl;
+    //cout << endl << "Drugi:" << endl;
     Pachner_move(dvatet->elements[1][1], dvatet);
-    cout << endl << "Treci:" << endl;
+    //cout << endl << "Treci:" << endl;
     Pachner_move(dvatet->elements[2][0], dvatet);
-    cout << endl << "Cetvrti:" << endl;    
+    //cout << endl << "Cetvrti:" << endl;    
 
-//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+    string expectedStr = R""""(Printing KSimplex:  k = 1, D = 2
+Printing colors:
+  Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+)"""";
 
+    // Redirect cout:
+    streambuf* oldCoutStreamBuf = cout.rdbuf();
+    std::ostringstream testStr;
+    cout.rdbuf( testStr.rdbuf() );
 
+    // All cout output is redirected to testStr:
+    simpdvatet->print();
+
+    // Restoring original cout:
+    cout.rdbuf( oldCoutStreamBuf );
+ 
+    // Printing all redirected cout output:
+    //cout << testStr.str();
+    //cout << expectedStr;
+
+    TEST_FAILED_IF(expectedStr != testStr.str(), "test_attach_new_simplex_to_boundary");
+
+    test_ok("test_attach_new_simplex_to_boundary");
 }
 
 void test_seed_single_simplex(){
@@ -235,9 +321,75 @@ void test_seed_single_simplex(){
     // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
     SimpComp *simpComp = seed_single_simplex(D+1, name);
 
-//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+    string expectedStr = R""""(Printing SimpComp Test, topology = linear, D = 2
+  Printing SimpComp Test elements, level = 0:
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , 
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , 
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , 
+Simplices at level k = 2:   
+  Printing SimpComp Test elements, level = 1:
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+Boundary = true
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex
+  Printing SimpComp Test elements, level = 2:
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+)"""";
 
+    // Redirect cout:
+    streambuf* oldCoutStreamBuf = cout.rdbuf();
+    std::ostringstream testStr;
+    cout.rdbuf( testStr.rdbuf() );
 
+    // All cout output is redirected to testStr:
+    simpComp->print();
+
+    // Restoring original cout:
+    cout.rdbuf( oldCoutStreamBuf );
+ 
+    // Printing all redirected cout output:
+    //cout << testStr.str();
+    //cout << expectedStr;
+
+    TEST_FAILED_IF(expectedStr != testStr.str(), "test_seed_single_simplex");
+
+    test_ok("test_seed_single_simplex");
 }
 
 
@@ -251,9 +403,114 @@ void test_seed_sphere(){
         log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
     }
 
+    string expectedStr = R""""(Printing SimpComp Test sphere, topology = sphere, D = 2
+  Printing SimpComp Test sphere elements, level = 0:
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+  Printing SimpComp Test sphere elements, level = 1:
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+  Printing SimpComp Test sphere elements, level = 2:
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+)"""";
 
-//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+    // Redirect cout:
+    streambuf* oldCoutStreamBuf = cout.rdbuf();
+    std::ostringstream testStr;
+    cout.rdbuf( testStr.rdbuf() );
 
+    // All cout output is redirected to testStr:
+    sphere->print();
+
+    // Restoring original cout:
+    cout.rdbuf( oldCoutStreamBuf );
+ 
+    // Printing all redirected cout output:
+    //cout << testStr.str();
+    //cout << expectedStr;
+
+    TEST_FAILED_IF(expectedStr != testStr.str(), "test_seed_sphere");
+
+    test_ok("test_seed_sphere");
 
 }
 
@@ -266,10 +523,114 @@ void test_seed_sphere_intuitively(){
         log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
     }
 
+    string expectedStr = R""""(Printing SimpComp Test sphere, topology = sphere, D = 2
+  Printing SimpComp Test sphere elements, level = 0:
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+    Printing KSimplex:  k = 0, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   
+Simplices at level k = 1:   , , 
+Simplices at level k = 2:   , , 
+  Printing SimpComp Test sphere elements, level = 1:
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+    Printing KSimplex:  k = 1, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex
+Simplices at level k = 1:   
+Simplices at level k = 2:   Simplex, Simplex
+  Printing SimpComp Test sphere elements, level = 2:
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+    Printing KSimplex:  k = 2, D = 2
+    Printing colors:
+      Printing neighbors:
+Simplices at level k = 0:   Simplex, Simplex, Simplex
+Simplices at level k = 1:   Simplex, Simplex, Simplex
+Simplices at level k = 2:   
+)"""";
 
-//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+    // Redirect cout:
+    streambuf* oldCoutStreamBuf = cout.rdbuf();
+    std::ostringstream testStr;
+    cout.rdbuf( testStr.rdbuf() );
 
+    // All cout output is redirected to testStr:
+    sphere->print();
 
+    // Restoring original cout:
+    cout.rdbuf( oldCoutStreamBuf );
+ 
+    // Printing all redirected cout output:
+    //cout << testStr.str();
+    //cout << expectedStr;
+
+    TEST_FAILED_IF(expectedStr != testStr.str(), "test_seed_sphere_intuitively");
+
+    test_ok("test_seed_sphere_intuitively");
 }
 
 
@@ -284,7 +645,10 @@ void test_unseed_complex(){
     
     KSimplex *newKSimplex = build_simplex_one_level_up(simpComp, simpsmall);    
 
-//    TEST_FAILED_IF(!k, "KSimplex not constructed");
+    //newKSimplex->print();
+
+
+
 
 }
 
@@ -292,8 +656,8 @@ void test_unseed_complex(){
 void test_unseed_everything(){
 
 
-
 //    TEST_FAILED_IF(!k, "KSimplex not constructed");
+
 
 }
 
