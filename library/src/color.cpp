@@ -2,6 +2,8 @@
 #include "triangulator.hpp"
 
 unsigned long UniqueIDColor::next_free_uid_number = 1;
+vector<double> TopologicalCoordinateColor::qMin;
+vector<double> TopologicalCoordinateColor::qMax;
 
 Color::~Color()
 {
@@ -427,5 +429,66 @@ void ScreenCoordinateColor::set_color_value_from_str(const string& source)
     int divider = source.find(",");
     this->x = stoi(source.substr(1, divider));
     this->y = stoi(source.substr(divider + sizeof(","), source.length() - sizeof(")")));
+}
+
+
+
+
+TopologicalCoordinateColor::TopologicalCoordinateColor(){
+    type = TYPE_TOPOLOGICAL_COORDINATE;
+}
+
+TopologicalCoordinateColor::~TopologicalCoordinateColor(){
+}
+
+void TopologicalCoordinateColor::initQMinQMax(int D){
+    if(qMin.size()==0){
+        for(int i = 0; i < D; i++){
+            qMin.push_back(5); // TODO
+            qMax.push_back(15);
+        }
+    }
+}
+
+bool TopologicalCoordinateColor::colorize_simplex(SimpComp* simp){
+    TopologicalCoordinateColor::initQMinQMax(simp->D);
+    srand((unsigned int)time(NULL));
+    // For all vertices:
+    for(auto &kSimplex : simp->elements[0]){
+        TopologicalCoordinateColor *c = new TopologicalCoordinateColor();
+        c->colorize_vertex();
+        c->print();
+        kSimplex->colors.push_back(c);
+    }
+    return true;
+}
+
+bool TopologicalCoordinateColor::colorize_vertex(){
+    for(int i = 0; i < qMin.size(); i++){
+        q.push_back(qMin[i] + (qMax[i]-qMin[i])*rand()/RAND_MAX); // TODO
+    }
+    return true;
+}
+
+void TopologicalCoordinateColor::remove_color_from_simplex(KSimplex* simp){
+    // TODO
+}
+
+void TopologicalCoordinateColor::print(){
+    //Color::print();
+    cout << "TopologicalCoordinateColor:" << endl;
+    for(int i = 0; i < q.size(); i++){
+        cout << q[i] << "  ";
+    }
+    cout << endl;
+}
+
+string TopologicalCoordinateColor::get_color_value_as_str() const
+{
+    return "(TopologicalCoordinateColor)"; // TODO
+}
+
+void TopologicalCoordinateColor::set_color_value_from_str(const string& source) // TODO
+{
 }
 

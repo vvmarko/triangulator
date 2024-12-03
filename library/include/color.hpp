@@ -20,8 +20,11 @@
 #define TYPE_PACHNER 1
 #define TYPE_SCREEN_COORDINATE 128
 #define TYPE_UNIQUE_ID 129
+#define TYPE_TOPOLOGICAL_COORDINATE 130
 
 #endif
+
+#include <memory>
 
 // ######################
 // Forward declarations of neccesary classes
@@ -132,5 +135,23 @@ public:
     void set_color_value_from_str(const string& source);
 
     int x, y; // screen coordinates
+};
+
+// Whether the KSimplex of this color represents a boundary:
+class TopologicalCoordinateColor : public Color{
+public:
+    TopologicalCoordinateColor();
+    ~TopologicalCoordinateColor();
+    static void initQMinQMax(int D);
+    static bool colorize_simplex(SimpComp* simp);
+    bool colorize_vertex();
+    static void remove_color_from_simplex(KSimplex* simp);
+    void print();
+    string get_color_value_as_str() const;
+    void set_color_value_from_str(const string& source) override;
+    
+    static vector<double> qMin;
+    static vector<double> qMax;
+    vector<double> q;
 };
 
