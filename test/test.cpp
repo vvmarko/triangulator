@@ -1037,6 +1037,8 @@ void test_TopologicalCoordinateColor(){
 
     TopologicalCoordinateColor::initQMinQMax(simpComp->D);
     TopologicalCoordinateColor::colorize_simplex(simpComp);
+    
+    TopologicalCoordinateColor::evaluate_spring_potential(simpComp);
 }
 
 

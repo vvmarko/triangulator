@@ -25,6 +25,7 @@
 #endif
 
 #include <memory>
+#include <math.h>
 
 // ######################
 // Forward declarations of neccesary classes
@@ -146,10 +147,14 @@ public:
     static bool colorize_simplex(SimpComp* simp);
     bool colorize_vertex();
     static void remove_color_from_simplex(KSimplex* simp);
+    
+    static double evaluate_spring_potential(SimpComp *simp);
+    static double evaluate_edge_length(KSimplex *edge, SimpComp *simp);
+    
     void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
-    
+        
     static vector<double> qMin;
     static vector<double> qMax;
     vector<double> q;

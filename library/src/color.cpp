@@ -469,13 +469,57 @@ bool TopologicalCoordinateColor::colorize_vertex(){
     }
     return true;
 }
-
+    
 void TopologicalCoordinateColor::remove_color_from_simplex(KSimplex* simp){
     // TODO
 }
 
+double TopologicalCoordinateColor::evaluate_edge_length(KSimplex *edge, SimpComp *simp){
+//aaaaaaaaaaaaaaaaaaaa
+cout << "Edge: " << endl;
+    KSimplex *v1 = edge->neighbors->elements[0][0];
+    KSimplex *v2 = edge->neighbors->elements[0][1];
+
+cout << "  v1: " << endl;
+    TopologicalCoordinateColor *c1 = (TopologicalCoordinateColor*) v1->colors[0];
+    c1->print();
+cout << "  v2: " << endl;
+    TopologicalCoordinateColor *c2 = (TopologicalCoordinateColor*) v2->colors[0];
+    c2->print();
+
+    double sum = 0;
+    for(int i = 0; i < simp->D; i++){
+        sum += pow((c1->q[i] - c2->q[i]), 2);
+    }
+    sum = sqrt(sum);
+    
+    return sum;
+}
+
+double TopologicalCoordinateColor::evaluate_spring_potential(SimpComp *simp){
+    double const1 = 0.1;
+    double const2 = 10;
+
+    // For all edges:
+    for(auto &kSimplex : simp->elements[1]){
+        double Le = TopologicalCoordinateColor::evaluate_edge_length(kSimplex, simp);
+        cout << "Le = " << Le << endl;
+//TODO:
+        double sum = 0;
+        for(int i = 0; i < simp->D; i++){
+        }
+        cout << "V = " << sum << endl;
+
+        sum = 0;
+        
+    }
+
+
+    return 0;
+}
+
 void TopologicalCoordinateColor::print(){
-    //Color::print();
+    Color::print();
     cout << "TopologicalCoordinateColor:" << endl;
     for(int i = 0; i < q.size(); i++){
         cout << q[i] << "  ";
