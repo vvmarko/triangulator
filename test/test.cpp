@@ -803,15 +803,11 @@ void test_KSimplex_reconstruct_neighbors_from_vertices(){
 
     UniqueIDColor::colorize_simplices_at_level(sphere, 0);
 
-    //cout << "aaaaaaaaaaaaaaa" << endl;
     //sphere->print();
-    //cout << "bbbbbbbbbbbbbbb" << endl;
      
     sphere->elements[0][0]->delete_all_neighbors();
 
-    //cout << "aaaaaaaaaaaaaaa" << endl;
     //sphere->print();
-    //cout << "bbbbbbbbbbbbbbb" << endl;
      
     //reconstruct_neighbors_from_vertices();
     
