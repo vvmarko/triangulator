@@ -24,9 +24,6 @@
 
 #endif
 
-#include <memory>
-#include <math.h>
-
 // ######################
 // Forward declarations of neccesary classes
 // ######################
@@ -147,7 +144,7 @@ public:
     static bool colorize_simplex(SimpComp* simp);
     bool colorize_vertex();
     
-    static double evaluate_edge_length(KSimplex *edge, SimpComp *simp);
+    static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
     static double evaluate_spring_potential(SimpComp *simp);
     
     void print();
