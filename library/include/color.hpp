@@ -18,9 +18,9 @@
 
 #define TYPE_BOUNDARY 0
 #define TYPE_PACHNER 1
-#define TYPE_SCREEN_COORDINATE 128
+#define TYPE_SCREEN_COORDINATES 128
 #define TYPE_UNIQUE_ID 129
-#define TYPE_TOPOLOGICAL_COORDINATE 130
+#define TYPE_TOPOLOGICAL_COORDINATES 130
 
 #endif
 
@@ -126,11 +126,11 @@ public:
 };
 
 // Drawing coordinates:
-class ScreenCoordinateColor : public Color{
+class ScreenCoordinatesColor : public Color{
 public:
-    ScreenCoordinateColor();
-    ~ScreenCoordinateColor();
-    ScreenCoordinateColor(int x, int y);
+    ScreenCoordinatesColor();
+    ~ScreenCoordinatesColor();
+    ScreenCoordinatesColor(int x, int y);
     void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source);
@@ -139,10 +139,10 @@ public:
 };
 
 // Whether the KSimplex of this color represents a boundary:
-class TopologicalCoordinateColor : public Color{
+class TopologicalCoordinatesColor : public Color{
 public:
-    TopologicalCoordinateColor();
-    ~TopologicalCoordinateColor();
+    TopologicalCoordinatesColor();
+    ~TopologicalCoordinatesColor();
     static void initQMinQMax(int D);
     static bool colorize_simplex(SimpComp* simp);
     bool colorize_vertex();

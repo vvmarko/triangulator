@@ -2,8 +2,8 @@
 #include "triangulator.hpp"
 
 unsigned long UniqueIDColor::next_free_uid_number = 1;
-vector<double> TopologicalCoordinateColor::qMin;
-vector<double> TopologicalCoordinateColor::qMax;
+vector<double> TopologicalCoordinatesColor::qMin;
+vector<double> TopologicalCoordinatesColor::qMax;
 
 Color::~Color()
 {
@@ -47,10 +47,10 @@ bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, c
         return PachnerColor::colorize_single_simplex(simp);
     case TYPE_UNIQUE_ID:
         return UniqueIDColor::colorize_single_simplex(simp);
-    case TYPE_SCREEN_COORDINATE: // Fix this case
-        color = new(nothrow) ScreenCoordinateColor();
+    case TYPE_SCREEN_COORDINATES: // Fix this case
+        color = new(nothrow) ScreenCoordinatesColor();
         if (color == nullptr) outcome = false;
-        static_cast<ScreenCoordinateColor *>(color) -> set_color_value_from_str(color_value);
+        static_cast<ScreenCoordinatesColor *>(color) -> set_color_value_from_str(color_value);
         simp->colors.push_back(color);
         return outcome;
     default:
@@ -107,8 +107,8 @@ string get_color_name_from_type(int color_type){
             return "Pachner";
         case TYPE_UNIQUE_ID:
             return "UniqueID";
-        case TYPE_SCREEN_COORDINATE:
-            return "ScreenCoordinate";
+        case TYPE_SCREEN_COORDINATES:
+            return "ScreenCoordinates";
         default:
             return "Unknown color name, type " + to_string(color_type);
     }
@@ -394,30 +394,30 @@ void UniqueIDColor::set_color_value_from_str(const string& source) {
 
 
 
-ScreenCoordinateColor::ScreenCoordinateColor(){
-    type = TYPE_SCREEN_COORDINATE;
+ScreenCoordinatesColor::ScreenCoordinatesColor(){
+    type = TYPE_SCREEN_COORDINATES;
 }
 
-ScreenCoordinateColor::~ScreenCoordinateColor(){
+ScreenCoordinatesColor::~ScreenCoordinatesColor(){
 }
 
-ScreenCoordinateColor::ScreenCoordinateColor(int xx, int yy){
-    type = TYPE_SCREEN_COORDINATE;
+ScreenCoordinatesColor::ScreenCoordinatesColor(int xx, int yy){
+    type = TYPE_SCREEN_COORDINATES;
     this->x = xx;
     this->y = yy;
 }
 
-void ScreenCoordinateColor::print(){
+void ScreenCoordinatesColor::print(){
   //    Color::print();
-    cout << "coordinate(" << x << ", " << y << ")" << endl;
+    cout << "coordinates(" << x << ", " << y << ")" << endl;
 }
 
-string ScreenCoordinateColor::get_color_value_as_str() const
+string ScreenCoordinatesColor::get_color_value_as_str() const
 {
     return "(" + to_string(this->x) + "," + to_string(y) + ")";
 }
 
-void ScreenCoordinateColor::set_color_value_from_str(const string& source)
+void ScreenCoordinatesColor::set_color_value_from_str(const string& source)
 {
     int divider = source.find(",");
     this->x = stoi(source.substr(1, divider));
@@ -427,14 +427,14 @@ void ScreenCoordinateColor::set_color_value_from_str(const string& source)
 
 
 
-TopologicalCoordinateColor::TopologicalCoordinateColor(){
-    type = TYPE_TOPOLOGICAL_COORDINATE;
+TopologicalCoordinatesColor::TopologicalCoordinatesColor(){
+    type = TYPE_TOPOLOGICAL_COORDINATES;
 }
 
-TopologicalCoordinateColor::~TopologicalCoordinateColor(){
+TopologicalCoordinatesColor::~TopologicalCoordinatesColor(){
 }
 
-void TopologicalCoordinateColor::initQMinQMax(int D){
+void TopologicalCoordinatesColor::initQMinQMax(int D){
     if(qMin.size()==0){
         for(int i = 0; i < D; i++){
             qMin.push_back(5); // TODO
@@ -443,12 +443,12 @@ void TopologicalCoordinateColor::initQMinQMax(int D){
     }
 }
 
-bool TopologicalCoordinateColor::colorize_simplex(SimpComp* simp){
-    TopologicalCoordinateColor::initQMinQMax(simp->D);
+bool TopologicalCoordinatesColor::colorize_simplex(SimpComp* simp){
+    TopologicalCoordinatesColor::initQMinQMax(simp->D);
     srand((unsigned int)time(NULL));
     // For all vertices:
     for(auto &kSimplex : simp->elements[0]){
-        TopologicalCoordinateColor *c = new TopologicalCoordinateColor();
+        TopologicalCoordinatesColor *c = new TopologicalCoordinatesColor();
         c->colorize_vertex();
         c->print();
         kSimplex->colors.push_back(c);
@@ -457,33 +457,33 @@ bool TopologicalCoordinateColor::colorize_simplex(SimpComp* simp){
     return true;
 }
 
-bool TopologicalCoordinateColor::colorize_vertex(){
+bool TopologicalCoordinatesColor::colorize_vertex(){
     for(unsigned int i = 0; i < qMin.size(); i++)
         q.push_back(qMin[i] + (qMax[i] - qMin[i]) * rand() / RAND_MAX); // TODO
 
     return true;
 }
     
-double TopologicalCoordinateColor::evaluate_edge_length(KSimplex *edge, SimpComp *simp){
+double TopologicalCoordinatesColor::evaluate_edge_length(KSimplex *edge, SimpComp *simp){
     Color *col;
-    TopologicalCoordinateColor *color1, *color2;
+    TopologicalCoordinatesColor *color1, *color2;
 cout << "Edge: " << endl;
     KSimplex *vertex1 = edge->neighbors->elements[0][0];
     KSimplex *vertex2 = edge->neighbors->elements[0][1];
 
 cout << "  vertex1: ";
-    col = Color::find_pointer_to_color_type(vertex1, TYPE_TOPOLOGICAL_COORDINATE);
+    col = Color::find_pointer_to_color_type(vertex1, TYPE_TOPOLOGICAL_COORDINATES);
     if(col)
-        color1 = (TopologicalCoordinateColor*) col;
+        color1 = (TopologicalCoordinatesColor*) col;
     else
         return 0;
 cout << " color1: ";
     color1->print();
 
 cout << "  vertex2: ";
-    col = Color::find_pointer_to_color_type(vertex2, TYPE_TOPOLOGICAL_COORDINATE);
+    col = Color::find_pointer_to_color_type(vertex2, TYPE_TOPOLOGICAL_COORDINATES);
     if(col)
-        color2 = (TopologicalCoordinateColor*) col;
+        color2 = (TopologicalCoordinatesColor*) col;
     else
         return 0;
 cout << " color2: ";
@@ -496,14 +496,14 @@ cout << " color2: ";
     return sqrt(sum);
 }
 
-double TopologicalCoordinateColor::evaluate_spring_potential(SimpComp *simp){
+double TopologicalCoordinatesColor::evaluate_spring_potential(SimpComp *simp){
     double const1 = 0.1; // TODO
     double const2 = 5;
 
     double sum = 0;
     // For all edges:
     for(auto &kSimplex : simp->elements[1]){
-        double Le = TopologicalCoordinateColor::evaluate_edge_length(kSimplex, simp);
+        double Le = TopologicalCoordinatesColor::evaluate_edge_length(kSimplex, simp);
 cout << "Le = " << Le << endl;
         sum += const1 * pow(Le - const2, 2);
     }
@@ -512,24 +512,24 @@ cout << "V = " << sum << endl;
     return sum;
 }
 
-void TopologicalCoordinateColor::print(){
+void TopologicalCoordinatesColor::print(){
     Color::print();
-cout << "TopologicalCoordinateColor: ";
+cout << "TopologicalCoordinatesColor: ";
     for(unsigned int i = 0; i < q.size(); i++){
         cout << q[i] << "  ";
     }
     cout << endl;
 }
 
-string TopologicalCoordinateColor::get_color_value_as_str() const
+string TopologicalCoordinatesColor::get_color_value_as_str() const
 {
     // Serialize vector q, by to_string(q[i]), or optimized? TODO
     // Serialize vectors qMin and qMax? // TODO
 
-    return "(TopologicalCoordinateColor)"; // TODO
+    return "(TopologicalCoordinatesColor)"; // TODO
 }
 
-void TopologicalCoordinateColor::set_color_value_from_str(const string& source) // TODO
+void TopologicalCoordinatesColor::set_color_value_from_str(const string& source) // TODO
 {
     cout << source; // remove
     // deserialize vector q // TODO

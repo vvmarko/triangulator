@@ -1024,17 +1024,17 @@ void test_KSimplex_print_non_html(){
     test_ok("test_KSimplex_print_non_html");
 }
 
-void test_TopologicalCoordinateColor(){
-    string name = "test_TopologicalCoordinateColor";
+void test_TopologicalCoordinatesColor(){
+    string name = "test_TopologicalCoordinatesColor";
     
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
     SimpComp *simpComp = seed_single_simplex(3, "triangle");
     //simpComp->print_compact();
 
-    TopologicalCoordinateColor::initQMinQMax(simpComp->D);
-    TopologicalCoordinateColor::colorize_simplex(simpComp);
+    TopologicalCoordinatesColor::initQMinQMax(simpComp->D);
+    TopologicalCoordinatesColor::colorize_simplex(simpComp);
     
-    TopologicalCoordinateColor::evaluate_spring_potential(simpComp);
+    TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
 }
 
 
@@ -1068,7 +1068,7 @@ void run_tests(){
     test_KSimplex_print_html();
     test_KSimplex_print_non_html();
 
-    test_TopologicalCoordinateColor();
+    test_TopologicalCoordinatesColor();
 }
 
 void test(){
