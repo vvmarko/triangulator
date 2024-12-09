@@ -143,11 +143,17 @@ public:
     static void initQMinQMax(int D);
     static bool colorize_simplex(SimpComp* simp);
     bool colorize_vertex();
+    void print();
+    static void print_coordinates(SimpComp *simp);
     
     static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
     static double evaluate_spring_potential(SimpComp *simp);
     
-    void print();
+    static void shake(SimpComp *simp);
+    static void storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
+    static void restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
+    static void evaluate_potential_minimum(SimpComp *simp);
+    
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
         

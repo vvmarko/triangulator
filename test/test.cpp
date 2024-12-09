@@ -1035,6 +1035,8 @@ void test_TopologicalCoordinatesColor(){
     TopologicalCoordinatesColor::colorize_simplex(simpComp);
     
     TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
+    
+    TopologicalCoordinatesColor::evaluate_potential_minimum(simpComp);
 }
 
 

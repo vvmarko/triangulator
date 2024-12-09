@@ -437,8 +437,10 @@ TopologicalCoordinatesColor::~TopologicalCoordinatesColor(){
 void TopologicalCoordinatesColor::initQMinQMax(int D){
     if(qMin.size()==0){
         for(int i = 0; i < D; i++){
-            qMin.push_back(std::numeric_limits<double>::lowest()); // TODO
-            qMax.push_back(std::numeric_limits<double>::max());
+            //qMin.push_back(std::numeric_limits<double>::lowest()); // TODO
+            //qMax.push_back(std::numeric_limits<double>::max());
+            qMin.push_back(5); // TODO
+            qMax.push_back(15);
         }
     }
 }
@@ -464,30 +466,51 @@ bool TopologicalCoordinatesColor::colorize_vertex(){
     return true;
 }
     
+void TopologicalCoordinatesColor::print(){
+    Color::print();
+cout << "TopologicalCoordinatesColor: ";
+    for(unsigned int i = 0; i < q.size(); i++){
+        cout << q[i] << "  ";
+    }
+    cout << endl;
+}
+
+void TopologicalCoordinatesColor::print_coordinates(SimpComp *simp){
+    TopologicalCoordinatesColor *color;
+    for(auto vertex : simp->elements[0]){
+        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        if(col)
+            color = (TopologicalCoordinatesColor*) col;
+        else
+            return;
+        color->print();
+    }
+}
+
 double TopologicalCoordinatesColor::evaluate_coordinate_length(KSimplex *edge, SimpComp *simp){
     Color *col;
     TopologicalCoordinatesColor *color1, *color2;
-cout << "Edge: " << endl;
+//cout << "Edge: " << endl;
     KSimplex *vertex1 = edge->neighbors->elements[0][0];
     KSimplex *vertex2 = edge->neighbors->elements[0][1];
 
-cout << "  vertex1: ";
+//cout << "  vertex1: ";
     col = Color::find_pointer_to_color_type(vertex1, TYPE_TOPOLOGICAL_COORDINATES);
     if(col)
         color1 = (TopologicalCoordinatesColor*) col;
     else
         return 0;
-cout << " color1: ";
-    color1->print();
+//cout << " color1: ";
+//    color1->print();
 
-cout << "  vertex2: ";
+//cout << "  vertex2: ";
     col = Color::find_pointer_to_color_type(vertex2, TYPE_TOPOLOGICAL_COORDINATES);
     if(col)
         color2 = (TopologicalCoordinatesColor*) col;
     else
         return 0;
-cout << " color2: ";
-    color2->print();
+//cout << " color2: ";
+//    color2->print();
 
     double sum = 0;
     for(int i = 0; i < simp->D; i++)
@@ -512,13 +535,80 @@ cout << "V = " << sum << endl;
     return sum;
 }
 
-void TopologicalCoordinatesColor::print(){
-    Color::print();
-cout << "TopologicalCoordinatesColor: ";
-    for(unsigned int i = 0; i < q.size(); i++){
-        cout << q[i] << "  ";
-    }
-    cout << endl;
+// Moving (a little bit) each coordinate of each vertex in random direction
+void TopologicalCoordinatesColor::shake(SimpComp *simp){
+    Color *col;
+    TopologicalCoordinatesColor *color;
+cout << "sssssssssssssssssssssssssssssssssssssssssshaked vertex colors: " << endl;
+    for(auto vertex : simp->elements[0]){
+        col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        if(col)
+            color = (TopologicalCoordinatesColor*) col;
+        else
+            return;
+        for(auto &coordinate : color->q)
+            coordinate += rand()-RAND_MAX/2 > 0 ? 0.1 : -0.1;
+    }    
+    TopologicalCoordinatesColor::print_coordinates(simp);
+}
+
+// Storing coordinates of each vertex
+void TopologicalCoordinatesColor::storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors){
+cout << "Storing coordinates... " << endl << endl;
+    colors.clear();
+    Color *col;
+    TopologicalCoordinatesColor *color;
+    for(auto vertex : simp->elements[0]){
+        col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        if(col)
+            color = (TopologicalCoordinatesColor *) col;
+        else
+            return;
+        colors.push_back(*color);
+    }    
+}
+
+// Restoring coordinates of each vertex
+void TopologicalCoordinatesColor::restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors){
+cout << "Restoring coordinates:" << endl;
+    Color *col;
+    TopologicalCoordinatesColor *color;
+    for(int i = 0; i < simp->elements[0].size(); i++){
+        KSimplex* vertex = simp->elements[0][i];
+        col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        if(col)
+            color = (TopologicalCoordinatesColor *) col;
+        else
+            return;
+        for(int k = 0; k < colors[i].q.size(); k++){
+            color->q[k] = colors[i].q[k];
+        }
+    }    
+TopologicalCoordinatesColor::print_coordinates(simp);
+}
+
+void TopologicalCoordinatesColor::evaluate_potential_minimum(SimpComp *simp){
+cout << "Evaluating potential minimum..." << endl;
+    static double step = 0.1; // TODO
+    double potential, minPotential;
+    minPotential = potential = TopologicalCoordinatesColor::evaluate_spring_potential(simp);
+
+    vector<TopologicalCoordinatesColor> minPotentialColors;
+    TopologicalCoordinatesColor::storeCoordinates(simp, minPotentialColors);
+
+for(int i = 0; i < 10; i++){
+        TopologicalCoordinatesColor::shake(simp);
+        potential = TopologicalCoordinatesColor::evaluate_spring_potential(simp);
+cout << "Vtemp = " << potential << endl << endl;
+        if(potential < minPotential){
+            minPotential = potential;
+            TopologicalCoordinatesColor::storeCoordinates(simp, minPotentialColors);
+        }
+}
+
+cout << "minPotential = " << minPotential << endl;
+    TopologicalCoordinatesColor::restoreCoordinates(simp, minPotentialColors);
+cout << "EEEEEEEEEEEEEEEEEEEEEEEEEnd Evaluating potential minimum" << endl;
 }
 
 string TopologicalCoordinatesColor::get_color_value_as_str() const
