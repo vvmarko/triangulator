@@ -1071,6 +1071,7 @@ void run_tests(){
     test_KSimplex_print_non_html();
 
     test_TopologicalCoordinatesColor();
+
 }
 
 void test(){
