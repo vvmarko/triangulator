@@ -52,7 +52,9 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
 
     // This is the document and the base xml node
     xml_document<> treeXml;
-    xml_node<>* base = treeXml.allocate_node(node_element, simpComp->name.c_str());
+    string baseString = "simpcomp";
+    char* baseCString = treeXml.allocate_string(baseString.c_str(), baseString.length() + 1);
+    xml_node<>* base = treeXml.allocate_node(node_element, baseCString);
     treeXml.append_node(base);
 
     /*
@@ -66,7 +68,7 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
      * 
      * In general, complex is saved in the .xml file in the format:
      * 
-     * <"complex_name">
+     * <simpcomp>
      *      <name> "complex_name" </name>
      *      <dimension> "D" </dimension>
      *      <topology> "topology of the complex" </topology>
@@ -78,7 +80,7 @@ void save_complex_to_xml_file(SimpComp* simpComp, const string& filename)
      *          [<level lvl="lvl"> "neighbours_at_lvl" </level> ...]
      *      </ksimplex>
      *      ]
-     * </complex_name>
+     * </simpcomp>
      * 
      * Variables are denoted as "variable_name", everything else is verbatim.
     */
