@@ -23,6 +23,9 @@
 void log_report(int type, string message);
 void log_report_to_cerr(int type, string message);
 
+std::string encode_string_for_xml( std::string s );
+std::string decode_string_from_xml( std::string s );
+
 void save_complex_to_xml_file(SimpComp* simpComp, const string& filename);
 vector<rapidxml::xml_node<>*> get_element_levels_as_xml_nodes(SimpComp* simpComp, rapidxml::memory_pool<>& mp);
 
