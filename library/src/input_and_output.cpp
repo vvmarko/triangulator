@@ -115,13 +115,13 @@ std::string encode_string_for_xml( std::string s )
  */
 std::string decode_string_from_xml( std::string s )
 {
-    int length = s.length();
-    char* buildspace = new char[s.length()+1];
-    memcpy(buildspace, s.data(), s.length());
-    buildspace[s.length()] = '\0';
+    unsigned int length = s.length();
+    char* buildspace = new char[length+1];
+    memcpy(buildspace, s.data(), length);
+    buildspace[length] = '\0';
     
-    int dest_pos = 0;
-    for (int orig_pos = 0; orig_pos < s.length(); orig_pos++, dest_pos++)
+    unsigned int dest_pos = 0;
+    for (unsigned int orig_pos = 0; orig_pos < length; orig_pos++, dest_pos++)
     {
         if (buildspace[orig_pos] != '&')
         {
