@@ -635,8 +635,47 @@ string TopologicalCoordinatesColor::get_color_value_as_str() const
 
 void TopologicalCoordinatesColor::set_color_value_from_str(const string& source) // TODO
 {
-    cout << source; // remove
+    if (source=="true") return; // This is a dummy command, do not remove
     // deserialize vector q // TODO
     // deserialize vectors qMin and qMax? // TODO
+}
+
+EmbeddingCoordinatesColor::EmbeddingCoordinatesColor(){
+    type = TYPE_EMBEDDING_COORDINATES;
+}
+
+void EmbeddingCoordinatesColor::set_color_value_from_str(const string& source){
+    if (source=="true") return; // This is a dummy command, do not remove
+}
+
+void EmbeddingCoordinatesColor::print(){
+    Color::print();
+    cout << "EmbeddingCoordinatesColor: ";
+    for(auto value : x){
+        cout << value << "  ";
+    }
+    cout << endl;
+}
+
+void EmbeddingCoordinatesColor::evaluate_embedding_coordinates(SimpComp *simp){
+    cout << "Evaluating embedding coordinates..." << endl; //TODO: for now, only for linear topology
+    cout << "Topology: " << simp->topology << endl;
+    
+    TopologicalCoordinatesColor *topColor;
+    for(auto vertex : simp->elements[0]){
+        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        if(col)
+            topColor = (TopologicalCoordinatesColor*) col;
+        else
+            return;
+topColor->print(); // TODO: remove
+        if(simp->topology == "linear"){
+            EmbeddingCoordinatesColor *embColor = new EmbeddingCoordinatesColor();
+            for(auto &qq : topColor->q){
+                embColor->x.push_back(qq);
+            }
+            vertex->colors.push_back(embColor);
+        }
+    }
 }
 

@@ -1039,7 +1039,27 @@ void test_TopologicalCoordinatesColor(){
     TopologicalCoordinatesColor::evaluate_potential_minimum(simpComp);
 }
 
+void test_EmbeddingCoordinatesColor(){
+    string name = "test_EmbeddingCoordinatesColor";
+    
+    // Initilize simplicial complex of dimension D, and an empty k-simplex:
+    SimpComp *simpComp = seed_single_simplex(3, "triangle");
+    //simpComp->print_compact();
 
+    TopologicalCoordinatesColor::initQMinQMax(simpComp->D);
+    TopologicalCoordinatesColor::colorize_simplex(simpComp);
+    
+    TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
+    
+    TopologicalCoordinatesColor::evaluate_potential_minimum(simpComp);
+
+    EmbeddingCoordinatesColor::evaluate_embedding_coordinates(simpComp);
+    for(auto vertex : simpComp->elements[0]){
+        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_EMBEDDING_COORDINATES);
+        col->print();
+    }
+}
+    
 void run_tests(){
     test_kSimplex_default_constructor();
     test_kSimplex_default_destructor();
@@ -1071,6 +1091,8 @@ void run_tests(){
     test_KSimplex_print_non_html();
 
     test_TopologicalCoordinatesColor();
+
+    test_EmbeddingCoordinatesColor();
 
 }
 

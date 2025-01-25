@@ -21,6 +21,7 @@
 #define TYPE_SCREEN_COORDINATES 128
 #define TYPE_UNIQUE_ID 129
 #define TYPE_TOPOLOGICAL_COORDINATES 130
+#define TYPE_EMBEDDING_COORDINATES 131
 
 #define POTENTIAL_SPRING_COEFFICIENT 1.0
 #define POTENTIAL_SPRING_SIZE 5.0
@@ -169,3 +170,12 @@ public:
     vector<double> q;
 };
 
+// Coordinatas for presenting simplexes on the screen:
+class EmbeddingCoordinatesColor : public Color{
+public:
+    EmbeddingCoordinatesColor();
+    void print();
+    void set_color_value_from_str(const string& source);
+    static void evaluate_embedding_coordinates(SimpComp *G);
+    vector<double> x;
+};
