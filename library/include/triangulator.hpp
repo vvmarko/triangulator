@@ -12,6 +12,7 @@ using namespace std;
 #include <memory>
 #include <math.h>
 #include <limits>
+#include <cstring>
 
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"

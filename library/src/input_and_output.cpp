@@ -1,6 +1,5 @@
 
 #include "triangulator.hpp"
-#include <cstring>
 
 void log_report(int type, string message){
   ofstream logf;
