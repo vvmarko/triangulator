@@ -18,8 +18,17 @@
 
 #define TYPE_BOUNDARY 0
 #define TYPE_PACHNER 1
-#define TYPE_SCREEN_COORDINATE 128
+#define TYPE_SCREEN_COORDINATES 128
 #define TYPE_UNIQUE_ID 129
+#define TYPE_TOPOLOGICAL_COORDINATES 130
+#define TYPE_EMBEDDING_COORDINATES 131
+
+#define POTENTIAL_SPRING_COEFFICIENT 1.0
+#define POTENTIAL_SPRING_SIZE 5.0
+#define POTENTIAL_SHAKE_STEP 0.2
+#define POTENTIAL_MAX_ITERATION_NUMBER 200
+#define MAX_TEST_COORDINATES 50
+
 
 #endif
 
@@ -122,11 +131,11 @@ public:
 };
 
 // Drawing coordinates:
-class ScreenCoordinateColor : public Color{
+class ScreenCoordinatesColor : public Color{
 public:
-    ScreenCoordinateColor();
-    ~ScreenCoordinateColor();
-    ScreenCoordinateColor(int x, int y);
+    ScreenCoordinatesColor();
+    ~ScreenCoordinatesColor();
+    ScreenCoordinatesColor(int x, int y);
     void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source);
@@ -134,3 +143,39 @@ public:
     int x, y; // screen coordinates
 };
 
+// Whether the KSimplex of this color represents a boundary:
+class TopologicalCoordinatesColor : public Color{
+public:
+    TopologicalCoordinatesColor();
+    ~TopologicalCoordinatesColor();
+    static void initQMinQMax(int D);
+    static bool colorize_simplex(SimpComp* simp);
+    bool colorize_vertex();
+    void print();
+    static void print_coordinates(SimpComp *simp);
+    
+    static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
+    static double evaluate_spring_potential(SimpComp *simp);
+    
+    static void shake(SimpComp *simp);
+    static void storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
+    static void restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
+    static void evaluate_potential_minimum(SimpComp *simp);
+    
+    string get_color_value_as_str() const;
+    void set_color_value_from_str(const string& source) override;
+        
+    static vector<double> qMin;
+    static vector<double> qMax;
+    vector<double> q;
+};
+
+// Coordinatas for presenting simplexes on the screen:
+class EmbeddingCoordinatesColor : public Color{
+public:
+    EmbeddingCoordinatesColor();
+    void print();
+    void set_color_value_from_str(const string& source);
+    static void evaluate_embedding_coordinates(SimpComp *G);
+    vector<double> x;
+};

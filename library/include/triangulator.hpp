@@ -9,6 +9,10 @@ using namespace std;
 #include <vector>
 #include <list>
 #include <new>
+#include <memory>
+#include <math.h>
+#include <limits>
+#include <cstring>
 
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"
