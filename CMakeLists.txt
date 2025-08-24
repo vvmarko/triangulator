@@ -18,7 +18,7 @@ project(TriangulatorProj VERSION 0.5)
 
 # Some options for build system generation.
 option(DEBUGGING "Toggle debugging mode for symbol generation etc."
-	   OFF)
+	   ON)
 option(COMPILE_LIBRARY "Compile triangulator core library. If turned off, it is expected to put precompiled triangulator.<ext> library,
                         its headers and dependencies in precompiled/ folder in the uppermost source directory."
 	   ON)

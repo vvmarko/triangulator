@@ -28,27 +28,10 @@ bool assign_matching_recursively( vector<KSimplex*> manifoldlist , vector<KSimpl
 
 // Tests if an established 1-to-1 matching between neighborhood of simp and
 // the internal part of the PachnerSphere preserves all neighbor relations
-bool test_for_isomorphism( KSimplex *simp , SimpComp *PachnerSphere );
-
-
+bool test_for_isomorphism( SimpComp *PachnerSphere );
 
 // Once everything has been verified, this function actually deletes the old
 // neighborgood of simp and constructs a copy of the external piece of the
 // Pachner sphere in its place, thereby performing the Pachner move
-bool perform_the_Pachner_move(SimpComp *simpComp, KSimplex *simp, SimpComp *PachnerSphere);
+bool perform_the_Pachner_move(SimpComp *simpComp, SimpComp *PachnerSphere);
 
-
-
-// Old code...
-
-// Connect k-simplex neighbors based on given vertices, assuming all sub-simplices exist:
-//KSimplex* build_KSimplex(SimpComp* simpComp, set<KSimplex*> &s);
-
-// Pachner move 1 to 4:
-//KSimplex* Pachner_move_1_to_4(KSimplex *kSimplex, SimpComp *simpComp);
-
-// Pachner move 4 to 1:
-//KSimplex* Pachner_move_4_to_1(KSimplex *kSimplex, SimpComp *simpComp);
-
-// Pachner move 3 to 2:
-//KSimplex* Pachner_move_3_to_2(KSimplex *simp, SimpComp *simpComp);
