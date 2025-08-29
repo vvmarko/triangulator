@@ -1032,7 +1032,7 @@ void test_TopologicalCoordinatesColor(){
     //simpComp->print_compact();
 
     TopologicalCoordinatesColor::initQMinQMax(simpComp->D);
-    TopologicalCoordinatesColor::colorize_simplex(simpComp);
+    TopologicalCoordinatesColor::colorize_entire_complex(simpComp);
     
     TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
     
@@ -1047,7 +1047,7 @@ void test_EmbeddingCoordinatesColor(){
     //simpComp->print_compact();
 
     TopologicalCoordinatesColor::initQMinQMax(simpComp->D);
-    TopologicalCoordinatesColor::colorize_simplex(simpComp);
+    TopologicalCoordinatesColor::colorize_entire_complex(simpComp);
     
     TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
     

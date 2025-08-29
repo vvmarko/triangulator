@@ -14,10 +14,10 @@ void Color::print(){
   cout << "color: " << get_color_name_from_type(type) << " (type " << type << "), value: " << this->get_color_value_as_str() << endl;
 }
 
-string Color::get_color_value_as_str() const
-{
-    return "";
-}
+//string Color::get_color_value_as_str() const
+//{
+//    return "";
+//}
 
 /**
  * @brief Creates new colour and gets its value from string, adding it to the
@@ -46,8 +46,6 @@ bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, c
       return TopologicalCoordinatesColor::colorize_single_simplex(simp,color_value);
     case TYPE_EMBEDDING_COORDINATES:
       return EmbeddingCoordinatesColor::colorize_single_simplex(simp,color_value);
-    case TYPE_SCREEN_COORDINATES:
-      return ScreenCoordinatesColor::colorize_single_simplex(simp,color_value);
     default:
       log_report(LOG_ERROR,"Color::colorize_simplex_from_string : Color type " + to_string(color_type) + " not recognized! Fix your code!");
       return false;
@@ -106,8 +104,6 @@ string get_color_name_from_type(int color_type){
             return "TopologicalCoordinates";
         case TYPE_EMBEDDING_COORDINATES:
             return "EmbeddingCoordinates";
-        case TYPE_SCREEN_COORDINATES:
-            return "ScreenCoordinates";
         default:
             return "Unknown color name, type " + to_string(color_type);
     }
@@ -148,13 +144,7 @@ void BoundaryColor::remove_color_from_simplex(KSimplex* simp)
   Color::remove_color_type_from_simplex(simp, TYPE_BOUNDARY);
 }
 
-
-void BoundaryColor::print(){
-  //    Color::print();
-    cout << "Boundary = true" << endl;
-}
-
-string BoundaryColor::get_color_value_as_str() const
+string BoundaryColor::get_color_value_as_str()
 {
     return "true";
 }
@@ -240,7 +230,7 @@ PachnerColor* PachnerColor::find_pointer_to_color(KSimplex* simp)
 }
 
 
-string PachnerColor::get_color_value_as_str() const
+string PachnerColor::get_color_value_as_str()
 {
   string s="internal: ";
   if (internalSimplex) s = s + "true, external: ";
@@ -273,10 +263,6 @@ UniqueIDColor::~UniqueIDColor(){
 UniqueIDColor::UniqueIDColor(unsigned long uid){
     type = TYPE_UNIQUE_ID;
     id = uid;
-}
-
-void UniqueIDColor::print(string space){
-    cout << space << "id = " << id << endl;
 }
 
 void UniqueIDColor::print_compact(){
@@ -375,7 +361,7 @@ bool UniqueIDColor::relabel_everything( void )
   return outcome;
 }
 
-string UniqueIDColor::get_color_value_as_str() const
+string UniqueIDColor::get_color_value_as_str()
 {
     return to_string(this->id);
 }
@@ -390,53 +376,6 @@ void UniqueIDColor::set_color_value_from_str(const string& source) {
 
 
 
-
-
-
-ScreenCoordinatesColor::ScreenCoordinatesColor(){
-    type = TYPE_SCREEN_COORDINATES;
-}
-
-ScreenCoordinatesColor::~ScreenCoordinatesColor(){
-}
-
-ScreenCoordinatesColor::ScreenCoordinatesColor(int xx, int yy){
-    type = TYPE_SCREEN_COORDINATES;
-    this->x = xx;
-    this->y = yy;
-}
-
-bool ScreenCoordinatesColor::colorize_single_simplex(KSimplex* simp, const string& source)
-{
-  bool outcome = true;
-  ScreenCoordinatesColor* color = new(nothrow) ScreenCoordinatesColor();
-  if (color==nullptr) {
-    outcome = false;
-    log_report(LOG_PANIC,"ScreenCoordinatesColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
-  }
-  else {
-    color->set_color_value_from_str(source);    
-    simp->colors.push_back(color);
-  }
-  return outcome;
-}
-
-void ScreenCoordinatesColor::print(){
-  //    Color::print();
-    cout << "coordinates(" << x << ", " << y << ")" << endl;
-}
-
-string ScreenCoordinatesColor::get_color_value_as_str() const
-{
-    return "(" + to_string(this->x) + "," + to_string(y) + ")";
-}
-
-void ScreenCoordinatesColor::set_color_value_from_str(const string& source)
-{
-    int divider = source.find(",");
-    this->x = stoi(source.substr(1, divider));
-    this->y = stoi(source.substr(divider + sizeof(","), source.length() - sizeof(")")));
-}
 
 
 
@@ -475,7 +414,7 @@ void TopologicalCoordinatesColor::initQMinQMax(int D){
     }
 }
 
-bool TopologicalCoordinatesColor::colorize_simplex(SimpComp* simp){
+bool TopologicalCoordinatesColor::colorize_entire_complex(SimpComp* simp){
     TopologicalCoordinatesColor::initQMinQMax(simp->D);
     srand((unsigned int)time(NULL));
     // For all vertices:
@@ -654,7 +593,7 @@ void TopologicalCoordinatesColor::evaluate_potential_minimum(SimpComp *simp){
     TopologicalCoordinatesColor::restoreCoordinates(simp, minPotentialColors);
 }
 
-string TopologicalCoordinatesColor::get_color_value_as_str() const
+string TopologicalCoordinatesColor::get_color_value_as_str()
 {
     // Serialize vector q, by to_string(q[i]), or optimized? TODO
     // Serialize vectors qMin and qMax? // TODO
@@ -681,6 +620,10 @@ EmbeddingCoordinatesColor::EmbeddingCoordinatesColor(){
     type = TYPE_EMBEDDING_COORDINATES;
 }
 
+EmbeddingCoordinatesColor::~EmbeddingCoordinatesColor(){
+}
+
+
 bool EmbeddingCoordinatesColor::colorize_single_simplex(KSimplex* simp, const string& source)
 {
   bool outcome = true;
@@ -695,6 +638,9 @@ bool EmbeddingCoordinatesColor::colorize_single_simplex(KSimplex* simp, const st
   return outcome;
 }
 
+string EmbeddingCoordinatesColor::get_color_value_as_str(){
+  return "true"; // FIXME
+}
 
 void EmbeddingCoordinatesColor::set_color_value_from_str(const string& source){
     if (source=="true") return; // This is a dummy command, do not remove

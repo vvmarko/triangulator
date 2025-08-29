@@ -58,7 +58,6 @@
 #define TYPE_UNIQUE_ID 128
 #define TYPE_TOPOLOGICAL_COORDINATES 129
 #define TYPE_EMBEDDING_COORDINATES 130
-#define TYPE_SCREEN_COORDINATES 131
 
 // ##################################################
 // Parameters foc evaluating topological coordinates:
@@ -107,137 +106,421 @@ public:
   // Default destructor:
     virtual ~Color();
 
+  // ########################################
+  // Adding and removing colors in a simplex:
+  // ########################################
 
-  void print();
-  
-
-    virtual string get_color_value_as_str() const;
-    virtual void set_color_value_from_str(const string& source) = 0;
+  // Given a color and its value in a string, add the color to a given
+  // simplex and convert the string into the color value (this function
+  // is used for loading the simplicial complex from a file)
     static bool colorize_simplex_from_string(KSimplex* simp, const int color_type, const string& color_value);
-    static bool is_colorized_with_type(KSimplex* simp, int typecode);
-    static Color* find_pointer_to_color_type(KSimplex* simp, int typecode);
+
+  // Remove all instances of the given color from a given simplex, erasing
+  // the respective color values
     static void remove_color_type_from_simplex(KSimplex* simp, int typecode);
+
+  // Go through all simplices of a given level in the complex, and for each
+  // remove all instances of the given color, as above
     static void remove_color_type_from_level(SimpComp* G, int level, int typecode);
+
+  // Go through all simplices in the whole complex, and remove all instances
+  // of the color from all of them, as above
     static void remove_color_type_from_complex(SimpComp* G, int typecode);
 
+  // ######################################
+  // String transliteration of color value:
+  // ######################################
+  
+  // Encode the value of the color into a string
+  // NB: This is an abstract virtual function, in the sense that every
+  // child Color class must provide its own implementation of this
+  // function, depending on the nature of the color data
+    virtual string get_color_value_as_str() = 0;
+//    virtual string get_color_value_as_str() const;
+
+  // Decode the string into a color value, and set it
+  // NB: This is an abstract virtual function, in the sense that every
+  // child Color class must provide its own implementation of this
+  // function, depending on the nature of the color data
+    virtual void set_color_value_from_str(const string& source) = 0;
+
+  // ##############################################
+  // Finding colors and testing for their presence:
+  // ##############################################
+  
+  // Check if a given simplex is colored with a given color
+    static bool is_colorized_with_type(KSimplex* simp, int typecode);
+  
+  // Find a pointer to a given color within a given simplex
+    static Color* find_pointer_to_color_type(KSimplex* simp, int typecode);
+
+  // ###################
+  // Printing functions:
+  // ###################
+
+  // Printing of the color name, type and value to stdout, in a
+  // human-readable format
+  // Makes use of get_color_name_from_type() to figure out the color
+  // name, and of the virtual function get_color_value_as_str() to
+  // convert the color value into a human-readable string.
+    void print();
 
 };
 
+
+// ######################################
+// Functions external to the Color class:
+// ######################################
+
+// Assigns a human-readable name to a given color type, in correspondence
+// with the definitions in the TYPE_ table above
 string get_color_name_from_type(int color_type);
 
-// Whether the KSimplex of this color represents a boundary:
+
+// ##############################
+// Child color --- Boundary color
+// ##############################
+
+// The boundary color is a special color that is internally used by the
+// library. It marks simplices of level D-1 that represent the boundary
+// of a simplicial complex. The built-in functions in the library
+// manipulate the boundary color automatically, and the only two cases
+// where a user may deal with it are (a) testing if a given simplex is
+// on the boundary of a complex, and (b) defining the boundary of a
+// complex when implementing a new seed function.
+
+// The boundary color contains no data or value. The mere presence of
+// the color in a given simplex is information enough that this simplex
+// is part of the boundary.
+
 class BoundaryColor : public Color{
 public:
+
+  // Constructor:
     BoundaryColor();
+  
+  // Destructor:
     ~BoundaryColor();
+
+  // Add boundary color to a given simplex:
     static bool colorize_single_simplex(KSimplex* simp);
+
+  // Add boundary color to all simplices of a given level:
     static bool colorize_simplices_at_level(SimpComp* G, int level);
+
+  // Remove boundary color from the simplex:
     static void remove_color_from_simplex(KSimplex* simp);
-    void print();
-    string get_color_value_as_str() const;
+
+  // Obligatory implementations of string codec functions for boundary color:
+    string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
 };
 
 
-// The color used by the Pachner move algorithm:
+// #############################
+// Child color --- Pachner color
+// #############################
+
+// The Pachner color is a special color that is internally used by the
+// library. It is being used exclusively by the Pachner_move() function
+// and the functions that it calls internally, and should never be used
+// or manipulated by the user, except for the purpose of debugging the
+// Pachner_move() function itself. The Pachner color is temporary in
+// its usage --- it is being added to some simplices automatically at
+// the beginning of the Pachner_move(), and is automatically removed
+// from all simplices by the end of the Pachner_move().
+
+// You most probably do not want to interact with Pachner color, ever.
+
+// The Pachner color contains the pointer to a matching simplex from
+// another simplicial complex, and is being used to build the
+// isomorphism between the wider neighborhood of the target simplex
+// and the internal part of the Pachner sphere to be replaced. It also
+// contains booleans that classify the sphere simplices into internal
+// and/or external, and one immutable boolean that serves as a
+// write-protect flag against changing the isomorphism relation of the
+// corresponding pair of simplices.
+
 class PachnerColor : public Color{
 public:
+
+  // Data structures:
+  // ################
+  
+  // Pointer to the matching simplex for the isomorphism:
+    KSimplex *matchingSimplex = nullptr;
+
+  // Booleans labelling the simplex as internal and/or external:
+    bool internalSimplex = false;
+    bool externalSimplex = false;
+
+  // Write-protect boolean for the simplex with the fixed match:
+    bool immutable = false;
+
+  // Functions:
+  // ##########
+  
+  // Constructor:
     PachnerColor();
+
+  // Destructor:
     ~PachnerColor();
 
+  // Add color to a single simplex, to all simplices of a given level
+  // and to all simplices in the complex:
     static bool colorize_single_simplex(KSimplex* simp);
     static bool colorize_simplices_at_level(SimpComp* G, int level);
     static bool colorize_entire_complex(SimpComp* G);
+
+  // Remove color from a single simplex, from all simplices of a given
+  // level, and from all simplices in a complex:
     static void remove_color_from_simplex(KSimplex* simp);
     static void remove_color_from_level(SimpComp* G, int level);
     static void remove_color_from_complex(SimpComp* G);
+
+  // verify if a simplex contains the Pachner color:
     static bool is_colorized(KSimplex* simp);
+
+  // find a pointer to the Pachner color for a given simplex:
     static PachnerColor* find_pointer_to_color(KSimplex* simp);
 
-    string get_color_value_as_str() const;
+  // Obligatory implementations of string codec functions for Pachner color
+  // (though it is unlikely that saving to file or reading from a file will
+  // ever happen in the middle of the execution of a Pachner_move() operation):
+    string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
 
-    KSimplex *matchingSimplex = nullptr;
-    bool internalSimplex = false;
-    bool externalSimplex = false;
-    bool immutable = false;
 };
 
 
-// Unique ID of KSimplex:
+// ##############################
+// Child color --- UniqueID color
+// ##############################
+
+// UniqueID color is one convenient colors built-in and integrated into the
+// library. Its purpose is to assign a unique numerical identifier (in
+// monotonically  ascending order) to any simplex that is colored. It is
+// extensively used by various printing functions and GUI functions, to
+// identify simplices in a human-readable form. The uniqueness of the
+// identifier is preserved across multiple instantiated simplicial complexes.
+
+// Sometimes some colored simplices get deleted. By default, their numerical
+// identifier (a UniqueID number) is not reused. This can sometimes lead to
+// big gaps in the numeration of simplices, and ever larger values for new
+// simplices. To mitigate this effect, a relabel_everything() function is
+// provided, which resets all UniqueID color identifiers for all colored
+// simplices, and re-enumerates them with a new numerical identifier,
+// starting back from 1. This changes the numeration of all colored simplices
+// in all complexes, resetting the identifiers to eliminate any gaps. Use this
+// function with care.
+
 class UniqueIDColor : public Color{
 public:
-    UniqueIDColor();
-    ~UniqueIDColor();
-    UniqueIDColor(unsigned long uid);
-    void print(string space = "");
-    void print_compact();
 
+  // Data structures:
+  // ################
+
+  // Next unused identifier (global for the color):
+    static unsigned long next_free_uid_number;
+
+  // A given UniqueID identifier for this simplex:
+    unsigned long id;
+
+  // Functions:
+  // ##########
+
+  // Constructor:
+    UniqueIDColor();
+  
+  // Constructor with a specified value of the identifier
+  // (used for reading from a file):
+    UniqueIDColor(unsigned long uid);
+  
+  // Destructor:
+    ~UniqueIDColor();
+
+  // Add color to a single simplex, to all simplices of a given level
+  // and to all simplices in the complex:
     static bool colorize_single_simplex(KSimplex* simplex);
     static bool colorize_simplices_at_level(SimpComp* G, int level);
     static bool colorize_entire_complex(SimpComp* G);
-    static bool is_colorized(KSimplex* simp);
+
+  // Append color to a single simplex, to all simplices of a given
+  // level, and to all simplices in a complex, if they have not already
+  // been colored:
     static bool append_color_to_single_simplex(KSimplex* simp);
     static bool append_color_to_simplices_at_level(SimpComp* G, int level);
     static bool append_color_to_entire_complex(SimpComp* G);
+
+  // verify if a simplex contains the UniqueID color:
+    static bool is_colorized(KSimplex* simp);
+
+  // Reset all UniqueID identifiers monotonically starting from 1, resetting
+  // all identifiers, for all colored simplices across all instantiated
+  // complexes in memory (use with care):
     static bool relabel_everything(void);
 
-    string get_color_value_as_str() const;
+  // Printing the UniqueID number in a compact form:
+    void print_compact();
+
+  // Obligatory implementations of string codec functions for UniqueID color
+    string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
 
-    static unsigned long next_free_uid_number;
-    unsigned long id;
 };
 
-// Drawing coordinates:
-class ScreenCoordinatesColor : public Color{
-public:
-    ScreenCoordinatesColor();
-    ~ScreenCoordinatesColor();
-    ScreenCoordinatesColor(int x, int y);
-    void print();
-    string get_color_value_as_str() const;
-    void set_color_value_from_str(const string& source);
-    static bool colorize_single_simplex(KSimplex* simp, const string& source);
 
-    int x, y; // screen coordinates
-};
+// #############################################
+// Child color --- Topological coordinates color
+// #############################################
 
-// Whether the KSimplex of this color represents a boundary:
+// Topological coordinates color is a built-in color that is used by
+// various functions of the library, for the purpose of drawing the
+// wireframe graph of the simplicial complex on the computer screen.
+// The idea is to use topological coordinates to evaluate the
+// embedding coordinates, which are in turn used to evaluate the
+// screen coordinates, the latter ultimately used for drawing.
+
+// Topological coordinates represent a set of D coordinates for every
+// vertex of a simplicial complex of dimension D, naturally adapted to
+// the given topology of the complex. The topological coordinates color
+// is assigned to vertices of the complex, while other simplices are
+// ignored. When instantiated for a given vertex, the values of the
+// topological coordinates are assigned randomly from their domain,
+// and they are afterwards recalculated so that the complex has the
+// most "natural shape", by invoking the external static function
+// evaluate_potential_minimum(), see file drawing-coordinates.hpp.
+// This function changes the topological coordinates from their initial
+// random values to values that minimize a certain given potential,
+// which encodes the notion of "natural shape" for a given complex.
+
+// The topological coordinates color consists of a D-dimensional vector
+// of coordinates, and two static D-dimensional vectors that define
+// their domain, i.e. the minimal and maximal possible value that each
+// coordinate may take.
+
+// The user is allowed to manipulate the values of topological
+// coordinates (within their domain of course), but for best visual
+// results we recommend that only the choice of the potential be
+// tweaked, rather than individual coordinates of individual vertices.
+// Every invocation of evaluate_potential_minimum() will erase and
+// modify any manual changes made to the topological coordinates.
+
 class TopologicalCoordinatesColor : public Color{
 public:
+
+  // Data structures:
+  // ################
+
+  // Array of D topological coordinates:
+    vector<double> q;
+
+  // Static arrays defining the domain of topological coordinates,
+  // namely minimal and maximal possible values for each of the
+  // D coordinates:
+    static vector<double> qMin;
+    static vector<double> qMax;
+  
+  // Functions:
+  // ##########
+
+  // Constructor:
     TopologicalCoordinatesColor();
+
+  // Destructor:
     ~TopologicalCoordinatesColor();
+
+  // Add topological coordinates color to a given simplex, and to the
+  // whole complex (only vertices are colored, other simplices are
+  // ignored):
+
+    static bool colorize_single_simplex(KSimplex* simp, const string& source); // FIXME
+    static bool colorize_entire_complex(SimpComp* simp);
+
+  // FIX ME:
     static void initQMinQMax(int D);
-    static bool colorize_single_simplex(KSimplex* simp, const string& source);
-    static bool colorize_simplex(SimpComp* simp);
     bool colorize_vertex();
     void print();
     static void print_coordinates(SimpComp *simp);
-
     static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
     static double evaluate_spring_potential(SimpComp *simp);
-
     static void shake(SimpComp *simp);
     static void storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
     static void restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
     static void evaluate_potential_minimum(SimpComp *simp);
 
-    string get_color_value_as_str() const;
+  // Obligatory implementations of string codec functions for topological coordinates color  
+    string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
 
-    static vector<double> qMin;
-    static vector<double> qMax;
-    vector<double> q;
 };
 
-// Coordinatas for presenting simplexes on the screen:
+
+// ###########################################
+// Child color --- Embedding coordinates color
+// ###########################################
+
+// Embedding coordinates color is a built-in color that is used by
+// various functions of the library, for the purpose of drawing the
+// wireframe graph of the simplicial complex on the computer screen.
+// The idea is to use topological coordinates to evaluate the
+// embedding coordinates, which are in turn used to evaluate the
+// screen coordinates, the latter ultimately used for drawing.
+
+// Embedding coordinates represent a set of Damb coordinates for every
+// vertex of a simplicial complex of dimension D, which is being
+// naturally embedded as a hypersurface into an ambient Euclidean
+// space of dimension Damb. Depending on the toplology of the complex,
+// Damb is fixed to be somewhere in the range D <= Damb <= 2D. 
+
+
+// The embedding coordinates color is assigned to vertices of the
+// complex, while other simplices are ignored. When instantiated for a
+// given vertex, the values of the embedded coordinates are evaluated
+// from the topological coordinates of the same vertex, via the function
+// evaluate_embedding_coordinates(), see file drawing-coordinates.hpp.
+
+// The embedding coordinates color consists of a Damb-dimensional vector
+// of coordinates. Since these are assumed to be Cartesian coordinates
+// in a Euclidean space, their domains are all real numbers, and there
+// is no need to keep track of minimal and maximal values, in contrast to
+// the topological coordinates.
+
+// In principle, the user is allowed to manipulate the values of embedding
+// coordinates, but for best visual results we recommend that they always
+// be evaluated via evaluate_embedding_coordinates(). Note that every
+// invocation of this function will erase and  modify any manual changes
+// made to the embedding coordinates.
+
 class EmbeddingCoordinatesColor : public Color{
 public:
-    EmbeddingCoordinatesColor();
-    void print();
-    void set_color_value_from_str(const string& source);
-    static void evaluate_embedding_coordinates(SimpComp *G);
-    static bool colorize_single_simplex(KSimplex* simp, const string& source);
+
+  // Data structures:
+  // ################
+
+  // Array of Damb topological coordinates:
     vector<double> x;
+
+  // Dimension of the ambient embedding space:
+    int Damb;
+
+  // Functions:
+  // ##########
+
+  // Constructor:
+    EmbeddingCoordinatesColor();
+
+  // Destructor:
+    ~EmbeddingCoordinatesColor();
+
+  // FIX ME:
+    static bool colorize_single_simplex(KSimplex* simp, const string& source);
+    static void evaluate_embedding_coordinates(SimpComp *G);
+    void print();
+  
+  // Obligatory implementations of string codec functions for topological coordinates color  
+    string get_color_value_as_str() override;
+    void set_color_value_from_str(const string& source) override;
+  
 };
+
