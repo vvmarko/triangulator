@@ -59,38 +59,6 @@ SimpComp::SimpComp(string SimpCompName, int dim):
 SimpComp::SimpComp(int dim):SimpComp("", dim){
 }
 
-// Copy constructor
-SimpComp::SimpComp(const SimpComp& simpComp){
-    name = simpComp.name;
-    topology = simpComp.topology;
-    D = simpComp.D;
-    for(auto &row : simpComp.elements){
-        vector<KSimplex*> newKSimplexList;
-        for(auto &kSimplex : row)
-	  newKSimplexList.push_back(kSimplex); // TODO: FIXME: Ovo ne valja!!
-// Kad kopiramo kompleks, trebalo bi da kopiramo i simplekse koji su zakaceni za njega.
-// Kompleksi su nezavisne strukture, i dva kompleksa ne smeju da dele iste simplekse.
-// Sta ce da se dogodi sa pointerom na simpleks u ovom kompleksu, ako obrisemo taj simpleks
-// pozivanjem remove_simplex() u onom drugom kompleksu?
-//
-// Kopiranje simplicijalnih kompleksa je netrivijalna operacija, i nije dobra ideja
-// da se tako nesto radi u konstruktoru. Umesto konstruktora, trebalo bi napraviti pravu
-// funkciju za kopiranje, koja ce da pozove default konstruktor za nov kompleks, i zatim da
-// ga "sazida" pozivanjem create_ksimplex() i povezivanjem svakog novog simpleksa sa njegovim
-// novim susedima, po ugledu na neighbor tabele u starom kompleksu. Ovo je prilicno komplikovano,
-// i mora da se radi odredjenim redom po nivoima, privremenim bojenjem ekvivalentnih simpleksa
-// u starom i novom kompleksu, itdisl.
-//
-// Ili, ako ne zelimo to sve da radimo, jedno moguce (kratko i "prljavo") resenje je da se operacija
-// kopiranja realizuje tako sto se prvo stari kompleks snimi u neki privremeni .xml fajl pomocu
-// save_complex_to_xml_file(), pa se zatim novi kompleks kreira ucitavanjem tog istog fajla
-// pomocu read_complex_from_xml_file(), i na kraju se pozove operativni sistem da obrise
-// privremeni fajl. Na taj nacin ceo gornji komplikovan posao zapravo rade f-je za snimanje i
-// ucitavanje kompleksa, jer one vec vrse sva neophodna privremena bojenja itd.
-        elements.push_back(newKSimplexList);
-    }
-}
-
 // Default destructor
 SimpComp::~SimpComp(){
     log_report(LOG_DEBUG, "~SimpComp(): Default destructor: deallocating an existing simplicial complex object");
@@ -354,37 +322,28 @@ bool SimpComp::reconstruct_neighbors_from_vertices(){
 // Printing functions:
 // ###################
 
-// Rudimentary printing of the complex structure to stdout
-// (probably will be deprecated soon --- use print_detailed() instead)
-// TODO: ja bih ovo prepravio u wrapper za print_detailed() ili sl.
-void SimpComp::print(string space){
-    cout << space << "Printing SimpComp " << name << ", topology = " << topology << ", D = " << D << endl;
-    for(size_t i = 0; i < elements.size(); i++){
-        if(!elements[i].empty()){
-            cout << space << "  Printing SimpComp " << name << " elements, level = " << i << ":" << endl;
-            for(auto kSimplex : elements[i]){
-                kSimplex->print(space + "    ");
-            }
-        }
-    }
+// Printing of the complex structure to stdout
+// Wrapper for the print_detailed() function
+void SimpComp::print(){
+  this->print_detailed();
 }
 
 
 // Prints a total number of simplices at each level in a complex to stdout
 // (probably will be deprecated soon --- use print_detailed() instead)
 // TODO: mislim da nam ova f-ja ni za sta ne treba, obrisao bih je...
-void SimpComp::print_sizes(){
-    cout << endl << " --- Number of elements in " << name << " for each dimension ---" << endl;
-    for(int i = 0; i <= D; i++){
-        int n = count_number_of_simplices(i);
-        if(n){
-            cout << "Number of KSimplices at level " << i << ": " << n << endl; // counting edges
-        }else{
-            //cout << "Nothing on level " << i << "." << endl;
-        }
-    }
-    cout << endl;
-}
+//void SimpComp::print_sizes(){
+//    cout << endl << " --- Number of elements in " << name << " for each dimension ---" << endl;
+//    for(int i = 0; i <= D; i++){
+//        int n = count_number_of_simplices(i);
+//        if(n){
+//            cout << "Number of KSimplices at level " << i << ": " << n << endl; // counting edges
+//        }else{
+//            //cout << "Nothing on level " << i << "." << endl;
+//        }
+//    }
+//    cout << endl;
+//}
 
 
 // Constructs a string with HTML code for printing all simplices in a complex,

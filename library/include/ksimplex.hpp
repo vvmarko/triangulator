@@ -130,10 +130,9 @@ public:
   // Printing functions:
   // ###################
 
-  // Rudimentary printing of the simplex data to stdout
-  // (probably will be deprecated soon --- use print_detailed() instead)
-  // TODO: ja bih ovo prepravio u wrapper za print_detailed() ili sl.
-    void print(string space = "");
+  // Printing of the simplex data to stdout
+  // Wrapper for print_detailed()
+    void print();
 
   // Prints the set of UniqueID colors of vertices of a given simplex,
   // in a human-readable format, "50(2-13-44)" or "(2-13-44)" and similar, to stdout

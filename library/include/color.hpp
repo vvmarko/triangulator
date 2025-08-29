@@ -1,10 +1,47 @@
 
+
+// ######################
+// Color class definition
+// ######################
+
+// General information:
+//
+// Class Color is the third fundamental class of the whole
+// Triangulator library and derived userspace apps. It contains
+// the basic description of the colors and labels corresponding to
+// a given simplex, by keeping track of the color type, value, and
+// various other parameters and constants associated to each
+// particular color.
+
+// The vast majority of usecases of the library revolves around
+// manipulating colors. Users are welcome and encouraged to define
+// and use their own custom colors, in addition to the ones that are
+// already provided by default. See below for the template for
+// user-defined colors and requirements for defining them.
+
+// As a rule, objects of the Color class should be allocated
+// and deallocated using various high-level functions such as
+// colorize_single_simplex() and remove_color_from_simplex().
+// You should not instantiate a Color object using a low-level
+// constructor, unless you know what you are doing (for example,
+// writing a new colorize_single_simplex() function for a newly
+// defined color, or something to that effect).
+//
+// Other than that, you will be working with, using and manipulating
+// Color objects all the time --- the whole purpose of the
+// Triangulator library is to facilitate various tools for that.
+
+
+// ####################################################
+// Definitions of the various constants and parameters:
+// ####################################################
+
 #ifndef _TRIANGULATOR_COLOR_HPP_
 #define _TRIANGULATOR_COLOR_HPP_
 
-// ######################
-// Color type definitions
-// ######################
+// #######################
+// Color type definitions:
+// #######################
 
 // Special colors will have type between MIN_SPECIAL and MAX_SPECIAL:
 #define MIN_SPECIAL 0
@@ -18,10 +55,14 @@
 
 #define TYPE_BOUNDARY 0
 #define TYPE_PACHNER 1
-#define TYPE_SCREEN_COORDINATES 128
-#define TYPE_UNIQUE_ID 129
-#define TYPE_TOPOLOGICAL_COORDINATES 130
-#define TYPE_EMBEDDING_COORDINATES 131
+#define TYPE_UNIQUE_ID 128
+#define TYPE_TOPOLOGICAL_COORDINATES 129
+#define TYPE_EMBEDDING_COORDINATES 130
+#define TYPE_SCREEN_COORDINATES 131
+
+// ##################################################
+// Parameters foc evaluating topological coordinates:
+// ##################################################
 
 #define POTENTIAL_SPRING_COEFFICIENT 1.0
 #define POTENTIAL_SPRING_SIZE 5.0
@@ -29,28 +70,46 @@
 #define POTENTIAL_MAX_ITERATION_NUMBER 200
 #define MAX_TEST_COORDINATES 50
 
-
 #endif
 
-// ######################
+// #########################################
 // Forward declarations of neccesary classes
-// ######################
+// #########################################
 
 class KSimplex;
 class SimpComp;
 
-// #######################
-// Color class definitions
-// #######################
+// #####################################
+// Definition of the parent Color class:
+// #####################################
 
-// Colors define features of K-simplices:
 class Color{
 public:
 
+  // ##########################################
+  // Data structures of the parent Color class:
+  // ##########################################
+
+  // Type of the color (corresponding to the TYPE_ constant from
+  // the table above):
+    int type;
+  // NB: All other data structures of the color are defined in child
+  // colors, rather than here. Type is the only common parameter for
+  // all colors.
+
+  // ########################################
+  // Constructors and destructors of a color:
+  // ########################################
+
+  // Default constructor does not exist for the parent class, one should
+  // only ever instantiate child color objects.
+  
+  // Default destructor:
     virtual ~Color();
 
-    virtual void print();
-    virtual void print_compact();
+
+  void print();
+  
 
     virtual string get_color_value_as_str() const;
     virtual void set_color_value_from_str(const string& source) = 0;
@@ -60,8 +119,8 @@ public:
     static void remove_color_type_from_simplex(KSimplex* simp, int typecode);
     static void remove_color_type_from_level(SimpComp* G, int level, int typecode);
     static void remove_color_type_from_complex(SimpComp* G, int typecode);
-  
-    int type;
+
+
 };
 
 string get_color_name_from_type(int color_type);
@@ -97,7 +156,7 @@ public:
 
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
-  
+
     KSimplex *matchingSimplex = nullptr;
     bool internalSimplex = false;
     bool externalSimplex = false;
@@ -122,7 +181,7 @@ public:
     static bool append_color_to_simplices_at_level(SimpComp* G, int level);
     static bool append_color_to_entire_complex(SimpComp* G);
     static bool relabel_everything(void);
-  
+
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
 
@@ -139,6 +198,7 @@ public:
     void print();
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source);
+    static bool colorize_single_simplex(KSimplex* simp, const string& source);
 
     int x, y; // screen coordinates
 };
@@ -149,22 +209,23 @@ public:
     TopologicalCoordinatesColor();
     ~TopologicalCoordinatesColor();
     static void initQMinQMax(int D);
+    static bool colorize_single_simplex(KSimplex* simp, const string& source);
     static bool colorize_simplex(SimpComp* simp);
     bool colorize_vertex();
     void print();
     static void print_coordinates(SimpComp *simp);
-    
+
     static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
     static double evaluate_spring_potential(SimpComp *simp);
-    
+
     static void shake(SimpComp *simp);
     static void storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
     static void restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
     static void evaluate_potential_minimum(SimpComp *simp);
-    
+
     string get_color_value_as_str() const;
     void set_color_value_from_str(const string& source) override;
-        
+
     static vector<double> qMin;
     static vector<double> qMax;
     vector<double> q;
@@ -177,5 +238,6 @@ public:
     void print();
     void set_color_value_from_str(const string& source);
     static void evaluate_embedding_coordinates(SimpComp *G);
+    static bool colorize_single_simplex(KSimplex* simp, const string& source);
     vector<double> x;
 };

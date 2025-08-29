@@ -207,18 +207,10 @@ bool KSimplex::reconstruct_neighbors_from_vertices(SimpComp* simpComp){
 // Printing functions:
 // ###################
 
-// Rudimentary printing of the simplex data to stdout
-// (probably will be deprecated soon --- use print_detailed() instead)
-// TODO: ja bih ovo prepravio u wrapper za print_detailed() ili sl.
-void KSimplex::print(string space){
-    cout << space << "Printing KSimplex: " << " k = " << k << ", D = " << D << endl;
-    cout << space << "Printing colors:" << endl;
-    for(auto &c : colors){
-        c->print();
-    }
-	// Recursively prints neighbors:
-    cout << space << "  Printing neighbors:" << endl;
-    neighbors->print_compact();
+// Printing of the simplex data to stdout
+// Wrapper for print_detailed()
+void KSimplex::print(){
+  this->print_detailed();
 }
 
 // Prints the set of UniqueID colors of vertices of a given simplex,

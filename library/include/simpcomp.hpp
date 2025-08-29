@@ -5,7 +5,7 @@
 
 // General information:
 //
-// Class SimpComp is the fundamental class of the whole
+// Class SimpComp is the first fundamental class of the whole
 // Triangulator library and derived userspace apps. It contains
 // the basic description of a simplicial complex corresponding to
 // a given manifold, by keeping track of its name, topology,
@@ -56,9 +56,6 @@ public:
 
   // No-name constructor (used for neighbor structure in the KSimplex class)
     SimpComp(int dim);
-
-  // Copy-constructor, copying a given complex
-    SimpComp(const SimpComp& simpComp);
 
   // Default destructor
     ~SimpComp();
@@ -148,15 +145,14 @@ public:
   // Printing functions:
   // ###################
 
-  // Rudimentary printing of the complex structure to stdout
-  // (probably will be deprecated soon --- use print_detailed() instead)
-  // TODO: ja bih ovo prepravio u wrapper za print_detailed() ili sl.
-    void print(string space = "");
+  // Printing of the complex structure to stdout
+  // Wrapper for the print_detailed() function
+    void print();
 
   // Prints a total number of simplices at each level in a complex to stdout
   // (probably will be deprecated soon --- use print_detailed() instead)
   // TODO: mislim da nam ova f-ja ni za sta ne treba, obrisao bih je...
-    void print_sizes();
+  //    void print_sizes();
 
   // Constructs a string with HTML code for printing all simplices in a complex,
   // with the HTML syntax appropriate for the GUI
