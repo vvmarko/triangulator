@@ -329,23 +329,6 @@ void SimpComp::print(){
 }
 
 
-// Prints a total number of simplices at each level in a complex to stdout
-// (probably will be deprecated soon --- use print_detailed() instead)
-// TODO: mislim da nam ova f-ja ni za sta ne treba, obrisao bih je...
-//void SimpComp::print_sizes(){
-//    cout << endl << " --- Number of elements in " << name << " for each dimension ---" << endl;
-//    for(int i = 0; i <= D; i++){
-//        int n = count_number_of_simplices(i);
-//        if(n){
-//            cout << "Number of KSimplices at level " << i << ": " << n << endl; // counting edges
-//        }else{
-//            //cout << "Nothing on level " << i << "." << endl;
-//        }
-//    }
-//    cout << endl;
-//}
-
-
 // Constructs a string with HTML code for printing all simplices in a complex,
 // with the HTML syntax appropriate for the GUI
 // (it is heavily used by the GUI, not useful otherwise)
