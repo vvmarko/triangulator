@@ -2,8 +2,8 @@
 #include "triangulator.hpp"
 
 unsigned long UniqueIDColor::next_free_uid_number = 1;
-vector<double> TopologicalCoordinatesColor::qMin;
-vector<double> TopologicalCoordinatesColor::qMax;
+vector<double> DrawingCoordinatesColor::qMin;
+vector<double> DrawingCoordinatesColor::qMax;
 
 Color::~Color()
 {
@@ -42,10 +42,8 @@ bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, c
         return PachnerColor::colorize_single_simplex(simp);
     case TYPE_UNIQUE_ID:
         return UniqueIDColor::colorize_single_simplex(simp);
-    case TYPE_TOPOLOGICAL_COORDINATES:
-      return TopologicalCoordinatesColor::colorize_single_simplex(simp,color_value);
-    case TYPE_EMBEDDING_COORDINATES:
-      return EmbeddingCoordinatesColor::colorize_single_simplex(simp,color_value);
+    case TYPE_DRAWING_COORDINATES:
+      return DrawingCoordinatesColor::colorize_single_simplex(simp,color_value);
     default:
       log_report(LOG_ERROR,"Color::colorize_simplex_from_string : Color type " + to_string(color_type) + " not recognized! Fix your code!");
       return false;
@@ -100,10 +98,8 @@ string get_color_name_from_type(int color_type){
             return "Pachner";
         case TYPE_UNIQUE_ID:
             return "UniqueID";
-        case TYPE_TOPOLOGICAL_COORDINATES:
-            return "TopologicalCoordinates";
-        case TYPE_EMBEDDING_COORDINATES:
-            return "EmbeddingCoordinates";
+        case TYPE_DRAWING_COORDINATES:
+            return "DrawingCoordinates";
         default:
             return "Unknown color name, type " + to_string(color_type);
     }
@@ -380,17 +376,35 @@ void UniqueIDColor::set_color_value_from_str(const string& source) {
 
 
 
-TopologicalCoordinatesColor::TopologicalCoordinatesColor(){
-    type = TYPE_TOPOLOGICAL_COORDINATES;
+DrawingCoordinatesColor::DrawingCoordinatesColor(){
+    type = TYPE_DRAWING_COORDINATES;
 }
 
-TopologicalCoordinatesColor::~TopologicalCoordinatesColor(){
+DrawingCoordinatesColor::~DrawingCoordinatesColor(){
 }
 
-bool TopologicalCoordinatesColor::colorize_single_simplex(KSimplex* simp, const string& source)
+
+string DrawingCoordinatesColor::get_color_value_as_str()
+{
+    // Serialize vector q, by to_string(q[i]), or optimized? TODO
+    // Serialize vectors qMin and qMax? // TODO
+
+    return "(TopologicalCoordinatesColor)"; // TODO
+}
+
+void DrawingCoordinatesColor::set_color_value_from_str(const string& source) // TODO
+{
+    if (source=="true") return; // This is a dummy command, do not remove
+    // deserialize vector q // TODO
+    // deserialize vectors qMin and qMax? // TODO
+}
+
+
+
+bool DrawingCoordinatesColor::colorize_single_simplex(KSimplex* simp, const string& source)
 {
   bool outcome = true;
-  TopologicalCoordinatesColor* color = new(nothrow) TopologicalCoordinatesColor();
+  DrawingCoordinatesColor* color = new(nothrow) DrawingCoordinatesColor();
   if (color==nullptr) {
     outcome = false;
     log_report(LOG_PANIC,"TopologicalCoordinatesColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
@@ -403,7 +417,7 @@ bool TopologicalCoordinatesColor::colorize_single_simplex(KSimplex* simp, const 
 
 
 
-void TopologicalCoordinatesColor::initQMinQMax(int D){
+void DrawingCoordinatesColor::initQMinQMax(int D){
     if(qMin.size()==0){
         for(int i = 0; i < D; i++){
             //qMin.push_back(std::numeric_limits<double>::lowest()); // TODO
@@ -414,67 +428,66 @@ void TopologicalCoordinatesColor::initQMinQMax(int D){
     }
 }
 
-bool TopologicalCoordinatesColor::colorize_entire_complex(SimpComp* simp){
-    TopologicalCoordinatesColor::initQMinQMax(simp->D);
+bool DrawingCoordinatesColor::colorize_entire_complex(SimpComp* simp){
+    DrawingCoordinatesColor::initQMinQMax(simp->D);
     srand((unsigned int)time(NULL));
     // For all vertices:
     for(auto &kSimplex : simp->elements[0]){
-        TopologicalCoordinatesColor *c = new TopologicalCoordinatesColor();
+        DrawingCoordinatesColor *c = new DrawingCoordinatesColor();
         c->colorize_vertex();
         //c->print();
         kSimplex->colors.push_back(c);
     }
-
     return true;
 }
 
-bool TopologicalCoordinatesColor::colorize_vertex(){
+bool DrawingCoordinatesColor::colorize_vertex(){
     for(unsigned int i = 0; i < qMin.size(); i++)
         q.push_back(qMin[i] + (qMax[i] / RAND_MAX - qMin[i] / RAND_MAX) * rand()); // TODO
 
     return true;
 }
     
-void TopologicalCoordinatesColor::print(){
-    cout << "TopologicalCoordinatesColor: ";
+void DrawingCoordinatesColor::print(){
+    cout << "DrawingCoordinatesColor: ";
     for(unsigned int i = 0; i < q.size(); i++){
         cout << q[i] << "  ";
     }
     cout << endl;
 }
 
-void TopologicalCoordinatesColor::print_coordinates(SimpComp *simp){
-    TopologicalCoordinatesColor *color;
+void DrawingCoordinatesColor::print_coordinates(SimpComp *simp){
+    DrawingCoordinatesColor *color;
     for(auto vertex : simp->elements[0]){
-        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
         if(col)
-            color = (TopologicalCoordinatesColor*) col;
+            color = (DrawingCoordinatesColor*) col;
         else
             return;
         color->print();
     }
 }
 
-double TopologicalCoordinatesColor::evaluate_coordinate_length(KSimplex *edge, SimpComp *simp){
+double DrawingCoordinatesColor::evaluate_coordinate_length(KSimplex *edge, SimpComp *simp){
     Color *col;
-    TopologicalCoordinatesColor *color1, *color2;
+    DrawingCoordinatesColor *color1, *color2;
 //cout << "Edge: " << endl;
     KSimplex *vertex1 = edge->neighbors->elements[0][0];
     KSimplex *vertex2 = edge->neighbors->elements[0][1];
 
 //cout << "  vertex1: ";
-    col = Color::find_pointer_to_color_type(vertex1, TYPE_TOPOLOGICAL_COORDINATES);
+    col = Color::find_pointer_to_color_type(vertex1, TYPE_DRAWING_COORDINATES);
     if(col)
-        color1 = (TopologicalCoordinatesColor*) col;
+        color1 = (DrawingCoordinatesColor*) col;
     else
         return 0;
 //cout << " color1: ";
 //    color1->print();
 
 //cout << "  vertex2: ";
-    col = Color::find_pointer_to_color_type(vertex2, TYPE_TOPOLOGICAL_COORDINATES);
+    col = Color::find_pointer_to_color_type(vertex2, TYPE_DRAWING_COORDINATES);
     if(col)
-        color2 = (TopologicalCoordinatesColor*) col;
+        color2 = (DrawingCoordinatesColor*) col;
     else
         return 0;
 //cout << " color2: ";
@@ -487,11 +500,11 @@ double TopologicalCoordinatesColor::evaluate_coordinate_length(KSimplex *edge, S
     return sqrt(sum);
 }
 
-double TopologicalCoordinatesColor::evaluate_spring_potential(SimpComp *simp){
+double DrawingCoordinatesColor::evaluate_spring_potential(SimpComp *simp){
     double sum = 0;
     // For all edges:
     for(auto &kSimplex : simp->elements[1]){
-        double Le = TopologicalCoordinatesColor::evaluate_coordinate_length(kSimplex, simp);
+        double Le = DrawingCoordinatesColor::evaluate_coordinate_length(kSimplex, simp);
 //cout << "Le = " << Le << endl;
         sum += POTENTIAL_SPRING_COEFFICIENT * pow(Le - POTENTIAL_SPRING_SIZE, 2);
     }
@@ -501,14 +514,14 @@ double TopologicalCoordinatesColor::evaluate_spring_potential(SimpComp *simp){
 }
 
 // Moving (a little bit) each coordinate of each vertex in random direction
-void TopologicalCoordinatesColor::shake(SimpComp *simp){
+void DrawingCoordinatesColor::shake(SimpComp *simp){
     Color *col;
-    TopologicalCoordinatesColor *color;
+    DrawingCoordinatesColor *color;
     //cout << "Shaked vertex color: " << endl;
     for(auto vertex : simp->elements[0]){
-        col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
         if(col)
-            color = (TopologicalCoordinatesColor*) col;
+            color = (DrawingCoordinatesColor*) col;
         else
             return;
         for(unsigned int i = 0; i < color->q.size(); i++){
@@ -530,15 +543,15 @@ void TopologicalCoordinatesColor::shake(SimpComp *simp){
 }
 
 // Storing coordinates of each vertex
-void TopologicalCoordinatesColor::storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors){
+void DrawingCoordinatesColor::storeCoordinates(SimpComp *simp, vector<DrawingCoordinatesColor> &colors){
     //cout << "Storing coordinates... " << endl << endl;
     colors.clear();
     Color *col;
-    TopologicalCoordinatesColor *color;
+    DrawingCoordinatesColor *color;
     for(auto vertex : simp->elements[0]){
-        col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
         if(col)
-            color = (TopologicalCoordinatesColor *) col;
+            color = (DrawingCoordinatesColor *) col;
         else
             return;
         colors.push_back(*color);
@@ -546,128 +559,66 @@ void TopologicalCoordinatesColor::storeCoordinates(SimpComp *simp, vector<Topolo
 }
 
 // Restoring coordinates of each vertex
-void TopologicalCoordinatesColor::restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors){
+void DrawingCoordinatesColor::restoreCoordinates(SimpComp *simp, vector<DrawingCoordinatesColor> &colors){
     //cout << "Restoring coordinates:" << endl;
     Color *col;
-    TopologicalCoordinatesColor *color;
+    DrawingCoordinatesColor *color;
     for(unsigned int i = 0; i < simp->elements[0].size(); i++){
         KSimplex* vertex = simp->elements[0][i];
-        col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
         if(col)
-            color = (TopologicalCoordinatesColor *) col;
+            color = (DrawingCoordinatesColor *) col;
         else
             return;
         for(unsigned int k = 0; k < colors[i].q.size(); k++){
             color->q[k] = colors[i].q[k];
         }
     }    
-    //TopologicalCoordinatesColor::print_coordinates(simp);
 }
 
-void TopologicalCoordinatesColor::evaluate_potential_minimum(SimpComp *simp){
+void DrawingCoordinatesColor::evaluate_potential_minimum(SimpComp *simp){
     cout << "Evaluating potential minimum..." << endl;
     double potential, minPotential;
-    minPotential = potential = TopologicalCoordinatesColor::evaluate_spring_potential(simp);
+    minPotential = potential = DrawingCoordinatesColor::evaluate_spring_potential(simp);
 
-    vector<TopologicalCoordinatesColor> minPotentialColors;
-    TopologicalCoordinatesColor::storeCoordinates(simp, minPotentialColors);
+    vector<DrawingCoordinatesColor> minPotentialColors;
+    DrawingCoordinatesColor::storeCoordinates(simp, minPotentialColors);
 
     int iIter = 0;
     int iShake = 0;
     while( (iIter < POTENTIAL_MAX_ITERATION_NUMBER) && (iShake < MAX_TEST_COORDINATES) ){
-        TopologicalCoordinatesColor::shake(simp);
+        DrawingCoordinatesColor::shake(simp);
         iShake++;
-        potential = TopologicalCoordinatesColor::evaluate_spring_potential(simp);
+        potential = DrawingCoordinatesColor::evaluate_spring_potential(simp);
         //cout << "Vtemp = " << potential << endl << endl;
         if(potential < minPotential){
             minPotential = potential;
-            TopologicalCoordinatesColor::storeCoordinates(simp, minPotentialColors);
+            DrawingCoordinatesColor::storeCoordinates(simp, minPotentialColors);
             iShake = 0;
             iIter++;
         }else{
-            TopologicalCoordinatesColor::restoreCoordinates(simp, minPotentialColors);
+            DrawingCoordinatesColor::restoreCoordinates(simp, minPotentialColors);
         }
     }
 
     cout << "minPotential = " << minPotential << ", iIter = " << iIter << endl;
-    TopologicalCoordinatesColor::restoreCoordinates(simp, minPotentialColors);
+    DrawingCoordinatesColor::restoreCoordinates(simp, minPotentialColors);
 }
 
-string TopologicalCoordinatesColor::get_color_value_as_str()
-{
-    // Serialize vector q, by to_string(q[i]), or optimized? TODO
-    // Serialize vectors qMin and qMax? // TODO
-
-    return "(TopologicalCoordinatesColor)"; // TODO
-}
-
-void TopologicalCoordinatesColor::set_color_value_from_str(const string& source) // TODO
-{
-    if (source=="true") return; // This is a dummy command, do not remove
-    // deserialize vector q // TODO
-    // deserialize vectors qMin and qMax? // TODO
-}
-
-
-
-
-
-
-
-
-
-EmbeddingCoordinatesColor::EmbeddingCoordinatesColor(){
-    type = TYPE_EMBEDDING_COORDINATES;
-}
-
-EmbeddingCoordinatesColor::~EmbeddingCoordinatesColor(){
-}
-
-
-bool EmbeddingCoordinatesColor::colorize_single_simplex(KSimplex* simp, const string& source)
-{
-  bool outcome = true;
-  EmbeddingCoordinatesColor* color = new(nothrow) EmbeddingCoordinatesColor();
-  if (color==nullptr) {
-    outcome = false;
-    log_report(LOG_PANIC,"EmbeddingCoordinatesColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
-  } else {
-    color->set_color_value_from_str(source);    
-    simp->colors.push_back(color);
-  }
-  return outcome;
-}
-
-string EmbeddingCoordinatesColor::get_color_value_as_str(){
-  return "true"; // FIXME
-}
-
-void EmbeddingCoordinatesColor::set_color_value_from_str(const string& source){
-    if (source=="true") return; // This is a dummy command, do not remove
-}
-
-void EmbeddingCoordinatesColor::print(){
-    cout << "EmbeddingCoordinatesColor: ";
-    for(auto value : x){
-        cout << value << "  ";
-    }
-    cout << endl;
-}
-
-void EmbeddingCoordinatesColor::evaluate_embedding_coordinates(SimpComp *simp){
+void DrawingCoordinatesColor::evaluate_embedding_coordinates(SimpComp *simp){
     cout << "Evaluating embedding coordinates..." << endl; //TODO: for now, only for linear topology
     cout << "Topology: " << simp->topology << endl;
     
-    TopologicalCoordinatesColor *topColor;
+    DrawingCoordinatesColor *topColor;
     for(auto vertex : simp->elements[0]){
-        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_TOPOLOGICAL_COORDINATES);
+        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
         if(col)
-            topColor = (TopologicalCoordinatesColor*) col;
+            topColor = (DrawingCoordinatesColor*) col;
         else
             return;
 topColor->print(); // TODO: remove
         if(simp->topology == "linear"){
-            EmbeddingCoordinatesColor *embColor = new EmbeddingCoordinatesColor();
+            DrawingCoordinatesColor *embColor = new DrawingCoordinatesColor();
             for(auto &qq : topColor->q){
                 embColor->x.push_back(qq);
             }

@@ -1024,19 +1024,19 @@ void test_KSimplex_print_non_html(){
     test_ok("test_KSimplex_print_non_html");
 }
 
-void test_TopologicalCoordinatesColor(){
-    string name = "test_TopologicalCoordinatesColor";
+void test_DrawingCoordinatesColor(){
+    string name = "test_DrawingCoordinatesColor";
     
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
     SimpComp *simpComp = seed_single_simplex(3, "triangle");
     //simpComp->print_compact();
 
-    TopologicalCoordinatesColor::initQMinQMax(simpComp->D);
-    TopologicalCoordinatesColor::colorize_entire_complex(simpComp);
+    DrawingCoordinatesColor::initQMinQMax(simpComp->D);
+    DrawingCoordinatesColor::colorize_entire_complex(simpComp);
     
-    TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
+    DrawingCoordinatesColor::evaluate_spring_potential(simpComp);
     
-    TopologicalCoordinatesColor::evaluate_potential_minimum(simpComp);
+    DrawingCoordinatesColor::evaluate_potential_minimum(simpComp);
 }
 
 void test_EmbeddingCoordinatesColor(){
@@ -1046,16 +1046,16 @@ void test_EmbeddingCoordinatesColor(){
     SimpComp *simpComp = seed_single_simplex(3, "triangle");
     //simpComp->print_compact();
 
-    TopologicalCoordinatesColor::initQMinQMax(simpComp->D);
-    TopologicalCoordinatesColor::colorize_entire_complex(simpComp);
+    DrawingCoordinatesColor::initQMinQMax(simpComp->D);
+    DrawingCoordinatesColor::colorize_entire_complex(simpComp);
     
-    TopologicalCoordinatesColor::evaluate_spring_potential(simpComp);
+    DrawingCoordinatesColor::evaluate_spring_potential(simpComp);
     
-    TopologicalCoordinatesColor::evaluate_potential_minimum(simpComp);
+    DrawingCoordinatesColor::evaluate_potential_minimum(simpComp);
 
-    EmbeddingCoordinatesColor::evaluate_embedding_coordinates(simpComp);
+    DrawingCoordinatesColor::evaluate_embedding_coordinates(simpComp);
     for(auto vertex : simpComp->elements[0]){
-        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_EMBEDDING_COORDINATES);
+        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
         col->print();
     }
 }
@@ -1090,7 +1090,7 @@ void run_tests(){
     test_KSimplex_print_html();
     test_KSimplex_print_non_html();
 
-    test_TopologicalCoordinatesColor();
+    test_DrawingCoordinatesColor();
 
     test_EmbeddingCoordinatesColor();
 

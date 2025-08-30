@@ -56,8 +56,7 @@
 #define TYPE_BOUNDARY 0
 #define TYPE_PACHNER 1
 #define TYPE_UNIQUE_ID 128
-#define TYPE_TOPOLOGICAL_COORDINATES 129
-#define TYPE_EMBEDDING_COORDINATES 130
+#define TYPE_DRAWING_COORDINATES 129
 
 // ##################################################
 // Parameters foc evaluating topological coordinates:
@@ -370,43 +369,38 @@ public:
 };
 
 
-// #############################################
-// Child color --- Topological coordinates color
-// #############################################
+// #########################################
+// Child color --- Drawing coordinates color
+// #########################################
 
-// Topological coordinates color is a built-in color that is used by
+// Drawing coordinates color is a built-in color that is used by
 // various functions of the library, for the purpose of drawing the
 // wireframe graph of the simplicial complex on the computer screen.
-// The idea is to use topological coordinates to evaluate the
-// embedding coordinates, which are in turn used to evaluate the
-// screen coordinates, the latter ultimately used for drawing.
+// The idea is to start from assigning some intrinsic coordinates
+// adapted to the topology of the simplicial complex. The simplicial
+// complex is then embedded as a hypersurface into a Euclidean space
+// of higher dimension, and intrinsic coordinates are used to
+// evaluate the embedding coordinates in the big Euclidean space.
+// Finally, the embedding coordinates are used to project the complex
+// onto a two-dimensional plane of the computer screen, and the
+// wireframe of the complex can then be drawn on the screen.
 
-// Topological coordinates represent a set of D coordinates for every
-// vertex of a simplicial complex of dimension D, naturally adapted to
-// the given topology of the complex. The topological coordinates color
-// is assigned to vertices of the complex, while other simplices are
-// ignored. When instantiated for a given vertex, the values of the
-// topological coordinates are assigned randomly from their domain,
-// and they are afterwards recalculated so that the complex has the
-// most "natural shape", by invoking the external static function
-// evaluate_potential_minimum(), see file drawing-coordinates.hpp.
-// This function changes the topological coordinates from their initial
-// random values to values that minimize a certain given potential,
-// which encodes the notion of "natural shape" for a given complex.
+// The drawing coordinates color is assigned to vertices of the
+// complex, while all other simplices are ignored. For a simplicial
+// complex of dimension D embedded into a Euclidean space of
+// dimension Damb (where D <= Damb <= 2D), the drawing coordinates
+// color keeps track of D intrinsic cooordinates, their domain (i.e.
+// their maximum and minimum values), and Damb embedding coordinates,
+// including the value of Damb.
 
-// The topological coordinates color consists of a D-dimensional vector
-// of coordinates, and two static D-dimensional vectors that define
-// their domain, i.e. the minimal and maximal possible value that each
-// coordinate may take.
+// The user is allowed to manipulate the values of both intrinsic
+// and embedding coordinates (within their domains of course), but
+// for best visual results we recommend that they always be evaluated
+// automatically. Note that there are functions which will erase and
+// modify any manual changes made to either intrinsic or to embedding
+// coordinates.
 
-// The user is allowed to manipulate the values of topological
-// coordinates (within their domain of course), but for best visual
-// results we recommend that only the choice of the potential be
-// tweaked, rather than individual coordinates of individual vertices.
-// Every invocation of evaluate_potential_minimum() will erase and
-// modify any manual changes made to the topological coordinates.
-
-class TopologicalCoordinatesColor : public Color{
+class DrawingCoordinatesColor : public Color{
 public:
 
   // Data structures:
@@ -420,24 +414,25 @@ public:
   // D coordinates:
     static vector<double> qMin;
     static vector<double> qMax;
+
+  // Array of Damb topological coordinates:
+    vector<double> x;
+
+  // Dimension of the ambient embedding space:
+    int Damb;
   
   // Functions:
   // ##########
 
   // Constructor:
-    TopologicalCoordinatesColor();
+    DrawingCoordinatesColor();
 
   // Destructor:
-    ~TopologicalCoordinatesColor();
-
-  // Add topological coordinates color to a given simplex, and to the
-  // whole complex (only vertices are colored, other simplices are
-  // ignored):
-
-    static bool colorize_single_simplex(KSimplex* simp, const string& source); // FIXME
-    static bool colorize_entire_complex(SimpComp* simp);
+    ~DrawingCoordinatesColor();
 
   // FIX ME:
+    static bool colorize_single_simplex(KSimplex* simp, const string& source); // FIXME
+    static bool colorize_entire_complex(SimpComp* simp);
     static void initQMinQMax(int D);
     bool colorize_vertex();
     void print();
@@ -445,82 +440,15 @@ public:
     static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
     static double evaluate_spring_potential(SimpComp *simp);
     static void shake(SimpComp *simp);
-    static void storeCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
-    static void restoreCoordinates(SimpComp *simp, vector<TopologicalCoordinatesColor> &colors);
+    static void storeCoordinates(SimpComp *simp, vector<DrawingCoordinatesColor> &colors);
+    static void restoreCoordinates(SimpComp *simp, vector<DrawingCoordinatesColor> &colors);
     static void evaluate_potential_minimum(SimpComp *simp);
-
-  // Obligatory implementations of string codec functions for topological coordinates color  
-    string get_color_value_as_str() override;
-    void set_color_value_from_str(const string& source) override;
-
-};
-
-
-// ###########################################
-// Child color --- Embedding coordinates color
-// ###########################################
-
-// Embedding coordinates color is a built-in color that is used by
-// various functions of the library, for the purpose of drawing the
-// wireframe graph of the simplicial complex on the computer screen.
-// The idea is to use topological coordinates to evaluate the
-// embedding coordinates, which are in turn used to evaluate the
-// screen coordinates, the latter ultimately used for drawing.
-
-// Embedding coordinates represent a set of Damb coordinates for every
-// vertex of a simplicial complex of dimension D, which is being
-// naturally embedded as a hypersurface into an ambient Euclidean
-// space of dimension Damb. Depending on the toplology of the complex,
-// Damb is fixed to be somewhere in the range D <= Damb <= 2D. 
-
-
-// The embedding coordinates color is assigned to vertices of the
-// complex, while other simplices are ignored. When instantiated for a
-// given vertex, the values of the embedded coordinates are evaluated
-// from the topological coordinates of the same vertex, via the function
-// evaluate_embedding_coordinates(), see file drawing-coordinates.hpp.
-
-// The embedding coordinates color consists of a Damb-dimensional vector
-// of coordinates. Since these are assumed to be Cartesian coordinates
-// in a Euclidean space, their domains are all real numbers, and there
-// is no need to keep track of minimal and maximal values, in contrast to
-// the topological coordinates.
-
-// In principle, the user is allowed to manipulate the values of embedding
-// coordinates, but for best visual results we recommend that they always
-// be evaluated via evaluate_embedding_coordinates(). Note that every
-// invocation of this function will erase and  modify any manual changes
-// made to the embedding coordinates.
-
-class EmbeddingCoordinatesColor : public Color{
-public:
-
-  // Data structures:
-  // ################
-
-  // Array of Damb topological coordinates:
-    vector<double> x;
-
-  // Dimension of the ambient embedding space:
-    int Damb;
-
-  // Functions:
-  // ##########
-
-  // Constructor:
-    EmbeddingCoordinatesColor();
-
-  // Destructor:
-    ~EmbeddingCoordinatesColor();
-
-  // FIX ME:
-    static bool colorize_single_simplex(KSimplex* simp, const string& source);
     static void evaluate_embedding_coordinates(SimpComp *G);
-    void print();
   
-  // Obligatory implementations of string codec functions for topological coordinates color  
+  // Obligatory implementations of string codec functions for drawing coordinates color:
     string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
   
 };
+
 
