@@ -1028,36 +1028,21 @@ void test_DrawingCoordinatesColor(){
     string name = "test_DrawingCoordinatesColor";
     
     // Initilize simplicial complex of dimension D, and an empty k-simplex:
-    SimpComp *simpComp = seed_single_simplex(3, "triangle");
+    //    SimpComp *simpComp = seed_single_simplex(3, "triangle");
     //simpComp->print_compact();
 
-    DrawingCoordinatesColor::initQMinQMax(simpComp->D);
-    DrawingCoordinatesColor::colorize_entire_complex(simpComp);
+    //    initQMinQMax(simpComp->D);
+    //    colorize_entire_complex(simpComp);
     
-    DrawingCoordinatesColor::evaluate_spring_potential(simpComp);
+    //    evaluate_spring_potential(simpComp);
     
-    DrawingCoordinatesColor::evaluate_potential_minimum(simpComp);
-}
+    //    evaluate_potential_minimum(simpComp);
 
-void test_EmbeddingCoordinatesColor(){
-    string name = "test_EmbeddingCoordinatesColor";
-    
-    // Initilize simplicial complex of dimension D, and an empty k-simplex:
-    SimpComp *simpComp = seed_single_simplex(3, "triangle");
-    //simpComp->print_compact();
-
-    DrawingCoordinatesColor::initQMinQMax(simpComp->D);
-    DrawingCoordinatesColor::colorize_entire_complex(simpComp);
-    
-    DrawingCoordinatesColor::evaluate_spring_potential(simpComp);
-    
-    DrawingCoordinatesColor::evaluate_potential_minimum(simpComp);
-
-    DrawingCoordinatesColor::evaluate_embedding_coordinates(simpComp);
-    for(auto vertex : simpComp->elements[0]){
-        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
-        col->print();
-    }
+    //    evaluate_embedding_coordinates(simpComp);
+    //    for(auto vertex : simpComp->elements[0]){
+    //        Color* col = Color::find_pointer_to_color_type(vertex, TYPE_DRAWING_COORDINATES);
+    //        col->print();
+    //    }
 }
     
 void run_tests(){
@@ -1091,8 +1076,6 @@ void run_tests(){
     test_KSimplex_print_non_html();
 
     test_DrawingCoordinatesColor();
-
-    test_EmbeddingCoordinatesColor();
 
 }
 

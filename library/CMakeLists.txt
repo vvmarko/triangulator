@@ -9,6 +9,7 @@ list(APPEND TRIANGULATOR_SRCS
     src/seed.cpp
     src/simpcomp.cpp
     src/global-vars.cpp
+    src/drawing.cpp
   )
 
 # List of directories to include header files from.

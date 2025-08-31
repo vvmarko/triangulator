@@ -10,7 +10,7 @@ using namespace std;
 #include <list>
 #include <new>
 #include <memory>
-#include <math.h>
+#include <cmath>
 #include <limits>
 #include <cstring>
 
@@ -19,6 +19,7 @@ using namespace std;
 #include "rapidxml-patch.hpp"
 #include "rapidxml_print.hpp"
 
+// Order of the following includes is important:
 #include "color.hpp"
 #include "simpcomp.hpp"
 #include "ksimplex.hpp"
@@ -26,5 +27,5 @@ using namespace std;
 #include "input_and_output.hpp"
 #include "pachner.hpp"
 #include "global-vars.hpp"
-
+#include "drawing.hpp"
 

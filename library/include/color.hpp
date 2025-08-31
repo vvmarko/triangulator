@@ -65,8 +65,9 @@
 #define POTENTIAL_SPRING_COEFFICIENT 1.0
 #define POTENTIAL_SPRING_SIZE 5.0
 #define POTENTIAL_SHAKE_STEP 0.2
-#define POTENTIAL_MAX_ITERATION_NUMBER 200
-#define MAX_TEST_COORDINATES 50
+#define POTENTIAL_MAX_ITERATION_NUMBER 1000
+#define POTENTIAL_MAX_TEST_COORDINATES 50
+#define SPHERE_DRAWING_RADIUS 20
 
 #endif
 
@@ -380,17 +381,17 @@ public:
 // adapted to the topology of the simplicial complex. The simplicial
 // complex is then embedded as a hypersurface into a Euclidean space
 // of higher dimension, and intrinsic coordinates are used to
-// evaluate the embedding coordinates in the big Euclidean space.
+// evaluate the embedding coordinates in the big ambient space.
 // Finally, the embedding coordinates are used to project the complex
 // onto a two-dimensional plane of the computer screen, and the
 // wireframe of the complex can then be drawn on the screen.
 
 // The drawing coordinates color is assigned to vertices of the
 // complex, while all other simplices are ignored. For a simplicial
-// complex of dimension D embedded into a Euclidean space of
-// dimension Damb (where D <= Damb <= 2D), the drawing coordinates
-// color keeps track of D intrinsic cooordinates, their domain (i.e.
-// their maximum and minimum values), and Damb embedding coordinates,
+// complex of dimension D embedded into an ambient space of dimension
+// Damb (where D <= Damb <= 2D), the drawing coordinates color keeps
+// track of D intrinsic cooordinates, their domain (i.e. their
+// maximum and minimum values), and Damb embedding coordinates,
 // including the value of Damb.
 
 // The user is allowed to manipulate the values of both intrinsic
@@ -409,11 +410,11 @@ public:
   // Array of D topological coordinates:
     vector<double> q;
 
-  // Static arrays defining the domain of topological coordinates,
+  // Arrays defining the domain of topological coordinates,
   // namely minimal and maximal possible values for each of the
   // D coordinates:
-    static vector<double> qMin;
-    static vector<double> qMax;
+    vector<double> qMin;
+    vector<double> qMax;
 
   // Array of Damb topological coordinates:
     vector<double> x;
@@ -430,20 +431,21 @@ public:
   // Destructor:
     ~DrawingCoordinatesColor();
 
-  // FIX ME:
-    static bool colorize_single_simplex(KSimplex* simp, const string& source); // FIXME
-    static bool colorize_entire_complex(SimpComp* simp);
-    static void initQMinQMax(int D);
-    bool colorize_vertex();
+  // Adding DrawingCoordinatesColor to a single simplex, and to a complex:
+    static bool colorize_single_simplex(KSimplex* simp);
+    static bool colorize_entire_complex(SimpComp* simpComp);
+
+  // Adding DrawingCoordinatesColor to a single simplex, using values from a string:
+    static bool colorize_single_simplex(KSimplex* simp, const string& source);
+
+  // verify if a simplex contains the DrawingCoordinates color:
+    static bool is_colorized(KSimplex* simp);
+  
+  // find a pointer to the Pachner color for a given simplex:
+    static DrawingCoordinatesColor* find_pointer_to_color(KSimplex* simp);
+  
+  // Printing the coordinates to the screen in human-readable form:
     void print();
-    static void print_coordinates(SimpComp *simp);
-    static double evaluate_coordinate_length(KSimplex *edge, SimpComp *simp);
-    static double evaluate_spring_potential(SimpComp *simp);
-    static void shake(SimpComp *simp);
-    static void storeCoordinates(SimpComp *simp, vector<DrawingCoordinatesColor> &colors);
-    static void restoreCoordinates(SimpComp *simp, vector<DrawingCoordinatesColor> &colors);
-    static void evaluate_potential_minimum(SimpComp *simp);
-    static void evaluate_embedding_coordinates(SimpComp *G);
   
   // Obligatory implementations of string codec functions for drawing coordinates color:
     string get_color_value_as_str() override;

@@ -3,6 +3,7 @@ list(APPEND tests
   main.cpp
   attach-simplex.cpp
   pachnertest.cpp
+  drawingtest.cpp
     )
 
 # Enabling testing.
