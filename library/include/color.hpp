@@ -58,16 +58,18 @@
 #define TYPE_UNIQUE_ID 128
 #define TYPE_DRAWING_COORDINATES 129
 
-// ##################################################
-// Parameters foc evaluating topological coordinates:
-// ##################################################
+// ################################################################
+// Parameters foc evaluating topological and embedding coordinates:
+// ################################################################
 
 #define POTENTIAL_SPRING_COEFFICIENT 1.0
 #define POTENTIAL_SPRING_SIZE 5.0
+#define POTENTIAL_INVERSE_DISTANCE_INTERACTION 50.0
 #define POTENTIAL_SHAKE_STEP 0.2
 #define POTENTIAL_MAX_ITERATION_NUMBER 1000
 #define POTENTIAL_MAX_TEST_COORDINATES 50
-#define SPHERE_DRAWING_RADIUS 20
+#define SPHERE_DRAWING_RADIUS 20.0
+#define DOMAIN_LINEAR_TOPOLOGY 20.0
 
 #endif
 

@@ -8,40 +8,23 @@ int main(){
     cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
     cout         << "#######################################################" << endl << endl;
 
-    DrawingCoordinatesColor *col;
     int D = 2;
     
     //    SimpComp *sph = seed_single_simplex(D,"sphere");
     SimpComp *sph = seed_sphere(D,"sphere");
     
-    Pachner_move(sph->elements[D][0],sph);
-    Pachner_move(sph->elements[D][1],sph);
-    Pachner_move(sph->elements[D][2],sph);
-    Pachner_move(sph->elements[D][3],sph);
-    Pachner_move(sph->elements[D][4],sph);
+    ScreenParameters *sp = new(nothrow) ScreenParameters(sph->D + 1);
 
-    UniqueIDColor::colorize_entire_complex(sph);
-    sph->print_compact();
-    cout << endl;
+    cout << "Damb = " << sp->Damb << endl;
+    cout << "d =    " << sp->d << endl;
+    cout << "sx =   " << sp->sx << endl;
+    cout << "sy =   " << sp->sy << endl;
+    cout << "sz =   " << sp->sz << endl;
+    cout << "Number of alpha angles: " << sp->alpha.size() << endl;
+    cout << "Number of beta angles: " << sp->beta.size() << endl;
+    cout << "Number of gamma angles: " << sp->gamma.size() << endl;
 
-    initialize_drawing_coordinates(sph);
-    evaluate_potential_minimum(sph);
-    evaluate_embedding_coordinates(sph);
-
-    cout << endl << "Spring potential value: " << evaluate_spring_potential(sph) << endl << endl;
-
-    cout << "Edge lengths:";
-    for(auto &it : sph->elements[1])
-      cout << "  " << evaluate_coordinate_length(it,sph);
-    cout << endl << endl;
-    
-    for(auto &it : sph->elements[0] ){
-      col = DrawingCoordinatesColor::find_pointer_to_color(it);
-      col->print();
-      cout << endl;
-    }
-
-    
+    free(sp);
     unseed_everything();
     
     cout << endl << "#################################################" << endl;
@@ -50,3 +33,4 @@ int main(){
 
     return 0;
 }
+

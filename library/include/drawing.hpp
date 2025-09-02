@@ -1,9 +1,76 @@
 
+
+class ScreenParameters{
+public:
+
+  // ################
+  // Data structures:
+  // ################
+  
+  // Dimension of the ambient space:
+  int Damb;
+  
+  // Distance of the screen from the coordinate origin of
+  // the ambient space:
+  double d;
+
+  // Scaling parameters for the X and Y axes of the screen
+  // coordinate system:
+  double sx;
+  double sy;
+
+  // Distance of the observer's eye from the screen:
+  double sz;
+
+  // Angles determining the orientation of the screen origin
+  // with respect to the coordinate system of ambient space,
+  // with their domain specification:
+  vector<double> alpha;
+  vector<double> alphaMin;
+  vector<double> alphaMax;
+
+  // Angles determining the orientation of the X axis of the
+  // screen coordinate system, with their domain specification:
+  vector<double> beta;
+  vector<double> betaMin;
+  vector<double> betaMax;
+
+  // Angles determining the orientation of the Y axis of the
+  // screen coordinate system, with their domain specification:
+  vector<double> gamma;
+  vector<double> gammaMin;
+  vector<double> gammaMax;
+
+  // #############################
+  // Constructors and destructors:
+  // #############################
+  
+  // Constructor, for a given dimension of ambient space:
+  ScreenParameters(int dimension);
+
+  // Destructor:
+  ~ScreenParameters();
+
+};
+
+
+
+
 bool initialize_drawing_coordinates(SimpComp *simpComp);
+
+void recenter_intrinsic_coordinates(SimpComp *simpComp);
 
 void evaluate_embedding_coordinates(SimpComp *simpComp);
 
-double evaluate_coordinate_length(KSimplex *edge, SimpComp *simpComp);
+double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpComp *simpComp);
+
+double evaluate_coordinate_edge_length(KSimplex *edge, SimpComp *simpComp);
+
+double evaluate_potential(SimpComp *simpComp);
+
+double evaluate_inverse_distance_potential(SimpComp *simpComp);
+
+double evaluate_inverse_edge_potential(SimpComp *simpComp);
 
 double evaluate_spring_potential(SimpComp *simpComp);
 

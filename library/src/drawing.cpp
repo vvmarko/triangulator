@@ -1,6 +1,163 @@
 
 #include "triangulator.hpp"
 
+ScreenParameters::ScreenParameters(int dimension){
+  int i;
+
+  // The constructor for the ScreenParameters class is nontrivial,
+  // since it needs to set up the default values of the parameters
+  // depending on the dimension of the ambient space. This is
+  // especially important for the angles, whose existance, number
+  // and domains depend on the dimension, in addition to their
+  // default values.
+  //
+  // The "trivial" constructor is deliberately not implemented,
+  // because it is conceptually wrong to instantiate a member of
+  // the ScreenParameter class, without doing the work that is being
+  // done below.
+  
+  // First set the ambient dimension
+  Damb = dimension;
+
+  // Set default distance and scaling parameters
+  d = 50.0;
+  sx = 1.0;
+  sy = 1.0;
+  sz = 10.0;
+
+  // Clear all angles, before actually setting them up
+  alpha.clear();
+  alphaMin.clear();
+  alphaMax.clear();
+  beta.clear();
+  betaMin.clear();
+  betaMax.clear();
+  gamma.clear();
+  gammaMin.clear();
+  gammaMax.clear();
+  
+  // Angles must be set according to the ambient dimension,
+  // with special treatment for Damb = 1,2.
+  if(Damb == 1){
+    // In Damb=1, alpha angles do not make sense, but the two constant
+    // ones can in fact formally be defined (for completeness sake, since
+    // they are not really useful):
+    alpha.push_back(M_PI/2);
+    alphaMin.push_back(M_PI/2);
+    alphaMax.push_back(M_PI/2);
+
+    alpha.push_back(0.0);
+    alphaMin.push_back(0.0);
+    alphaMax.push_back(0.0);
+
+    // In Damb=1, beta and gamma angles are not even defined, so we leave
+    // them completely empty.
+  }
+
+  if(Damb == 2){
+    // In Damb=2, alpha angles have one free angle (known as the
+    // "polar angle" of 2D polar coordinates), with the domain [0,2*pi):
+    // We choose the default value zero for the polar angle:
+    alpha.push_back(M_PI/2);
+    alphaMin.push_back(M_PI/2);
+    alphaMax.push_back(M_PI/2);
+
+    alpha.push_back(0.0);
+    alphaMin.push_back(0.0);
+    alphaMax.push_back(2*M_PI);
+
+    alpha.push_back(0.0);
+    alphaMin.push_back(0.0);
+    alphaMax.push_back(0.0);
+
+    // In Damb=2, the trivial beta angles can be defined, for completeness:
+    beta.push_back(M_PI/2);
+    betaMin.push_back(M_PI/2);
+    betaMax.push_back(M_PI/2);
+
+    beta.push_back(0.0);
+    betaMin.push_back(0.0);
+    betaMax.push_back(0.0);
+
+    // In Damb=2, the gamma angles are not even defined, so we leave
+    // them completely empty.
+  }
+
+  if(Damb >=3){
+    // The case Damb>=3 is already generic, with all angles being defined.
+    // Generically, polar angles have the domain [0,pi], and the default
+    // value pi/2, while azimuthal angles have domain [0,2*pi), and the
+    // default value zero.
+
+    // There are Damb-1 free alpha angles, and two fixed ones
+    alpha.push_back(M_PI/2); // fixed angle
+    alphaMin.push_back(M_PI/2);
+    alphaMax.push_back(M_PI/2);
+
+    for(i = 1; i < Damb - 1; i++) {
+      alpha.push_back(M_PI/2); // Damb-2 polar angles
+      alphaMin.push_back(0.0);
+      alphaMax.push_back(M_PI);
+    }
+    
+    alpha.push_back(0.0); // one azimuthal angle
+    alphaMin.push_back(0.0);
+    alphaMax.push_back(2*M_PI);
+
+    alpha.push_back(0.0); // fixed angle
+    alphaMin.push_back(0.0);
+    alphaMax.push_back(0.0);
+
+    // There are Damb-2 free beta angles, and two fixed ones
+    beta.push_back(M_PI/2); // fixed angle
+    betaMin.push_back(M_PI/2);
+    betaMax.push_back(M_PI/2);
+
+    for(i = 1; i < Damb - 2; i++) {
+      beta.push_back(M_PI/2); // Damb-3 polar angles
+      betaMin.push_back(0.0);
+      betaMax.push_back(M_PI);
+    }
+    
+    beta.push_back(0.0); // one azimuthal angle
+    betaMin.push_back(0.0);
+    betaMax.push_back(2*M_PI);
+
+    beta.push_back(0.0); // fixed angle
+    betaMin.push_back(0.0);
+    betaMax.push_back(0.0);
+    
+    // There are Damb-3 free beta angles, and two fixed ones
+    gamma.push_back(M_PI/2); // fixed angle
+    gammaMin.push_back(M_PI/2);
+    gammaMax.push_back(M_PI/2);
+
+    for(i = 1; i < Damb - 3; i++) {
+      gamma.push_back(M_PI/2); // Damb-4 polar angles
+      gammaMin.push_back(0.0);
+      gammaMax.push_back(M_PI);
+    }
+
+    if( Damb > 3 ){ // In D=3 the azimuthal angle does not exist
+      gamma.push_back(0.0); // one azimuthal angle
+      gammaMin.push_back(0.0);
+      gammaMax.push_back(2*M_PI);
+    }
+
+    gamma.push_back(0.0); // fixed angle
+    gammaMin.push_back(0.0);
+    gammaMax.push_back(0.0);
+  }
+
+  if(Damb < 1){
+    log_report(LOG_ERROR,"You are trying to instantiate screen parameters for a non-positive dimension! Fix your code!");
+  }
+}
+
+ScreenParameters::~ScreenParameters(){
+}
+
+
 
 bool initialize_drawing_coordinates(SimpComp* simpComp){
   bool outcome;
@@ -46,8 +203,8 @@ bool initialize_drawing_coordinates(SimpComp* simpComp){
           // Set the domain values for intrinsic coordinates:
           //        color->qMin.push_back(std::numeric_limits<double>::lowest()); // Absolute domain limits supported by the hardware
           //        color->qMax.push_back(std::numeric_limits<double>::max());
-          color->qMin.push_back(-20.0); // Reasonable limits compatible with typical screen resolutions
-          color->qMax.push_back(20.0);
+          color->qMin.push_back(-DOMAIN_LINEAR_TOPOLOGY); // Reasonable limits compatible with typical screen resolutions
+          color->qMax.push_back(DOMAIN_LINEAR_TOPOLOGY);
 
           // Set initial random values for intrinsic coordinates:
           color->q.push_back(color->qMin[i] + (color->qMax[i] / RAND_MAX - color->qMin[i] / RAND_MAX) * rand());
@@ -117,6 +274,94 @@ bool initialize_drawing_coordinates(SimpComp* simpComp){
   return true;
 }
 
+void recenter_intrinsic_coordinates(SimpComp *simpComp){
+  int dim;
+  DrawingCoordinatesColor *color;
+  vector<double> minq;
+  vector<double> maxq;
+  int i;
+  bool outcome;
+
+  // In linear topology, the intrinsic coordinates are initially assigned
+  // completely randomly within the allowed domain, which means they can
+  // end up off-center with respect to the coordinate origin. Even after
+  // they are recalculated via the minimization of the potential, they
+  // may remain bunched up around some non-origin point in the domain.
+  // The purpose of this function is to perform a translation of the
+  // whole complex along each coordinate axis in order to put the complex
+  // around the coordinate origin.
+  //
+  // This function is typically executed after the minimization of the
+  // potential, but immediately before the evaluation of the embedding
+  // coordinates. The function evaluate_embedding_coordinates() invokes
+  // this function automatically as needed.
+
+  // First initialize the drawing coordinates for the complex,
+  // to make sure that all vertices are colored properly. If
+  // they already were colored previously, the coloring data
+  // will be preserved.
+  outcome = initialize_drawing_coordinates(simpComp);
+  if(!outcome){
+    log_report(LOG_ERROR,"Could not initialize drawing coordinates, something is wrong, aborting.");
+    return;
+  }
+  
+  // Recentering the intrinsic coordinates should ever be done
+  // only for linear topology. For the sphere coordinates are
+  // already centered properly, and probably for any other
+  // topologies out there.
+  if(simpComp->topology == "linear"){
+
+    // Initialization of min and max arrays with zeros was done
+    // just to build the vectors. Now we initialize their proper
+    // values, based on the first vertex in the complex.
+
+    // Determine the dimension of the intrinsic space
+    color = DrawingCoordinatesColor::find_pointer_to_color(simpComp->elements[0][0]);
+    dim = color->q.size();
+
+    // Initialize the min and max helper arrays using the first
+    // vertex as a base point
+    minq.clear();
+    maxq.clear();
+    for(i = 0; i < dim; i++){
+      maxq.push_back(color->q[i]);
+      minq.push_back(color->q[i]);
+    }
+
+    // First step is to determine the current bounding box of the
+    // complex, and put its coordinates into min and max arrays.
+      
+    // Go through all vertices of the complex
+    for(auto &vertex : simpComp->elements[0]){
+      color = DrawingCoordinatesColor::find_pointer_to_color(vertex);
+      // Go through all the coordinates of the current vertex
+      for(i = 0; i < dim; i++){
+        // If the coordinate is larger than max or smaller than
+        // min, readjust max and min
+        if(color->q[i] > maxq[i]) maxq[i] = color->q[i];
+        if(color->q[i] < minq[i]) minq[i] = color->q[i];
+      }
+    }
+
+    // Given the max and min arrays now contain the outer bounding box
+    // along all coordinate axes, we move the whole complex so that it
+    // becomes centered around the coordinate origin. This is done by
+    // translating all coordinates along each axis by the amount
+    // necessary to center the bounding box around the origin.
+
+    // Go through all vertices of the complex
+    for(auto &vertex : simpComp->elements[0]){
+      color = DrawingCoordinatesColor::find_pointer_to_color(vertex);
+      // Translate each coordinate of the current vertex
+      for(i = 0; i < dim; i++){
+        color->q[i] -= (maxq[i] + minq[i]) / 2;
+      }
+    }
+  }
+}
+
+
 void evaluate_embedding_coordinates(SimpComp *simpComp){
   DrawingCoordinatesColor *color;
   bool outcome;
@@ -133,6 +378,9 @@ void evaluate_embedding_coordinates(SimpComp *simpComp){
   }
 
   if(simpComp->topology == "linear"){
+    // First we recenter the whole complex to sit around the
+    // coordinate origin
+    recenter_intrinsic_coordinates(simpComp);
     // Go through all vertices of the complex
     for(auto vertex : simpComp->elements[0]){
       // Find the drawing coordinates color of the vertex
@@ -160,21 +408,18 @@ void evaluate_embedding_coordinates(SimpComp *simpComp){
   }
 }
 
-double evaluate_coordinate_length(KSimplex *edge, SimpComp *simpComp){
+double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpComp *simpComp){
   DrawingCoordinatesColor *color1, *color2;
   double temp,sum;
   int i,j;
-  
-  // Find the two vertices of the given edge
-  KSimplex *vertex1 = edge->neighbors->elements[0][0];
-  KSimplex *vertex2 = edge->neighbors->elements[0][1];
-    
+
   // Find drawing coordinates colors of the two vertices
   color1 = DrawingCoordinatesColor::find_pointer_to_color(vertex1);
   color2 = DrawingCoordinatesColor::find_pointer_to_color(vertex2);
 
-  // In the case of linear topology, we evaluate the length of an edge using the
-  // ordinary Euclidean distance between vertices, i.e. the following formula:
+  // In the case of linear topology, we evaluate the distance between
+  // two vertices using the ordinary Euclidean definition of distance,
+  // i.e. the following formula:
   //
   // L = \sqrt{ \sum_{i=0}^{D-1} ( q^1_i - q^2_i )^2 } .
   //
@@ -186,25 +431,133 @@ double evaluate_coordinate_length(KSimplex *edge, SimpComp *simpComp){
     }
     return sqrt(sum);
   }
-  // In the case of spherical topology, we evaluate the length of an edge using the
-  // formula for the arclength distance between two points on a sphere:
+  // In the case of spherical topology, we evaluate the distance between
+  // two vertices using the formula for the arclength between two points
+  // on a D-dimensional sphere:
   //
   // L = R \arccos{ \sum_{i=1}^{D+1} \cos q^1_i \cos q^2_i \prod_{j=0}^{i-1} \sin q^1_j \sin q^2_j }
   //
   if(simpComp->topology == "sphere"){
     sum = 0;
-    for(i = 1; i < simpComp->D + 2; i++){
+    for(i = 1; i <= simpComp->D + 1; i++){
       temp = cos(color1->q[i]) * cos(color2->q[i]);
-      for(j = 0; j < i; j++) temp = temp * sin(color1->q[j]) * sin(color2->q[j]);
+      for(j = 0; j <= i - 1; j++) temp = temp * sin(color1->q[j]) * sin(color2->q[j]);
       sum += temp;
     }
-    if( sum < -1 ) sum = -1.0; // Just to make sure sum does not veer outside the segment [-1,1],
-    if( sum > 1 ) sum = 1.0;   // because arccos is not defined outside that segment...
+    if( sum < -1.0 ) sum = -0.9; // Just to make sure sum does not veer outside the segment [-1,1],
+    if( sum > 1.0 ) sum = 0.9;   // because arccos is not defined outside that segment...
     return SPHERE_DRAWING_RADIUS * acos(sum);
   }
-  // We should never reach this part, but just to satisfy the
-  // compiler, we return some dummy value:
+  // We do not know how to evaluate distance for the topologies other than the ones given
+  // above, we return a dummy unit value:
   return 1.0;
+}
+
+double evaluate_coordinate_edge_length(KSimplex *edge, SimpComp *simpComp){
+  
+  // Find the two vertices of the given edge
+  KSimplex *vertex1 = edge->neighbors->elements[0][0];
+  KSimplex *vertex2 = edge->neighbors->elements[0][1];
+
+  return evaluate_coordinate_distance(vertex1,vertex2,simpComp);
+}
+
+double evaluate_potential(SimpComp *simpComp){
+  string top;
+  double pot;
+  
+  // Different choices of the potential are suitable for different
+  // topologies, so we evaluate it taking into account the topology
+  // of the simplicial complex. If the topology is not recognized,
+  // it defaults to the basic spring potential, which is the
+  // least bad option... :-)
+
+  top = simpComp->topology;
+  
+  if(top == "linear"){
+    // For any linear manifold, one typically uses the spring
+    // potential. However, if used alone, it is prone to various
+    // foldings and overlaps. These can be avoided by further
+    // adding an inverse distance potential between non-nearest-
+    // neighbor vertices (i.e. vertices which are not connected
+    // with an edge). This pushes non-nearest-neighbor vertices as
+    // far apart as possible, until they are balanced by the spring
+    // tension between the nearest-neighbor vertices. In most cases
+    // this "unfolds" the complex by stretching it, and hopefully
+    // eliminates any overlaps.
+
+    pot = evaluate_spring_potential(simpComp);
+    pot += evaluate_inverse_distance_potential(simpComp);
+    // The inverse distance potential took into accout also the
+    // nearest-neighbors, so we have to subtract their contribution
+    pot -= evaluate_inverse_edge_potential(simpComp);
+    return pot;
+  }
+
+  if(top == "sphere"){
+    // Since any D-dimensional sphere is a compact manifold, the
+    // inverse distance potential on a sphere is bounded, and is
+    // therefore the best choice, since it will force all vertices
+    // of the complex to be as far as possible from each other,
+    // distributing them "evenly" over the sphere.
+
+    return evaluate_inverse_distance_potential(simpComp);
+  }
+
+  // If we do not recognize the topology, fall back to the
+  // spring potential
+  return evaluate_spring_potential(simpComp);
+}
+  
+double evaluate_inverse_distance_potential(SimpComp *simpComp){
+  KSimplex *vi;
+  KSimplex *vj;
+  double sum,dij;
+  int i,j,N;
+  
+  // We evaluate the inverse distance potential according to the
+  // formula
+  //
+  // V = \sum_{i=0}^{N-2} \sum_{j=i+1}^{N-1} const / d_{ij} .
+  //
+  // Here N is the number of vertices in the complex, const is the
+  // interaction constant between the vertices, and d_{ij} is the
+  // coordinate distance between vertices i and j.
+  //
+  sum = 0.0;
+  N = simpComp->elements[0].size();
+  
+  for(i = 0; i <= N-2; i++){
+    for(j = i+1; j <= N-1; j++){
+      vi = simpComp->elements[0][i];
+      vj = simpComp->elements[0][j];
+      dij = evaluate_coordinate_distance(vi,vj,simpComp);
+      if(dij == 0.0) dij = 0.001; // Small hack to avoid accidental division by zero
+      sum += POTENTIAL_INVERSE_DISTANCE_INTERACTION / dij;
+    }
+  }
+  return sum;
+}
+
+double evaluate_inverse_edge_potential(SimpComp *simpComp){
+  double sum,di;
+  
+  // We evaluate the inverse edge potential according to the
+  // formula
+  //
+  // V = \sum_{i=0}^{E-1} const / d_i .
+  //
+  // Here E is the number of edges in the complex, const is the
+  // interaction constant across the edge, and d_i is the
+  // coordinate length of the given edge.
+  //
+  sum = 0.0;
+  for(auto &edge : simpComp->elements[1]){
+    di = evaluate_coordinate_edge_length(edge,simpComp);
+    if(di == 0.0) di = 0.001; // Small hack to avoid accidental division by zero
+    sum += POTENTIAL_INVERSE_DISTANCE_INTERACTION / di;
+  }
+  return sum;
 }
 
 double evaluate_spring_potential(SimpComp *simpComp){
@@ -220,7 +573,7 @@ double evaluate_spring_potential(SimpComp *simpComp){
   //
   sum = 0.0;
   for(auto &edge : simpComp->elements[1]){
-    Ledge = evaluate_coordinate_length(edge, simpComp);
+    Ledge = evaluate_coordinate_edge_length(edge, simpComp);
     sum += POTENTIAL_SPRING_COEFFICIENT * (Ledge - POTENTIAL_SPRING_SIZE) * (Ledge - POTENTIAL_SPRING_SIZE);
   }
   return sum;
@@ -238,7 +591,7 @@ void shake_intrinsic_coordinates(SimpComp *simpComp){
   // each vertex
   for(auto vertex : simpComp->elements[0]){
     color = DrawingCoordinatesColor::find_pointer_to_color(vertex);
-    for(int i = 0; i < simpComp->D; i++){
+    for(long unsigned int i = 0; i < color->q.size(); i++){
 
       // pick a random number
       unsigned int randValue = rand();
@@ -311,8 +664,8 @@ void restore_drawing_coordinates(SimpComp *simpComp, vector<DrawingCoordinatesCo
     // coordinates will have to be recalculated later anyway,
     // so we only want to copy the intrinsic coordinates.
     //
-    for(int k = 0; k < simpComp->D; k++) color->q[k] = source[i].q[k];
-  }    
+    for(long unsigned int k = 0; k < source[i].q.size(); k++) color->q[k] = source[i].q[k];
+  }
 }
 
 void evaluate_potential_minimum(SimpComp *simpComp){
@@ -373,7 +726,7 @@ void evaluate_potential_minimum(SimpComp *simpComp){
 
   // Initialize the starting value for the candidate minimum
   // of the spring potential
-  minPotential = potential = evaluate_spring_potential(simpComp);
+  minPotential = potential = evaluate_potential(simpComp);
 
   // Make a copy of initial drawing coordinates that correspond to
   // the candidate minimum of the potential
@@ -385,13 +738,13 @@ void evaluate_potential_minimum(SimpComp *simpComp){
 
   // Start the main loop
   while( (iIter < POTENTIAL_MAX_ITERATION_NUMBER) && (iShake < POTENTIAL_MAX_TEST_COORDINATES) ){
-
+    
     // Pick a random new point nearby
     shake_intrinsic_coordinates(simpComp);
     iShake++;
 
     // Evaluate the potential at the new point
-    potential = evaluate_spring_potential(simpComp);
+    potential = evaluate_potential(simpComp);
 
     // If it is better than before, store the new point as the
     // candidate minimum; otherwise, revert to the previous point
@@ -405,7 +758,8 @@ void evaluate_potential_minimum(SimpComp *simpComp){
       restore_drawing_coordinates(simpComp, minPotentialColors);
     }
   }
+  restore_drawing_coordinates(simpComp, minPotentialColors);
   // Debugging cout, remove it:
-  cout << "Min found potential = " << minPotential << ", iIter = " << iIter << ", iShake = " << iShake << endl;
+  //  cout << "Min found potential = " << minPotential << ", iIter = " << iIter << ", iShake = " << iShake << endl;
 }
 
