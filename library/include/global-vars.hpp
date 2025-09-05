@@ -2,11 +2,22 @@
 using namespace std;
 
 namespace triangulator_global{
-    // Vector of all instantiated simplicial complexes:
-    extern vector<SimpComp*> seededComplexes;
+  // Vector of all instantiated simplicial complexes:
+  extern vector<SimpComp*> seededComplexes;
 
-    extern string logFilename; //default logfile
-    extern int logLevel; // default logLevel
+  // Default logging parameters:
+  extern string logFilename;
+  extern int logLevel;
 
+  // Default values for drawing parameters:
+  extern double potential_spring_interaction;
+  extern double potential_spring_length;
+  extern double potential_inverse_distance_interaction;
+  extern double potential_shake_step;
+  extern int potential_max_iteration_number;
+  extern int potential_max_test_coordinates;
+  extern double sphere_topology_drawing_radius;
+  extern double linear_topology_drawing_domain_size;
+  
 }
 

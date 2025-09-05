@@ -203,8 +203,8 @@ bool initialize_drawing_coordinates(SimpComp* simpComp){
           // Set the domain values for intrinsic coordinates:
           //        color->qMin.push_back(std::numeric_limits<double>::lowest()); // Absolute domain limits supported by the hardware
           //        color->qMax.push_back(std::numeric_limits<double>::max());
-          color->qMin.push_back(-DOMAIN_LINEAR_TOPOLOGY); // Reasonable limits compatible with typical screen resolutions
-          color->qMax.push_back(DOMAIN_LINEAR_TOPOLOGY);
+          color->qMin.push_back(-(triangulator_global::linear_topology_drawing_domain_size)); // Reasonable limits compatible with typical screen resolutions
+          color->qMax.push_back(triangulator_global::linear_topology_drawing_domain_size);
 
           // Set initial random values for intrinsic coordinates:
           color->q.push_back(color->qMin[i] + (color->qMax[i] / RAND_MAX - color->qMin[i] / RAND_MAX) * rand());
@@ -401,7 +401,7 @@ void evaluate_embedding_coordinates(SimpComp *simpComp){
       // x_{i-1} = R \cos q_i \prod_{j=0}^{i-1} \sin q_j ,  i = 1,...,D+1.
       // 
       for(i = 1; i < simpComp->D + 2; i++){
-        color->x[i-1] = SPHERE_DRAWING_RADIUS * cos(color->q[i]);
+        color->x[i-1] = (triangulator_global::sphere_topology_drawing_radius) * cos(color->q[i]);
         for(j = 0; j < i; j++) color->x[i-1] = color->x[i-1] * sin(color->q[j]);
       }
     }
@@ -446,7 +446,7 @@ double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpCo
     }
     if( sum < -1.0 ) sum = -0.9; // Just to make sure sum does not veer outside the segment [-1,1],
     if( sum > 1.0 ) sum = 0.9;   // because arccos is not defined outside that segment...
-    return SPHERE_DRAWING_RADIUS * acos(sum);
+    return (triangulator_global::sphere_topology_drawing_radius) * acos(sum);
   }
   // We do not know how to evaluate distance for the topologies other than the ones given
   // above, we return a dummy unit value:
@@ -533,7 +533,7 @@ double evaluate_inverse_distance_potential(SimpComp *simpComp){
       vj = simpComp->elements[0][j];
       dij = evaluate_coordinate_distance(vi,vj,simpComp);
       if(dij == 0.0) dij = 0.001; // Small hack to avoid accidental division by zero
-      sum += POTENTIAL_INVERSE_DISTANCE_INTERACTION / dij;
+      sum += (triangulator_global::potential_inverse_distance_interaction) / dij;
     }
   }
   return sum;
@@ -555,7 +555,7 @@ double evaluate_inverse_edge_potential(SimpComp *simpComp){
   for(auto &edge : simpComp->elements[1]){
     di = evaluate_coordinate_edge_length(edge,simpComp);
     if(di == 0.0) di = 0.001; // Small hack to avoid accidental division by zero
-    sum += POTENTIAL_INVERSE_DISTANCE_INTERACTION / di;
+    sum += (triangulator_global::potential_inverse_distance_interaction) / di;
   }
   return sum;
 }
@@ -567,14 +567,16 @@ double evaluate_spring_potential(SimpComp *simpComp){
   //
   // V = \sum_{i=0}^{E-1} c_1 ( L_i - c_2 )^2 .
   //
-  // Here E is the number of edges in the complex, c_1 is the spring coefficient,
+  // Here E is the number of edges in the complex, c_1 is the spring interaction,
   // c_2 is the spring length (both c_1 and c_2 are constants), and L_i is the
   // coordinate length of the given edge.
   //
   sum = 0.0;
   for(auto &edge : simpComp->elements[1]){
     Ledge = evaluate_coordinate_edge_length(edge, simpComp);
-    sum += POTENTIAL_SPRING_COEFFICIENT * (Ledge - POTENTIAL_SPRING_SIZE) * (Ledge - POTENTIAL_SPRING_SIZE);
+    sum += (triangulator_global::potential_spring_interaction)
+           * (Ledge - (triangulator_global::potential_spring_length))
+           * (Ledge - (triangulator_global::potential_spring_length));
   }
   return sum;
 }
@@ -599,7 +601,7 @@ void shake_intrinsic_coordinates(SimpComp *simpComp){
       // if random is less than 1/3 of its domain,
       // step the coordinate to the left:
       if( randValue < RAND_MAX/3 ){
-        color->q[i] -= POTENTIAL_SHAKE_STEP;
+        color->q[i] -= (triangulator_global::potential_shake_step);
         // make sure the coordinate remains inside its domain:
         if(color->q[i] < color->qMin[i])
           color->q[i] = color->qMin[i];
@@ -608,7 +610,7 @@ void shake_intrinsic_coordinates(SimpComp *simpComp){
       // if random is greater than 2/3 of its domain,
       // step the coordinate to the right:
       if( randValue > (RAND_MAX/3)*2 ){
-        color->q[i] += POTENTIAL_SHAKE_STEP;
+        color->q[i] += (triangulator_global::potential_shake_step);
         // make sure the coordinate remains inside its domain:
         if(color->q[i] > color->qMax[i])
           color->q[i] = color->qMax[i];
@@ -684,22 +686,26 @@ void evaluate_potential_minimum(SimpComp *simpComp){
   //
   // The loop has two exits:
   // One: given a candidate minimum point, we may repeatedly fail to
-  // find a better point in its neighborhood. We make an attept
-  // POTENTIAL_MAX_TEST_COORDINATES number of times, and if all attempts
-  // fail, the current candidate is likely very close to a local minimum.
+  // find a better point in its neighborhood. We make an attept a certain
+  // number of times (controlled by the global variable
+  // triangulator_global::potential_max_test_coordinates), and if all
+  // attempts fail, the current candidate is likely very close to a local
+  // minimum.
   //
   // Two: the candidate minimum point lies on some large slope, and we
   // repeatedly always find a better candidate, running down the slope.
   // Depending on the nature of the potential function, the slope may be
   // infinite (i.e. no global minimum), or otherwise very large and too
   // expensive to traverse all the way down. To keep the search
-  // reasonably fast, after POTENTIAL_MAX_ITERATION_NUMBER attempts we
-  // give up on trying to find a local minimum, we break the loop, and
-  // finish with the best point found so far.
+  // reasonably fast, after a certain number of attempts (controlled by
+  // the global variable
+  // triangulator_global::potential_max_iteration_number), we give up on
+  // trying to find a local minimum, we break the loop, and finish with
+  // the best point found so far.
   //
-  // The user may tweak the values of the two POTENTIAL_MAX_* constants,
-  // to optimize the algorithm for their usecase and available computing
-  // time.
+  // The user may tweak the values of the two global variables as needed,
+  // in order to optimize the algorithm for their usecase and available
+  // computing time.
   //
   // Note that the above procedure may not find the *global* minimum of
   // the potential (which may even not exist, depending on the potential
@@ -737,7 +743,8 @@ void evaluate_potential_minimum(SimpComp *simpComp){
   int iShake = 0;
 
   // Start the main loop
-  while( (iIter < POTENTIAL_MAX_ITERATION_NUMBER) && (iShake < POTENTIAL_MAX_TEST_COORDINATES) ){
+  while( (iIter < (triangulator_global::potential_max_iteration_number))
+         && (iShake < (triangulator_global::potential_max_test_coordinates)) ){
     
     // Pick a random new point nearby
     shake_intrinsic_coordinates(simpComp);
