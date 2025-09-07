@@ -13,6 +13,30 @@
 #include "Inspector.h"
 #include "Utils.h"
 
+//struct ScreenCoords;
+
+#ifndef SCREENCOORDS_STRUCT
+#define SCREENCOORDS_STRUCT
+
+struct ScreenCoords {
+  KSimplex *simplex;
+  int X;
+  int Y;
+  double Z;
+};
+
+#endif
+
+#ifndef EDGEDATA_STRUCT
+#define EDGEDATA_STRUCT
+
+struct EdgeData {
+  KSimplex *simplex1;
+  KSimplex *simplex2;
+};
+
+#endif
+
 class DrawComplexGLWidget :
     public QOpenGLWidget
 {
@@ -23,26 +47,24 @@ public:
 
     SimpCompItem *item;
 
+    std::vector<ScreenCoords> drawingdata;
+    std::vector<EdgeData> edgedata;
+
     int m_posAttr, m_colAttr, m_matrixUniform;
     QOpenGLShaderProgram *m_program;
 
-protected:
-    GLfloat vertex1_x_pos;
+//protected:
+//    GLfloat vertex1_x_pos;
 
     void initializeGL() override;
     void resizeGL(int w, int h) override;
-    void create_test (GLfloat *vertices, GLfloat *colors);
-    void create_circleTriangles (GLfloat *vertices, int subdivs);
-    void create_circleTriangleFan (GLfloat *vertices, int subdivs);
-    void create_circle (GLfloat *vertices, int subdivs);
+    void create_circleTriangleFan (GLfloat *vertices, int subdivs, double radius);
     void draw_lines(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
     void draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
-    void draw_triangles(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
-    void draw_testTriangle(QOpenGLFunctions *f, GLfloat *vertices, int numVertices, GLfloat *colors);
-    void create_simpcomp_line(GLfloat *vertices);
+    void create_simpcomp_edge(GLfloat *vertices);
+    KSimplex* find_nearest_vertex_to_mouse_position(int posx, int posy );
     void paintGL() override;
 public:
-    void set_vertex1_x_pos(GLfloat value);
     void setDrawComplexStatusBar (QStatusBar *drawComplex);
 protected:
     void leaveEvent(QEvent *event) override;

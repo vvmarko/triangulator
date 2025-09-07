@@ -89,8 +89,8 @@ void MainWindow::tblItemDrawComplexClick() {
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
     if (items[i].drawComplex == NULL) {
-        items[i].drawComplex = new DrawComplex(this, &(items[i]));        
-        items[i].drawComplex->setWindowTitle(QString::fromStdString("Triangulator visualizer for complex: " + items[i].simpComp->name));
+        items[i].drawComplex = new DrawComplex(this, items[i].simpComp, &(items[i]));
+        items[i].drawComplex->setWindowTitle(QString::fromStdString("Triangulator visualize complex: " + items[i].simpComp->name));
 
         if( (items[i].drawComplexXcoordinate!=-1)||(items[i].drawComplexYcoordinate!=-1) )
             items[i].drawComplex->move(items[i].drawComplexXcoordinate,items[i].drawComplexYcoordinate);
@@ -218,7 +218,7 @@ void MainWindow::tblItemDeleteRowClick(int row) {
 
 void MainWindow::createItemWidget(int row) {
     QPushButton *btnPrintComplex = new QPushButton("Catalogue");
-    QPushButton *btnDrawComplex = new QPushButton("Visualizer");
+    QPushButton *btnDrawComplex = new QPushButton("Visualize");
     QComboBox *cmbTools = new QComboBox();
     QComboBox *cmbActions = new QComboBox();
 

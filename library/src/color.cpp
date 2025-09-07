@@ -461,13 +461,36 @@ void DrawingCoordinatesColor::print(){
   cout << endl << "Ambient space dimension: Damb = " << Damb << endl;
 }
 
+string DrawingCoordinatesColor::double_to_string_with_precision(double number, int decdigits){
+  stringstream ss;
+
+  ss << std::fixed << std::setprecision(decdigits) << number;
+  return ss.str();
+}
+
 string DrawingCoordinatesColor::get_color_value_as_str()
 {
-  // Serialize vector q, by to_string(q[i]), or optimized?
+  long unsigned int i;
+  // TODO:
   // Serialize vectors qMin and qMax?
-  // Serialize vector x
-  // Serialize Damb?
-  return "(TopologicalCoordinatesColor)"; // TODO
+  // Design the output that is good both for XML and for the GUI?
+
+  // The output below is currently optimized for GUI only:
+  string output;
+  output = "Int: ( " + double_to_string_with_precision(q[0],2);
+  for(i = 1; i < q.size(); i++)
+    output += " , " + double_to_string_with_precision(q[i],2);
+  output += " )";
+  output += '\n';
+  output += "Emb: ( "
+    + double_to_string_with_precision(x[0],2);
+  for(i = 1; i < x.size(); i++)
+    output += " , " + double_to_string_with_precision(x[i],2);
+  output += " )";
+  output += '\n';
+  output += "Emb dim: " + to_string(Damb); 
+
+  return output;
 }
 
 void DrawingCoordinatesColor::set_color_value_from_str(const string& source) // TODO

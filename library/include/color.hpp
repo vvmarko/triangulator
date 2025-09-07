@@ -63,13 +63,13 @@
 // ################################################################
 
 #define POTENTIAL_SPRING_INTERACTION 1.0
-#define POTENTIAL_SPRING_LENGTH 5.0
+#define POTENTIAL_SPRING_LENGTH 50.0
 #define POTENTIAL_INVERSE_DISTANCE_INTERACTION 50.0
 #define POTENTIAL_SHAKE_STEP 0.2
 #define POTENTIAL_MAX_ITERATION_NUMBER 1000
 #define POTENTIAL_MAX_TEST_COORDINATES 50
-#define SPHERE_TOPOLOGY_DRAWING_RADIUS 20.0
-#define LINEAR_TOPOLOGY_DRAWING_DOMAIN_SIZE 20.0
+#define SPHERE_TOPOLOGY_DRAWING_RADIUS 200.0
+#define LINEAR_TOPOLOGY_DRAWING_DOMAIN_SIZE 300.0
 
 #endif
 
@@ -448,6 +448,10 @@ public:
   
   // Printing the coordinates to the screen in human-readable form:
     void print();
+
+  // Small helper function to convert a float/double to a string, with a fixed number
+  // of decimal places
+    string double_to_string_with_precision(double number, int decdigits);
   
   // Obligatory implementations of string codec functions for drawing coordinates color:
     string get_color_value_as_str() override;

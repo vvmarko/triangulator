@@ -4,6 +4,7 @@ using namespace std;
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 #include <string>
 #include <set>
 #include <vector>
@@ -19,7 +20,9 @@ using namespace std;
 #include "rapidxml-patch.hpp"
 #include "rapidxml_print.hpp"
 
-// Order of the following includes is important:
+// FIXME:
+// Order of the following includes should not be important,
+// but at the moment it is
 #include "color.hpp"
 #include "simpcomp.hpp"
 #include "ksimplex.hpp"

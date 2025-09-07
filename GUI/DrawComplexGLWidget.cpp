@@ -10,12 +10,6 @@ void DrawComplexGLWidget::initializeGL()
     f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     static const char *vertexShaderSource =
-            /*"attribute highp vec4 posAttr;\n"
-                "uniform highp mat4 matrix;\n"
-                "void main(void)\n"
-                "{\n"
-                "   gl_Position = matrix * posAttr;\n"
-                "}"; */
         "attribute highp vec4 posAttr;\n"
         "attribute lowp vec4 colAttr;\n"
         "varying lowp vec4 col;\n"
@@ -30,11 +24,6 @@ void DrawComplexGLWidget::initializeGL()
         "void main() {\n"
         "   gl_FragColor = col;\n"
         "}\n";
-    /*"uniform mediump vec4 color;\n"
-        "void main(void)\n"
-        "{\n"
-        "   gl_FragColor = color;\n"
-        "}"; */
 
     m_program = new QOpenGLShaderProgram(this);
     m_program->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
@@ -46,8 +35,6 @@ void DrawComplexGLWidget::initializeGL()
     Q_ASSERT(m_colAttr != -1);
     m_matrixUniform = m_program->uniformLocation("matrix");
     Q_ASSERT(m_matrixUniform != -1);
-
-    vertex1_x_pos = 115;
 }
 
 void DrawComplexGLWidget::resizeGL(int w, int h)
@@ -57,54 +44,13 @@ void DrawComplexGLWidget::resizeGL(int w, int h)
     //m_projection.perspective(45.0f, w / float(h), 0.01f, 100.0f);
 }
 
-void DrawComplexGLWidget::create_test (GLfloat *vertices, GLfloat *colors)
-{
-    static const GLfloat verticesTriangle[] = {
-             0.0f,  0.707f,
-             -0.5f, -0.5f,
-             0.5f, -0.5f
-        };
 
-    static const GLfloat colorsTriangle[] = {
-            1.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 1.0f
-        };
-
-    for (int i = 0; i < 6; i++)
-    {
-        vertices[i] = verticesTriangle[i];
-    }
-
-    for (int i = 0; i < 9; i++)
-    {
-        colors[i] = colorsTriangle[i];
-    }
-
-}
-
-void DrawComplexGLWidget::create_circleTriangles (GLfloat *vertices, int subdivs)
+void DrawComplexGLWidget::create_circleTriangleFan (GLfloat *vertices, int subdivs, double radius)
 {
     GLfloat fSubDivs = (GLfloat)subdivs;
     double diff = 2 * M_PI / fSubDivs;
-    double radius = 4;
 
-    for (int i = 0; i < subdivs; i ++)
-    {
-        vertices[i * 6] = 0.0f;
-        vertices[i * 6 + 1] = 0.0f;
-        vertices[i * 6 + 2] = radius * cos((double)i * diff);
-        vertices[i * 6 + 3] = radius * sin((double)i * diff);
-        vertices[i * 6 + 4] = radius * cos((double)(i + 1) * diff);
-        vertices[i * 6 + 5] = radius * sin((double)(i + 1) * diff);
-    }
-}
-
-void DrawComplexGLWidget::create_circleTriangleFan (GLfloat *vertices, int subdivs)
-{
-    GLfloat fSubDivs = (GLfloat)subdivs;
-    double diff = 2 * M_PI / fSubDivs;
-    double radius = 4;
+    if(radius < 4) radius = 4; // cutoff on the smallness of the fat vertex size
 
     vertices[0] = 0.0f;
     vertices[1] = 0.0f;
@@ -115,20 +61,7 @@ void DrawComplexGLWidget::create_circleTriangleFan (GLfloat *vertices, int subdi
     }
 }
 
-void DrawComplexGLWidget::create_circle (GLfloat *vertices, int subdivs)
-{
-    GLfloat fSubDivs = (GLfloat)subdivs;
-    double diff = 2 * M_PI / fSubDivs;
-    double radius = 4;
 
-    for (int i = 0; i < subdivs; i ++)
-    {
-        vertices[i * 4] = radius * cos((double)i * diff);
-        vertices[i * 4 + 1] = radius * sin((double)i * diff);
-        vertices[i * 4 + 2] = radius * cos((double)(i + 1) * diff);
-        vertices[i * 4 + 3] = radius * sin((double)(i + 1) * diff);
-    }
-}
 
 void DrawComplexGLWidget::draw_lines(QOpenGLFunctions *f, GLfloat *vertices, int numVertices)
 {
@@ -145,24 +78,13 @@ void DrawComplexGLWidget::draw_lines(QOpenGLFunctions *f, GLfloat *vertices, int
         colors[i] = color;
     }
 
-    /*QColor color1(255, 255, 255, 255);
-
-    m_program->enableAttributeArray(m_posAttr);
-    m_program->setAttributeArray(m_posAttr, vertices, 2);
-    //program.setUniformValue(m_matrixUniform, pmvMatrix);
-    m_program->setUniformValue(m_colAttr, color1);
-    m_program->bind();
-
-    f->glDrawArrays(GL_LINES, 0, numVertices);
-
-    m_program->disableAttributeArray(m_posAttr); */
-
     f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
 
     f->glEnableVertexAttribArray(m_posAttr);
     f->glEnableVertexAttribArray(m_colAttr);
 
+    // This function actually does the actual drawing of lines on the screen:
     f->glDrawArrays(GL_LINES, 0, numVertices);
 
     f->glDisableVertexAttribArray(m_colAttr);
@@ -170,6 +92,8 @@ void DrawComplexGLWidget::draw_lines(QOpenGLFunctions *f, GLfloat *vertices, int
 
     delete[] colors;
 }
+
+
 
 void DrawComplexGLWidget::draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices)
 {
@@ -192,6 +116,7 @@ void DrawComplexGLWidget::draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertice
     f->glEnableVertexAttribArray(m_posAttr);
     f->glEnableVertexAttribArray(m_colAttr);
 
+    // This function actually does the actual drawing of polygons on the screen:
     f->glDrawArrays(GL_TRIANGLE_FAN, 0, numVertices);
 
     f->glDisableVertexAttribArray(m_colAttr);
@@ -200,119 +125,85 @@ void DrawComplexGLWidget::draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertice
     delete[] colors;
 }
 
-void DrawComplexGLWidget::draw_triangles(QOpenGLFunctions *f, GLfloat *vertices, int numVertices)
+void DrawComplexGLWidget::create_simpcomp_edge(GLfloat *vertices)
 {
-    GLfloat *colors = new GLfloat[numVertices * 3];
+    // The array of vertices is constructed by the sequence:
+    //
+    // v1x,v1y,v2x,v2y,v3x,v3y,v4x,v4y,...
+    //
+    // This will draw a line between v1 and v2, another line
+    // between v3 and v4, etc...
 
-    int i;
-
-    GLfloat color = (GLfloat)0.0;
-
-    int numVertices3 = numVertices * 3;
-
-    for (i = 0; i < numVertices3; i++)
-    {
-        colors[i] = color;
+    int i=0;
+    for(auto edge : edgedata){
+        for(auto vertex : drawingdata){
+            if(edge.simplex1 == vertex.simplex){
+                vertices[i] = static_cast<GLfloat>(vertex.X + (this->width()/2));
+                i++;
+                // y-axis has an extra minus, to orient it upwards
+                vertices[i] = static_cast<GLfloat>(-vertex.Y + (this->height()/2));
+                i++;
+            }
+            if(edge.simplex2 == vertex.simplex){
+                vertices[i] = static_cast<GLfloat>(vertex.X + (this->width()/2));
+                i++;
+                // y-axis has an extra minus, to orient it upwards
+                vertices[i] = static_cast<GLfloat>(-vertex.Y + (this->height()/2));
+                i++;
+            }
+        }
     }
-
-    f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
-
-    f->glEnableVertexAttribArray(m_posAttr);
-    f->glEnableVertexAttribArray(m_colAttr);
-
-    f->glDrawArrays(GL_TRIANGLES, 0, numVertices);
-
-    f->glDisableVertexAttribArray(m_colAttr);
-    f->glDisableVertexAttribArray(m_posAttr);
-
-    delete[] colors;
-}
-
-void DrawComplexGLWidget::draw_testTriangle(QOpenGLFunctions *f, GLfloat *vertices, int numVertices, GLfloat *colors)
-{
-    f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
-    f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
-
-    f->glEnableVertexAttribArray(m_posAttr);
-    f->glEnableVertexAttribArray(m_colAttr);
-
-    f->glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    f->glDisableVertexAttribArray(m_colAttr);
-    f->glDisableVertexAttribArray(m_posAttr);
-}
-
-void DrawComplexGLWidget::create_simpcomp_line(GLfloat *vertices)
-{
-    vertices[0] = vertex1_x_pos;
-    vertices[1] = 145.0f;
-    vertices[2] = 325.0f;
-    vertices[3] = 225.0f;
 }
 
 void DrawComplexGLWidget::paintGL()
 {
+    int x,y;
     // Draw the scene:
     QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
     f->glClear(GL_COLOR_BUFFER_BIT);
 
-    //f->glDisable(GL_DEPTH_BUFFER_BIT);
-
     m_program->bind();
 
     QMatrix4x4 matrix;
-    //matrix.perspective(60.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-    //m_program->setUniformValue(m_matrixUniform, matrix);
-    //GLfloat vertices[6], colors[9];
-    //create_test(vertices, colors);
-    //draw_testTriangle(f, vertices, 3, colors);
 
     QRect rect;
 
-    /*if (this->width() > this->height()) {
-        rect = QRect(0, 0, 100 * this->width() / this->height(), 100);
-    } else {
-        rect = QRect(0, 0, 100, 100 * this->height() / this->width());
-    } */
-
     rect = QRect(0, 0, this->width(), this->height());
 
+    // Create the array of vertices for drawing a set of edges --- we have two
+    // vertices times two coordinates per edge, i.e. 4 GLfloat numbers per edge:
+    GLfloat vertices_edge[4 * edgedata.size()];
+    create_simpcomp_edge(vertices_edge);
+
+    // Draw the set of edges defined by their array of vertices:
     matrix.setToIdentity();
     matrix.ortho(rect);
-    //m_program->setUniformValue(m_matrixUniform, matrix);
     m_program->setUniformValue(m_matrixUniform, matrix);
+    draw_lines(f, vertices_edge, 2 * edgedata.size());
 
-    GLfloat vertices_line[4 * 2];
-    create_simpcomp_line(vertices_line);
-    draw_lines(f, vertices_line, 2);
+    // Create the array containing data for drawing a single "node" as a
+    // regular 10-polygon (which is a good approximation to a real circle for
+    // small radii):
+    GLfloat node[2 * 10 + 2 + 2]; // last vertex is repeated twice
 
-    /* matrix.translate(20, 20, 0);
-    m_program->setUniformValue(m_matrixUniform, matrix);
+    // Now draw one node for every vertex in the simplicial complex:
+    for(auto it : drawingdata){
+        // Evaluate the radius of a given node
+        double radius = 400.0/std::abs(it.Z);
 
-    draw_lines(f, vertices_line, 2); */
+        // Populate the array for drawing a node
+        create_circleTriangleFan(node, 10, radius);
 
-    GLfloat vertices_circle[2 * 10 + 2 + 2]; // last vertex is repeated twice
-
-    create_circleTriangleFan(vertices_circle, 10);
-
-    matrix.setToIdentity();
-    matrix.ortho(rect);
-    matrix.translate(vertex1_x_pos, 145, 0);
-    m_program->setUniformValue(m_matrixUniform, matrix);
-    draw_triangleFan(f, vertices_circle, 2 + 10);
-
-    matrix.setToIdentity();
-    matrix.ortho(rect);
-    matrix.translate(325, 225, 0);
-    m_program->setUniformValue(m_matrixUniform, matrix);
-    draw_triangleFan(f, vertices_circle, 2 + 10);
-
-}
-
-void DrawComplexGLWidget::set_vertex1_x_pos(GLfloat value)
-{
-    vertex1_x_pos = value;
+        // Draw the node, by setting the center of the polygon at the
+        // coordinates of the vertex, and then drawing it on the screen:
+        x = it.X + (this->width())/2;
+        y = -it.Y + (this->height())/2; // minus to orient the y-axis upwards
+        matrix.setToIdentity();
+        matrix.ortho(rect);
+        matrix.translate(x, y, 0);
+        m_program->setUniformValue(m_matrixUniform, matrix);
+        draw_triangleFan(f, node, 2 + 10);
+    }
 }
 
 void DrawComplexGLWidget::setDrawComplexStatusBar (QStatusBar *drawComplex)
@@ -324,41 +215,61 @@ void DrawComplexGLWidget::leaveEvent(QEvent *event)
 {
     if (drawComplexStatusBar != NULL)
     {
-        drawComplexStatusBar->showMessage("0, 0");
+        drawComplexStatusBar->showMessage("Click near a vertex to inspect it...");
     }
 }
 
 void DrawComplexGLWidget::enterEvent(QEnterEvent *e)
 {
-    std::string s = std::to_string((int)e->position().x());
-    std::string s1 = std::to_string((int)e->position().y());
-    if (drawComplexStatusBar != NULL)
-    {
-            drawComplexStatusBar->showMessage((s + ", " + s1).c_str());
+    KSimplex *nearestvertex = find_nearest_vertex_to_mouse_position( e->position().x() , e->position().y() );
+
+    if (drawComplexStatusBar != NULL){
+            drawComplexStatusBar->showMessage(("Click to inspect vertex " + nearestvertex->print_non_html() + " ...").c_str());
     }
 }
 
 void DrawComplexGLWidget::mouseMoveEvent(QMouseEvent *e)
 {
-    std::string s = std::to_string((int)e->position().x());
-    std::string s1 = std::to_string((int)e->position().y());
-    if (drawComplexStatusBar != NULL)
-    {
-        drawComplexStatusBar->showMessage((s + ", " + s1).c_str());
+    KSimplex *nearestvertex = find_nearest_vertex_to_mouse_position( e->position().x() , e->position().y() );
+
+    if (drawComplexStatusBar != NULL){
+        drawComplexStatusBar->showMessage(("Click to inspect vertex " + nearestvertex->print_non_html() + " ...").c_str());
     }
+}
+
+KSimplex* DrawComplexGLWidget::find_nearest_vertex_to_mouse_position(int posx, int posy ){
+    int xsep, ysep;
+    double mindistance;
+    KSimplex *nearestvertex;
+
+    // Translate current mouse position to vertex coordinates
+    int x = posx - (this->width()/2);
+    int y = -(posy - (this->height()/2)); // minus to orient the y-axis upwards
+
+    // Setup initial minimum distance and nearset vertex
+    xsep = std::abs(drawingdata[0].X - x);
+    ysep = std::abs(drawingdata[0].Y - y);
+    mindistance = std::sqrt( xsep*xsep + ysep*ysep );
+    nearestvertex = drawingdata[0].simplex;
+
+    // Go through all vertices and find the closest one to the mouse
+    for(auto it : drawingdata){
+        xsep = std::abs(it.X - x);
+        ysep = std::abs(it.Y - y);
+        double tempdistance = std::sqrt( xsep*xsep + ysep*ysep );
+        if(tempdistance < mindistance){
+            mindistance = tempdistance;
+            nearestvertex = it.simplex;
+        }
+    }
+    return nearestvertex;
 }
 
 void DrawComplexGLWidget::mouseReleaseEvent(QMouseEvent *e)
 {
-    std::string s = std::to_string((int)e->position().x());
-    std::string s1 = std::to_string((int)e->position().y());
+    KSimplex *nearestvertex = find_nearest_vertex_to_mouse_position( e->position().x() , e->position().y() );
 
-    QVBoxLayout *layout = new QVBoxLayout();
-    QLabel *label = new QLabel();
-    label->setText((s + ", " + s1).c_str());
-    layout->addWidget(label);
-
-    Inspector *inspector = new Inspector(item->simpComp->elements[0][0], item);
+    Inspector *inspector = new Inspector(nearestvertex, item);
 
     Utils::openWindowOnRandomPos(inspector);
 

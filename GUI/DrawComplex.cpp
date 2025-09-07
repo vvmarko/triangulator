@@ -1,46 +1,479 @@
 #include "DrawComplex.h"
+#include "DrawComplexGLWidget.h"
 #include "MainWindow.h"
 #include <QSlider>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include "SimpCompTableModel.h"
 
 #include "triangulator.hpp"
 
-DrawComplex::DrawComplex(MainWindow *mainWnd, SimpCompItem *item, QWidget *parent)
+DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *item, QWidget *parent)
 	: QWidget(parent)
 {    
-	ui.setupUi(this);
-
-    statusBar = new QStatusBar();
-
-    this->layout()->addWidget (statusBar);
-
-    statusBar->showMessage("0, 0");
-
+    // Housekeeping
     this->mainWnd = mainWnd;
+    this->simpComp = simpComp;
     this->item = item;
-    ui.openGLWidget->item = item;
 
-    ui.openGLWidget->setDrawComplexStatusBar(statusBar);    
+    // Initialize screen parameters and embedding coordinates
+    this->scrparam = setup_screen_parameters(simpComp);
+    this->coords = extract_embedding_data(simpComp);
 
-    connect(ui.horizontalSlider, &QSlider::valueChanged, this, &DrawComplex::sliderValueChanged);
-    connect(ui.spinBox, &QSpinBox::valueChanged, this, &DrawComplex::spinBoxValueChanged);
-
+    // Set up basic user interface and add self to list of open windows
+	ui.setupUi(this);
     item->childWindows.push_back(this);
+
+    // Add status bar to the user interface
+    statusBar = new QStatusBar();
+    this->layout()->addWidget (statusBar);
+    statusBar->showMessage("Click near a vertex to inspect it...");
+
+    // Set up the drawing widget
+    ui.openGLWidget->item = item;
+    ui.openGLWidget->edgedata = extract_edge_data(simpComp);
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->setDrawComplexStatusBar(statusBar);
+
+    // #################################################
+    // Populate user interface with four scaling sliders
+    // #################################################
+
+    // Label for the parameter d
+    QLabel *labelDistance = new QLabel("  Screen distance:", this);
+    ui.verticalLayout->addWidget(labelDistance);
+    labelDistance->show();
+
+    // Horizontal layout for the parameter d
+    QHBoxLayout *hboxd = new QHBoxLayout(this);
+    ui.verticalLayout->addLayout(hboxd);
+
+    // Slider for the parameter d
+    QSlider *sliderd = new QSlider(Qt::Horizontal, this);
+    this->sliderd = sliderd;
+    sliderd->setRange(1, 100); // Sets the minimum and maximum values
+    sliderd->setValue(50); // Sets the current value
+    sliderd->setSingleStep(1);
+    sliderd->setPageStep(10);
+    sliderd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    sliderd->setFixedWidth(250);
+    hboxd->addWidget(sliderd);
+    sliderd->show();
+
+    // Spinbox for the parameter d
+    QSpinBox *spinboxd = new QSpinBox(this);
+    this->spinboxd = spinboxd;
+    spinboxd->setRange(1,100);
+    spinboxd->setValue(50);
+    spinboxd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    spinboxd->setFixedWidth(55);
+    hboxd->addWidget(spinboxd);
+    spinboxd->show();
+
+    // Synchronize the values of the slider and the spinbox
+    connect(sliderd, &QSlider::valueChanged, this, &DrawComplex::sliderdValueChanged);
+    connect(spinboxd, &QSpinBox::valueChanged, this, &DrawComplex::spinboxdValueChanged);
+
+    // Label for the parameter sz
+    QLabel *labelEye = new QLabel("  Eye distance:", this);
+    ui.verticalLayout->addWidget(labelEye);
+    labelEye->show();
+
+    // Horizontal layout for the parameter sz
+    QHBoxLayout *hboxsz = new QHBoxLayout(this);
+    ui.verticalLayout->addLayout(hboxsz);
+
+    // Slider for the parameter sz
+    QSlider *slidersz = new QSlider(Qt::Horizontal, this);
+    this->slidersz = slidersz;
+    slidersz->setRange(1, 100); // Sets the minimum and maximum values
+    slidersz->setValue(10); // Sets the current value
+    slidersz->setSingleStep(1);
+    slidersz->setPageStep(10);
+    slidersz->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    slidersz->setFixedWidth(250);
+    hboxsz->addWidget(slidersz);
+    slidersz->show();
+
+    // Spinbox for the parameter sz
+    QSpinBox *spinboxsz = new QSpinBox(this);
+    this->spinboxsz = spinboxsz;
+    spinboxsz->setRange(1,100);
+    spinboxsz->setValue(10);
+    spinboxsz->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    spinboxsz->setFixedWidth(55);
+    hboxsz->addWidget(spinboxsz);
+    spinboxsz->show();
+
+    // Synchronize the values of the slider and the spinbox
+    connect(slidersz, &QSlider::valueChanged, this, &DrawComplex::sliderszValueChanged);
+    connect(spinboxsz, &QSpinBox::valueChanged, this, &DrawComplex::spinboxszValueChanged);
+
+    // Label for the parameter sx
+    QLabel *labelScalex = new QLabel("  Horizontal scale:", this);
+    ui.verticalLayout->addWidget(labelScalex);
+    labelScalex->show();
+
+    // Horizontal layout for the parameter sx
+    QHBoxLayout *hboxsx = new QHBoxLayout(this);
+    ui.verticalLayout->addLayout(hboxsx);
+
+    // Slider for the parameter sx
+    QSlider *slidersx = new QSlider(Qt::Horizontal, this);
+    this->slidersx = slidersx;
+    slidersx->setRange(1, 100); // Sets the minimum and maximum values
+    slidersx->setValue(10); // Sets the current value
+    slidersx->setSingleStep(1);
+    slidersx->setPageStep(10);
+    slidersx->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    slidersx->setFixedWidth(250);
+    hboxsx->addWidget(slidersx);
+    slidersx->show();
+
+    // Spinbox for the parameter sx
+    QSpinBox *spinboxsx = new QSpinBox(this);
+    this->spinboxsx = spinboxsx;
+    spinboxsx->setRange(1,100);
+    spinboxsx->setValue(10);
+    spinboxsx->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    spinboxsx->setFixedWidth(55);
+    hboxsx->addWidget(spinboxsx);
+    spinboxsx->show();
+
+    // Synchronize the values of the slider and the spinbox
+    connect(slidersx, &QSlider::valueChanged, this, &DrawComplex::slidersxValueChanged);
+    connect(spinboxsx, &QSpinBox::valueChanged, this, &DrawComplex::spinboxsxValueChanged);
+
+    // Label for the parameter sy
+    QLabel *labelScaley = new QLabel("  Vertical scale:", this);
+    ui.verticalLayout->addWidget(labelScaley);
+    labelScaley->show();
+
+    // Horizontal layout for the parameter sy
+    QHBoxLayout *hboxsy = new QHBoxLayout(this);
+    ui.verticalLayout->addLayout(hboxsy);
+
+    // Slider for the parameter sy
+    QSlider *slidersy = new QSlider(Qt::Horizontal, this);
+    this->slidersy = slidersy;
+    slidersy->setRange(1, 100); // Sets the minimum and maximum values
+    slidersy->setValue(10); // Sets the current value
+    slidersy->setSingleStep(1);
+    slidersy->setPageStep(10);
+    slidersy->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    slidersy->setFixedWidth(250);
+    hboxsy->addWidget(slidersy);
+    slidersy->show();
+
+    // Spinbox for the parameter sy
+    QSpinBox *spinboxsy = new QSpinBox(this);
+    this->spinboxsy = spinboxsy;
+    spinboxsy->setRange(1,100);
+    spinboxsy->setValue(10);
+    spinboxsy->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    spinboxsy->setFixedWidth(55);
+    hboxsy->addWidget(spinboxsy);
+    spinboxsy->show();
+
+    // Synchronize the values of the slider and the spinbox
+    connect(slidersy, &QSlider::valueChanged, this, &DrawComplex::slidersyValueChanged);
+    connect(spinboxsy, &QSpinBox::valueChanged, this, &DrawComplex::spinboxsyValueChanged);
+
+    // ################################################
+    // Populate user interface with alpha angle sliders
+    // ################################################
+
+    this->sliderAlpha.clear();
+    this->spinboxAlpha.clear();
+    if(scrparam->alpha.size() >2){ // set up slider only for nontrivial angles
+        for(unsigned long int i = 1; i < scrparam->alpha.size() - 1; i++){ // skip first and final angle, they are constants
+
+            // Label for the parameter alpha_i
+            QString str;
+            QLabel *labelAlpha = new QLabel("  Alpha angle " + str.setNum(i) + ":", this);
+            ui.verticalLayout->addWidget(labelAlpha);
+            labelAlpha->show();
+
+            // Horizontal layout for the parameter alpha_i
+            QHBoxLayout *hboxAlpha = new QHBoxLayout(this);
+            ui.verticalLayout->addLayout(hboxAlpha);
+
+            // Slider for the parameter alpha_i
+            QSlider *sliderAlphaTemp = new QSlider(Qt::Horizontal, this);
+            this->sliderAlpha.push_back(sliderAlphaTemp);
+            sliderAlphaTemp->setRange(0,100); // Sets the minimum and maximum values
+            sliderAlphaTemp->setValue(static_cast<int>(std::round(scrparam->alpha[i]*100.0/scrparam->alphaMax[i]))); // Sets the current value
+            sliderAlphaTemp->setSingleStep(1);
+            sliderAlphaTemp->setPageStep(10);
+            sliderAlphaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+            sliderAlphaTemp->setFixedWidth(250);
+            hboxAlpha->addWidget(sliderAlphaTemp);
+            sliderAlphaTemp->show();
+
+            // Spinbox for the parameter alpha_i
+            QDoubleSpinBox *spinboxAlphaTemp = new QDoubleSpinBox(this);
+            this->spinboxAlpha.push_back(spinboxAlphaTemp);
+            spinboxAlphaTemp->setRange(scrparam->alphaMin[i],scrparam->alphaMax[i]);
+            spinboxAlphaTemp->setValue(scrparam->alpha[i]);
+            spinboxAlphaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+            spinboxAlphaTemp->setFixedWidth(55);
+            hboxAlpha->addWidget(spinboxAlphaTemp);
+            spinboxAlphaTemp->show();
+
+            // Synchronize the values of the slider and the spinbox
+            connect(this->sliderAlpha[i-1], &QSlider::valueChanged, this, [this, i](int signalValue) {
+                this->sliderAlphaValueChanged(signalValue, i);
+            });
+            connect(this->spinboxAlpha[i-1], &QDoubleSpinBox::valueChanged, this, [this, i](double signalValue) {
+                this->spinboxAlphaValueChanged(signalValue, i);
+            });
+        }
+    }
+
+
+    // ###############################################
+    // Populate user interface with beta angle sliders
+    // ###############################################
+
+    this->sliderBeta.clear();
+    this->spinboxBeta.clear();
+    if(scrparam->beta.size() >2){ // set up slider only for nontrivial angles
+        for(unsigned long int i = 1; i < scrparam->beta.size() - 1; i++){ // skip first and final angle, they are constants
+
+            // Label for the parameter beta_i
+            QString str;
+            QLabel *labelBeta = new QLabel("  Beta angle " + str.setNum(i) + ":", this);
+            ui.verticalLayout->addWidget(labelBeta);
+            labelBeta->show();
+
+            // Horizontal layout for the parameter beta_i
+            QHBoxLayout *hboxBeta = new QHBoxLayout(this);
+            ui.verticalLayout->addLayout(hboxBeta);
+
+            // Slider for the parameter beta_i
+            QSlider *sliderBetaTemp = new QSlider(Qt::Horizontal, this);
+            this->sliderBeta.push_back(sliderBetaTemp);
+            sliderBetaTemp->setRange(0,100); // Sets the minimum and maximum values
+            sliderBetaTemp->setValue(static_cast<int>(std::round(scrparam->beta[i]*100.0/scrparam->betaMax[i]))); // Sets the current value
+            sliderBetaTemp->setSingleStep(1);
+            sliderBetaTemp->setPageStep(10);
+            sliderBetaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+            sliderBetaTemp->setFixedWidth(250);
+            hboxBeta->addWidget(sliderBetaTemp);
+            sliderBetaTemp->show();
+
+            // Spinbox for the parameter beta_i
+            QDoubleSpinBox *spinboxBetaTemp = new QDoubleSpinBox(this);
+            this->spinboxBeta.push_back(spinboxBetaTemp);
+            spinboxBetaTemp->setRange(scrparam->betaMin[i],scrparam->betaMax[i]);
+            spinboxBetaTemp->setValue(scrparam->beta[i]);
+            spinboxBetaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+            spinboxBetaTemp->setFixedWidth(55);
+            hboxBeta->addWidget(spinboxBetaTemp);
+            spinboxBetaTemp->show();
+
+            // Synchronize the values of the slider and the spinbox
+            connect(this->sliderBeta[i-1], &QSlider::valueChanged, this, [this, i](int signalValue) {
+                this->sliderBetaValueChanged(signalValue, i);
+            });
+            connect(this->spinboxBeta[i-1], &QDoubleSpinBox::valueChanged, this, [this, i](double signalValue) {
+                this->spinboxBetaValueChanged(signalValue, i);
+            });
+        }
+    }
+
+
+    // ################################################
+    // Populate user interface with gamma angle sliders
+    // ################################################
+
+    this->sliderGamma.clear();
+    this->spinboxGamma.clear();
+    if(scrparam->gamma.size() >2){ // set up slider only for nontrivial angles
+        for(unsigned long int i = 1; i < scrparam->gamma.size() - 1; i++){ // skip first and final angle, they are constants
+
+            // Label for the parameter gamma_i
+            QString str;
+            QLabel *labelGamma = new QLabel("  Gamma angle " + str.setNum(i) + ":", this);
+            ui.verticalLayout->addWidget(labelGamma);
+            labelGamma->show();
+
+            // Horizontal layout for the parameter gamma_i
+            QHBoxLayout *hboxGamma = new QHBoxLayout(this);
+            ui.verticalLayout->addLayout(hboxGamma);
+
+            // Slider for the parameter gamma_i
+            QSlider *sliderGammaTemp = new QSlider(Qt::Horizontal, this);
+            this->sliderGamma.push_back(sliderGammaTemp);
+            sliderGammaTemp->setRange(0,100); // Sets the minimum and maximum values
+            sliderGammaTemp->setValue(static_cast<int>(std::round(scrparam->gamma[i]*100.0/scrparam->gammaMax[i]))); // Sets the current value
+            sliderGammaTemp->setSingleStep(1);
+            sliderGammaTemp->setPageStep(10);
+            sliderGammaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+            sliderGammaTemp->setFixedWidth(250);
+            hboxGamma->addWidget(sliderGammaTemp);
+            sliderGammaTemp->show();
+
+            // Spinbox for the parameter gamma_i
+            QDoubleSpinBox *spinboxGammaTemp = new QDoubleSpinBox(this);
+            this->spinboxGamma.push_back(spinboxGammaTemp);
+            spinboxGammaTemp->setRange(scrparam->gammaMin[i],scrparam->gammaMax[i]);
+            spinboxGammaTemp->setValue(scrparam->gamma[i]);
+            spinboxGammaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+            spinboxGammaTemp->setFixedWidth(55);
+            hboxGamma->addWidget(spinboxGammaTemp);
+            spinboxGammaTemp->show();
+
+            // Synchronize the values of the slider and the spinbox
+            connect(this->sliderGamma[i-1], &QSlider::valueChanged, this, [this, i](int signalValue) {
+                this->sliderGammaValueChanged(signalValue, i);
+            });
+            connect(this->spinboxGamma[i-1], &QDoubleSpinBox::valueChanged, this, [this, i](double signalValue) {
+                this->spinboxGammaValueChanged(signalValue, i);
+            });
+        }
+    }
+
+    // Fill the space below the sliders with strechable space
+    ui.verticalLayout->insertStretch(-1,0);
+
+//    // Synchronize the values of the slider and the spinbox
+//    connect(ui.horizontalSlider, &QSlider::valueChanged, this, &DrawComplex::sliderValueChanged);
+//    connect(ui.spinBox, &QSpinBox::valueChanged, this, &DrawComplex::spinBoxValueChanged);
 }
 
-void DrawComplex::sliderValueChanged(int value)
+void DrawComplex::sliderdValueChanged(int value)
 {
-    ui.openGLWidget->set_vertex1_x_pos(115 + value);
+    scrparam->d = value * 10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
-    ui.spinBox->setValue(value);
+    spinboxd->setValue(value);
 }
 
-void DrawComplex::spinBoxValueChanged(int value)
+void DrawComplex::spinboxdValueChanged(int value)
 {
-    ui.openGLWidget->set_vertex1_x_pos(115 + value);
+    scrparam->d = value * 10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
-    ui.horizontalSlider->setValue(value);
+    sliderd->setValue(value);
+}
+
+void DrawComplex::slidersxValueChanged(int value)
+{
+    scrparam->sx = static_cast<double>(value)/10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    spinboxsx->setValue(value);
+}
+
+void DrawComplex::spinboxsxValueChanged(int value)
+{
+    scrparam->sx = static_cast<double>(value)/10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    slidersx->setValue(value);
+}
+
+void DrawComplex::slidersyValueChanged(int value)
+{
+    scrparam->sy = static_cast<double>(value)/10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    spinboxsy->setValue(value);
+}
+
+void DrawComplex::spinboxsyValueChanged(int value)
+{
+    scrparam->sy = static_cast<double>(value)/10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    slidersy->setValue(value);
+}
+
+void DrawComplex::sliderszValueChanged(int value)
+{
+    scrparam->sz = value * 10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    spinboxsz->setValue(value);
+}
+
+void DrawComplex::spinboxszValueChanged(int value)
+{
+    scrparam->sz = value * 10.0;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    slidersz->setValue(value);
+}
+
+void DrawComplex::sliderAlphaValueChanged(int value, int i)
+{
+    scrparam->alpha[i] = value * (scrparam->alphaMax[i]) / 100.0;
+    if(scrparam->alpha[i] == 0.0) scrparam->alpha[i] = 0.01;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    spinboxAlpha[i-1]->setValue(scrparam->alpha[i]);
+    // Counting members in the spinboxAlpha vector starts from zero,
+    // while the counting of corresponding angles in the vector alpha
+    // starts from one (alpha[0] is a constant angle that we ignore).
+    // Hence "i-1" in the assignment above.
+}
+
+void DrawComplex::spinboxAlphaValueChanged(double value, int i)
+{
+    scrparam->alpha[i] = value;
+    if(scrparam->alpha[i] == 0.0) scrparam->alpha[i] = 0.01;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    int num = static_cast<int>(std::round(value * 100.0 / scrparam->alphaMax[i]));
+    sliderAlpha[i-1]->setValue(num);
+}
+
+
+void DrawComplex::sliderBetaValueChanged(int value, int i)
+{
+    scrparam->beta[i] = value * (scrparam->betaMax[i]) / 100.0;
+    if(scrparam->beta[i] == 0.0) scrparam->beta[i] = 0.01;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    spinboxBeta[i-1]->setValue(scrparam->beta[i]);
+    // Counting members in the spinboxBeta vector starts from zero,
+    // while the counting of corresponding angles in the vector beta
+    // starts from one (beta[0] is a constant angle that we ignore).
+    // Hence "i-1" in the assignment above.
+}
+
+void DrawComplex::spinboxBetaValueChanged(double value, int i)
+{
+    scrparam->beta[i] = value;
+    if(scrparam->beta[i] == 0.0) scrparam->beta[i] = 0.01;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    int num = static_cast<int>(std::round(value * 100.0 / scrparam->betaMax[i]));
+    sliderBeta[i-1]->setValue(num);
+}
+
+void DrawComplex::sliderGammaValueChanged(int value, int i)
+{
+    scrparam->gamma[i] = value * (scrparam->gammaMax[i]) / 100.0;
+    if(scrparam->gamma[i] == 0.0) scrparam->gamma[i] = 0.01;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    spinboxGamma[i-1]->setValue(scrparam->gamma[i]);
+    // Counting members in the spinboxGamma vector starts from zero,
+    // while the counting of corresponding angles in the vector gamma
+    // starts from one (gamma[0] is a constant angle that we ignore).
+    // Hence "i-1" in the assignment above.
+}
+
+void DrawComplex::spinboxGammaValueChanged(double value, int i)
+{
+    scrparam->gamma[i] = value;
+    if(scrparam->gamma[i] == 0.0) scrparam->gamma[i] = 0.01;
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
+    int num = static_cast<int>(std::round(value * 100.0 / scrparam->gammaMax[i]));
+    sliderGamma[i-1]->setValue(num);
 }
 
 DrawComplex::~DrawComplex()
@@ -58,6 +491,7 @@ void DrawComplex::closeEvent (QCloseEvent* event)
     item->drawComplexYcoordinate = this->y();
 
     mainWnd->drawComplexWndClosed(this);
+    free(scrparam);
 
     bool erased = false;
 

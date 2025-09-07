@@ -7,7 +7,7 @@ ScreenParameters::ScreenParameters(int dimension){
   // The constructor for the ScreenParameters class is nontrivial,
   // since it needs to set up the default values of the parameters
   // depending on the dimension of the ambient space. This is
-  // especially important for the angles, whose existance, number
+  // especially important for the angles, whose existence, number
   // and domains depend on the dimension, in addition to their
   // default values.
   //
@@ -20,10 +20,10 @@ ScreenParameters::ScreenParameters(int dimension){
   Damb = dimension;
 
   // Set default distance and scaling parameters
-  d = 50.0;
+  d = 1000.0;
   sx = 1.0;
   sy = 1.0;
-  sz = 10.0;
+  sz = 1000.0;
 
   // Clear all angles, before actually setting them up
   alpha.clear();
@@ -62,7 +62,7 @@ ScreenParameters::ScreenParameters(int dimension){
     alphaMin.push_back(M_PI/2);
     alphaMax.push_back(M_PI/2);
 
-    alpha.push_back(0.0);
+    alpha.push_back(0.01);
     alphaMin.push_back(0.0);
     alphaMax.push_back(2*M_PI);
 
@@ -100,7 +100,7 @@ ScreenParameters::ScreenParameters(int dimension){
       alphaMax.push_back(M_PI);
     }
     
-    alpha.push_back(0.0); // one azimuthal angle
+    alpha.push_back(0.01); // one azimuthal angle
     alphaMin.push_back(0.0);
     alphaMax.push_back(2*M_PI);
 
@@ -119,7 +119,7 @@ ScreenParameters::ScreenParameters(int dimension){
       betaMax.push_back(M_PI);
     }
     
-    beta.push_back(0.0); // one azimuthal angle
+    beta.push_back(0.01); // one azimuthal angle
     betaMin.push_back(0.0);
     betaMax.push_back(2*M_PI);
 
@@ -139,7 +139,7 @@ ScreenParameters::ScreenParameters(int dimension){
     }
 
     if( Damb > 3 ){ // In D=3 the azimuthal angle does not exist
-      gamma.push_back(0.0); // one azimuthal angle
+      gamma.push_back(0.01); // one azimuthal angle
       gammaMin.push_back(0.0);
       gammaMax.push_back(2*M_PI);
     }
@@ -157,6 +157,15 @@ ScreenParameters::ScreenParameters(int dimension){
 ScreenParameters::~ScreenParameters(){
 }
 
+ScreenParameters* setup_screen_parameters(SimpComp *simpComp){
+  ScreenParameters *params = nullptr;
+  if(simpComp->topology == "linear") params = new(nothrow) ScreenParameters(simpComp->D);
+  if(simpComp->topology == "sphere") params = new(nothrow) ScreenParameters(simpComp->D + 1);
+  if(params == nullptr){
+    log_report(LOG_ERROR,"Cannot set up screen parameters, this topology is not recognized! Fix your code!");
+  }
+  return(params);
+}
 
 
 bool initialize_drawing_coordinates(SimpComp* simpComp){
@@ -273,6 +282,386 @@ bool initialize_drawing_coordinates(SimpComp* simpComp){
   // have been successfully initialized, for all vertices in the simplicial complex.
   return true;
 }
+
+vector<EmbData> extract_embedding_data(SimpComp *simpComp){
+  vector<EmbData> coords;
+  EmbData temp;
+  long unsigned int i;
+  DrawingCoordinatesColor *color;
+
+  coords.clear();
+  evaluate_embedding_coordinates(simpComp);
+  for(auto &vertex : simpComp->elements[0]){
+    temp.simplex = vertex;
+    temp.x.clear();
+    color = DrawingCoordinatesColor::find_pointer_to_color(vertex);
+    for(i = 0; i < color->x.size(); i++) temp.x.push_back(color->x[i]);
+    coords.push_back(temp);
+  }
+  return(coords);
+}
+
+vector<EdgeData> extract_edge_data(SimpComp *simpComp){
+  vector <EdgeData> edges;
+  EdgeData temp;
+
+  edges.clear();
+  for(auto &edge : simpComp->elements[1]){
+    temp.simplex1 = edge->neighbors->elements[0][0];
+    temp.simplex2 = edge->neighbors->elements[0][1];
+    edges.push_back(temp);
+  }
+  return(edges);
+}
+
+vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, ScreenParameters *scrparams){
+
+  // TODO: This function could be made multithreaded, since it
+  // involves a lot of floating point calculations, does not
+  // depend too much on dynamic memory access, can potentially
+  // be vectorizable by splitting the embcoords domain into
+  // multiple independent pieces, and the goal is to execute
+  // it as fast as possible...
+  
+  int dimension;
+  ScreenCoords temp;
+  vector<ScreenCoords> drawingdata;
+
+  drawingdata.clear();
+  dimension = embcoords[0].x.size();
+
+  if(dimension == 1){
+    for(auto it : embcoords){
+      temp.simplex = it.simplex;
+      temp.X = static_cast<int>(round(it.x[0]/scrparams->sx));
+      temp.Y = 0;
+      temp.Z = 0.0;
+      drawingdata.push_back(temp);
+    }
+  }
+
+  if(dimension == 2){
+    for(auto it : embcoords){
+      temp.simplex = it.simplex;
+      double sinalpha = sin(scrparams->alpha[1]);
+      double cosalpha = cos(scrparams->alpha[1]);
+      temp.X = static_cast<int>(round( (-it.x[0] * sinalpha + it.x[1] * cosalpha) /scrparams->sx ));
+      temp.Y = static_cast<int>(round( (it.x[0] * cosalpha + it.x[1] * sinalpha) /scrparams->sy ));
+      temp.Z = 0.0;
+      drawingdata.push_back(temp);
+    }
+  }
+
+  // In cases of dimension 3 and higher, we employ the general algorithm
+  if(dimension > 2){
+
+    // Begin by reading all screen parameters into local variables,
+    // easier access
+    double d = scrparams->d;
+    double sx = scrparams->sx;
+    double sy = scrparams->sy;
+    double sz = scrparams->sz;
+    vector<double> sinalpha; // array to hold sin(alpha)
+    sinalpha.resize(scrparams->alpha.size());
+    vector<double> cosalpha; // array to hold cos(alpha)
+    cosalpha.resize(scrparams->alpha.size());
+    vector<double> sinbeta; // same for beta and gamma
+    sinbeta.resize(scrparams->beta.size());
+    vector<double> cosbeta;
+    cosbeta.resize(scrparams->beta.size());
+    vector<double> singamma;
+    singamma.resize(scrparams->gamma.size());
+    vector<double> cosgamma;
+    cosgamma.resize(scrparams->gamma.size());
+
+    // Evaluate all necessary trigonometry functions
+    int size = scrparams->alpha.size();
+    for(int i = 0; i < size; i++){
+      double angle = scrparams->alpha[i];
+      sinalpha[i] = sin( angle );
+      cosalpha[i] = cos( angle );
+    }
+    size = scrparams->beta.size();
+    for(int i = 0; i < size; i++){
+      double angle = scrparams->beta[i];
+      sinbeta[i] = sin( angle );
+      cosbeta[i] = cos( angle );
+    }
+    size = scrparams->gamma.size();
+    for(int i = 0; i < size; i++){
+      double angle = scrparams->gamma[i];
+      singamma[i] = sin( angle );
+      cosgamma[i] = cos( angle );
+    }
+
+    // Evaluate the array c (of size Damb), according to the formula:
+    //
+    // c_{i-1} = d * \cos alpha_i \prod_{j=0}^{i-1} \sin alpha_j ,
+    //
+    // where i = 1, ..., Damb.
+
+    vector<double> c;
+    c.resize(dimension);
+    for(int i = 1; i <= dimension; i++){
+      c[i-1] = d * cosalpha[i];
+      for(int j = 0; j <= i-1; j++) c[i-1] *= sinalpha[j];
+    }
+
+    // Evaluate the array eX (of size Damb-1), according to the formula:
+    //
+    // eX_{i-1} = sx * \cos beta_i \prod_{j=0}^{i-1} \sin beta_i ,
+    //
+    // where i = 1, ..., Damb-1.
+    
+    vector<double> eX;
+    eX.resize(dimension-1);
+    for(int i = 1; i <= dimension-1; i++){
+      eX[i-1] = sx * cosbeta[i];
+      for(int j = 0; j <= i-1; j++) eX[i-1] *= sinbeta[j];
+    }
+
+    // Evaluate the array eY (of size Damb-2), according to the formula:
+    //
+    // eY_{i-1} = sy * \cos gamma_i \prod_{j=0}^{i-1} \sin gamma_i ,
+    //
+    // where i = 1, ..., Damb-2.
+    
+    vector<double> eY;
+    eY.resize(dimension-2);
+    for(int i = 1; i <= dimension-2; i++){
+      eY[i-1] = sy * cosgamma[i];
+      for(int j = 0; j <= i-1; j++) eY[i-1] *= sinbeta[j];
+    }
+
+    // Evaluate the array normN (of size Damb-1), according to the formula:
+    //
+    // normN_{i-1} = \sqrt{arg1_i + \cos^2 alpha_i * arg2_i} ,
+    //
+    // where i = 1, ..., Damb-1, and args are given as:
+    //
+    // arg1_i = \prod_{j=1}^i \sin^2 alpha_j ,
+    //
+    // arg2_i = \sum_{j=i+1}^{Damb} \cos^2 \alpha_j \prod_{k=0,k!=i}^{j-1} \sin^2 alpha_k . 
+
+    vector<double> normN;
+    normN.resize(dimension-1);
+    for(int i = 1; i <= dimension-1; i++){
+      double arg1 = 1.0;
+      for(int j = 1; j <= i; j++) arg1 *= sinalpha[j] * sinalpha[j];
+      double arg2 = 0.0;
+      for(int j = i+1; j <= dimension; j++){
+        double prodsines = 1.0;
+        for(int k = 0; k <= j-1; k++){
+          if(k!=i) prodsines *= sinalpha[k] * sinalpha[k];
+        }
+        arg2 += cosalpha[j] * cosalpha[j] * prodsines;
+      }
+      normN[i-1] = sqrt(arg1 + cosalpha[i] * cosalpha[i] * arg2);
+    }
+    
+    // Evaluate the array normM (of size Damb-2), according to the formula:
+    //
+    // normM_{i-1} = \sqrt{arg1_i + \cos^2 beta_i * arg2_i} ,
+    //
+    // where i = 1, ..., Damb-2, and args are given as:
+    //
+    // arg1_i = \prod_{j=1}^i \sin^2 beta_j ,
+    //
+    // arg2_i = \sum_{j=i+1}^{Damb-1} \cos^2 beta_j \prod_{k=0,k!=i}^{j-1} \sin^2 beta_k . 
+
+    vector<double> normM;
+    normM.resize(dimension-2);
+    for(int i = 1; i <= dimension-2; i++){
+      double arg1 = 1.0;
+      for(int j = 1; j <= i; j++) arg1 *= sinbeta[j] * sinbeta[j];
+      double arg2 = 0.0;
+      for(int j = i+1; j <= dimension-1; j++){
+        double prodsines = 1.0;
+        for(int k = 0; k <= j-1; k++){
+          if(k!=i) prodsines *= sinbeta[k] * sinbeta[k];
+        }
+        arg2 += cosbeta[j] * cosbeta[j] * prodsines;
+      }
+      normM[i-1] = sqrt(arg1 + cosbeta[i] * cosbeta[i] * arg2);
+    }
+    
+    // Evaluate the rectangular matrix u (of size (Damb-1) x Damb), according to the formula:
+    //
+    // for j < i: u_{i-1,j-1} = 0 ,
+    //
+    // for j = i: u_{i-1,j-1} = - 1/N_{i-1} \prod_{k=1}^{i} \sin alpha_k ,
+    //
+    // for j > i: u_{i-1,j-1} = 1/N_{i-1} \cos alpha_i \cos alpha_j \prod_{k=0,k!=i}^{j-1} \sin alpha_k .
+    //
+    // Here i = 1, ..., Damb-1, while j = 1, ..., Damb.
+
+    vector<vector<double>> u(dimension-1, vector<double>(dimension));
+    for(int i = 1; i <= dimension-1; i++)
+      for(int j = 1; j <= dimension; j++){
+        if(j < i) u[i-1][j-1] = 0.0;
+        if(j == i){
+          double prodsines = 1.0;
+          for(int k = 1; k <= i; k++) prodsines *= sinalpha[k];
+          u[i-1][j-1] = - prodsines / normN[i-1];
+        }
+        if(j > i){
+          double prodsines = 1.0;
+          for(int k = 0; k <= j-1; k++){
+            if(k!=i) prodsines *= sinalpha[k];
+          }
+          u[i-1][j-1] = prodsines * cosalpha[i] * cosalpha[j] / normN[i-1];
+        }
+      }
+
+    // Evaluate the rectangular matrix v (of size (Damb-2) x (Damb-1) ), according to the formula:
+    //
+    // for j < i: v_{i-1,j-1} = 0 ,
+    //
+    // for j = i: v_{i-1,j-1} = - 1/M_{i-1} \prod_{k=1}^{i} \sin beta_k ,
+    //
+    // for j > i: v_{i-1,j-1} = 1/M_{i-1} \cos beta_i \cos beta_j \prod_{k=0,k!=i}^{j-1} \sin beta_k .
+    //
+    // Here i = 1, ..., Damb-2, while j = 1, ..., Damb-1.
+
+    vector<vector<double>> v(dimension-2, vector<double>(dimension-1));
+    for(int i = 1; i <= dimension-2; i++)
+      for(int j = 1; j <= dimension-1; j++){
+        if(j < i) v[i-1][j-1] = 0.0;
+        if(j == i){
+          double prodsines = 1.0;
+          for(int k = 1; k <= i; k++) prodsines *= sinbeta[k];
+          v[i-1][j-1] = - prodsines / normM[i-1];
+        }
+        if(j > i){
+          double prodsines = 1.0;
+          for(int k = 0; k <= j-1; k++){
+            if(k!=i) prodsines *= sinbeta[k];
+          }
+          v[i-1][j-1] = prodsines * cosbeta[i] * cosbeta[j] / normM[i-1];
+        }
+      }
+
+    // Evaluate the following products of matrices:
+    //
+    // uTeX = u^T . eX ,
+    //
+    // vTeY = v^T . eY , (this one is an intermediary step)
+    //
+    // uTvTeY = u^t . vTeY .
+    //
+    // Here exponent T stands for matrix transpose, so that the dimensions match:
+    //
+    // eX has dimensions (Damb-1) x 1,
+    //
+    // u^T has dimensions Damb x (Damb-1),
+    //
+    // eY has dimensions (Damb-2) x 1,
+    //
+    // v^T has dimensions (Damb-1) x (Damb-2).
+    //
+    // The resulting matrices are vectors:
+    //
+    // uTeX has dimensions Damb x 1,
+    //
+    // vTeY has dimensions (Damb-1) x 1,
+    //
+    // uTvTey has dimensions Damb x 1.
+
+    vector<double> uTeX;
+    uTeX.resize(dimension);
+    for(int i = 0; i < dimension; i++){
+      uTeX[i] = 0.0;
+      for(int j = 0; j < dimension-1; j++) uTeX[i] += u[j][i] * eX[j];
+    }
+
+    vector<double> vTeY;
+    vTeY.resize(dimension-1);
+    for(int i = 0; i < dimension-1; i++){
+      vTeY[i] = 0.0;
+      for(int j = 0; j < dimension-2; j++) vTeY[i] += v[j][i] * eY[j];
+    }
+        
+    vector<double> uTvTeY;
+    uTvTeY.resize(dimension);
+    for(int i = 0; i < dimension; i++){
+      uTvTeY[i] = 0.0;
+      for(int j = 0; j < dimension-1; j++) uTvTeY[i] += u[j][i] * vTeY[j];
+    }
+
+    // From this point on, calculations depend on the position of each
+    // vertex. All positions are tabulated in embcoords, so from now on
+    // we loop the remaining calculations through embcoords...
+
+    for(auto it : embcoords){
+
+      // Given a coordinate vector x (of dimension Damb), and the previously
+      // obtained vectors c, uTeX, uTvTeY, we now evaluate four fundamental scalar
+      // products:
+      //
+      // vX = x . uTeX , vY = x . uTvTeY , vc = x . c , v2 = x . x
+      //
+      // The dimensions of all vectors is Damb. The scalars vX, vY, vc, v2 will be
+      // crucial in further calculations.
+
+      double vX = 0.0;
+      double vY = 0.0;
+      double vc = 0.0;
+      double v2 = 0.0;
+      for(int i = 0; i < dimension; i++){
+        vX += it.x[i] * uTeX[i];
+        vY += it.x[i] * uTvTeY[i];
+        vc += it.x[i] * c[i];
+        v2 += it.x[i] * it.x[i];
+      }
+
+      // Evaluate the parameter F, given as
+      //
+      // F = numerator / denominator,
+      //
+      // numerator = sz [sz + d - vc / d] ,
+      //
+      // denominator = sx^2 sy^2 (sz + d) [sz + d - vc / d] + sx^2 sy^2 v2 - sy^2 vX^2 - sx^2 vY^2 .
+
+      double bracket = sz + d - (vc / d);
+      double numerator = sz * bracket;
+      double denominator = sx * sx * sy * sy * (sz + d) * bracket;
+      denominator += sx * sx * sy * sy * v2;
+      denominator -= sy * sy * vX * vX;
+      denominator -= sx * sx * vY * vY;
+      double F = numerator/denominator;
+
+      // Finally, we calculate the screen coordinates XX, YY and the distance of the
+      // vertex from the screen ZZ, according to the formulas:
+      //
+      // XX = F sy^2 vX , YY = F sx^2 vY ,
+      //
+      // ZZ = \sqrt{ c^2 + XX^2 + YY^2 + v2 - 2(vc + XX vX + YY vY)} .
+
+      double XX = F * sy * sy * vX;
+      double YY = F * sx * sx * vY;
+      double c2 = 0.0;
+      for(int i = 0; i < dimension; i++) c2+= c[i] * c[i];
+      double ZZ = sqrt( abs(c2 + (XX * XX) + (YY * YY) + v2 - 2 * (vc + (XX * vX) + (YY * vY))) );
+
+      // We are done!! Collect all results and save them into drawingdata
+      temp.simplex = it.simplex;
+      temp.X = static_cast<int>(round(XX));
+      temp.Y = static_cast<int>(round(YY));
+      temp.Z = ZZ;
+      drawingdata.push_back(temp);
+    }
+  }
+  
+  if( (dimension <= 0) ){
+    log_report(LOG_ERROR,"The dimension of the embedding space must be positive! Fix your code!");
+    temp.simplex = nullptr;
+    temp.X = 0;
+    temp.Y = 0;
+    temp.Z = 0.0;
+    drawingdata.push_back(temp);
+  }
+  return(drawingdata);
+} 
 
 void recenter_intrinsic_coordinates(SimpComp *simpComp){
   int dim;
@@ -500,8 +889,8 @@ double evaluate_potential(SimpComp *simpComp){
     // therefore the best choice, since it will force all vertices
     // of the complex to be as far as possible from each other,
     // distributing them "evenly" over the sphere.
-
-    return evaluate_inverse_distance_potential(simpComp);
+    pot = evaluate_inverse_distance_potential(simpComp);
+    return pot;
   }
 
   // If we do not recognize the topology, fall back to the

@@ -39,6 +39,7 @@
     <addaction name="actionOpen_session"/>
     <addaction name="actionSave_session"/>
     <addaction name="separator"/>
+    <addaction name="actionUnseed_everything"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -106,7 +107,7 @@
   </action>
   <action name="actionOpen">
    <property name="text">
-    <string> Open complex from file</string>
+    <string>Open complex from file</string>
    </property>
   </action>
   <action name="actionSave_As">
@@ -157,6 +158,11 @@
   <action name="actionFind_simplices_with_color_value">
    <property name="text">
     <string>Find simplices with color value</string>
+   </property>
+  </action>
+  <action name="actionUnseed_everything">
+   <property name="text">
+    <string>Unseed everything</string>
    </property>
   </action>
  </widget>

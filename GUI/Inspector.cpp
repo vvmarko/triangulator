@@ -21,6 +21,8 @@ void Inspector::anchorClicked(const QUrl &url) {
 void Inspector::activateBtnAttachNewSimplex() {
     KSimplex* newSimplex = attach_new_simplex_to_boundary(simplex , simpComp);
     UniqueIDColor::append_color_to_entire_complex(simpComp);
+    evaluate_potential_minimum(simpComp);
+    evaluate_embedding_coordinates(simpComp);
 
     //    w->updateSimpCompTableModel();
 
@@ -29,6 +31,22 @@ void Inspector::activateBtnAttachNewSimplex() {
         Utils::openWindowOnRandomPos(newinspector);
         newinspector->show();
     }
+}
+
+void Inspector::activateBtnApplyPachnerMove() {
+    KSimplex* newSimplex = Pachner_move(simplex , simpComp);
+    UniqueIDColor::append_color_to_entire_complex(simpComp);
+    evaluate_potential_minimum(simpComp);
+    evaluate_embedding_coordinates(simpComp);
+
+    //    w->updateSimpCompTableModel();
+
+    if(newSimplex!=nullptr){
+        Inspector *newinspector = new Inspector(newSimplex, item);
+        Utils::openWindowOnRandomPos(newinspector);
+        newinspector->show();
+    }
+    this->close();
 }
 
 void resizeLabelToFitContents(QLabel *label) {
@@ -89,7 +107,7 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
     ui->tbNeighbors->setOpenLinks(false);
     connect(ui->tbNeighbors, &QTextBrowser::anchorClicked, this, &Inspector::anchorClicked);
     connect(ui->btnAttachNewSimplex,  &QPushButton::clicked, this, &Inspector::activateBtnAttachNewSimplex);
-
+    connect(ui->btnApplyPachnerMove,  &QPushButton::clicked, this, &Inspector::activateBtnApplyPachnerMove);
 
     item->childWindows.push_back(this);
 

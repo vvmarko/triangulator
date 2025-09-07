@@ -50,11 +50,43 @@ public:
 
   // Destructor:
   ~ScreenParameters();
-
 };
 
+#ifndef EMBDATA_STRUCT
+#define EMBDATA_STRUCT
 
+struct EmbData {
+  KSimplex *simplex;
+  vector<double> x;
+};
 
+#endif
+
+#ifndef EDGEDATA_STRUCT
+#define EDGEDATA_STRUCT
+
+struct EdgeData {
+  KSimplex *simplex1;
+  KSimplex *simplex2;
+};
+
+#endif
+
+#ifndef SCREENCOORDS_STRUCT
+#define SCREENCOORDS_STRUCT
+
+struct ScreenCoords {
+  KSimplex *simplex;
+  int X;
+  int Y;
+  double Z;
+};
+
+#endif
+
+// A setup function that calls the constructor based on the
+// topology of the given complex:
+ScreenParameters* setup_screen_parameters(SimpComp *simpComp);
 
 bool initialize_drawing_coordinates(SimpComp *simpComp);
 
@@ -81,6 +113,12 @@ void store_drawing_coordinates(SimpComp *simpComp, vector<DrawingCoordinatesColo
 void restore_drawing_coordinates(SimpComp *simpComp, vector<DrawingCoordinatesColor> &source);
 
 void evaluate_potential_minimum(SimpComp *simpComp);
+
+vector<EmbData> extract_embedding_data(SimpComp *simpComp);
+
+vector<EdgeData> extract_edge_data(SimpComp *simpComp);
+
+vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, ScreenParameters *scrparams);
 
 
 

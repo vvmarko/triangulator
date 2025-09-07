@@ -36,6 +36,8 @@ void SeedComplex::handleAccepted() {
     if (ui.cbType->itemText(ui.cbType->currentIndex()) != "Please select...")
     {
         UniqueIDColor::colorize_entire_complex(i.simpComp);
+        evaluate_potential_minimum(i.simpComp);
+        evaluate_embedding_coordinates(i.simpComp);
         items->push_back(i);
         mainWnd->updateSimpCompTableModel();
         table->show();

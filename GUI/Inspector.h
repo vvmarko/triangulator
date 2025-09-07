@@ -28,6 +28,7 @@ private:
 
     void anchorClicked(const QUrl &url);
     void activateBtnAttachNewSimplex();
+    void activateBtnApplyPachnerMove();
 
     void closeEvent(QCloseEvent* event) override;
 
