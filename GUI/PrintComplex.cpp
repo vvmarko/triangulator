@@ -56,7 +56,7 @@ void PrintComplex::closeEvent (QCloseEvent* event)
             erased = true;
         }
     }
-
+    if(event == nullptr) return; // This is a dummy command to satisfy the compiler, do not remove
 }
 
 PrintComplex::~PrintComplex()

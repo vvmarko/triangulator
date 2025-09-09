@@ -49,19 +49,16 @@ public:
 
     std::vector<ScreenCoords> drawingdata;
     std::vector<EdgeData> edgedata;
+    double enveloping_radius;
 
     int m_posAttr, m_colAttr, m_matrixUniform;
     QOpenGLShaderProgram *m_program;
 
-//protected:
-//    GLfloat vertex1_x_pos;
-
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void create_circleTriangleFan (GLfloat *vertices, int subdivs, double radius);
-    void draw_lines(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
+    void create_rodTriangleFan (GLfloat *vertices1, GLfloat *vertices2, int x1, int y1, int x2, int y2, double radius1, double radius2);
     void draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
-    void create_simpcomp_edge(GLfloat *vertices);
     KSimplex* find_nearest_vertex_to_mouse_position(int posx, int posy );
     void paintGL() override;
 public:

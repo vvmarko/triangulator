@@ -335,7 +335,7 @@ vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, 
       temp.simplex = it.simplex;
       temp.X = static_cast<int>(round(it.x[0]/scrparams->sx));
       temp.Y = 0;
-      temp.Z = 0.0;
+      temp.Z = triangulator_global::linear_topology_drawing_domain_size;
       drawingdata.push_back(temp);
     }
   }
@@ -347,7 +347,7 @@ vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, 
       double cosalpha = cos(scrparams->alpha[1]);
       temp.X = static_cast<int>(round( (-it.x[0] * sinalpha + it.x[1] * cosalpha) /scrparams->sx ));
       temp.Y = static_cast<int>(round( (it.x[0] * cosalpha + it.x[1] * sinalpha) /scrparams->sy ));
-      temp.Z = 0.0;
+      temp.Z = triangulator_global::linear_topology_drawing_domain_size;
       drawingdata.push_back(temp);
     }
   }

@@ -45,6 +45,9 @@ private:
     ScreenParameters *scrparam;
     std::vector<EmbData> coords;
 
+    double enveloping_radius;
+    double default_scale;
+
     QStatusBar *statusBar;
     QSlider *sliderd;
     QSpinBox *spinboxd;
@@ -70,8 +73,15 @@ private:
     void spinboxsxValueChanged(int value);
     void slidersyValueChanged(int value);
     void spinboxsyValueChanged(int value);
+
+/*  // We comment out the sz user interface, since we do not want the user to manipulate
+    // it. Instead we use the hard-coded value sz = 20, since that is an optimal value for
+    // the graphics rendering. We leave the commented-out code here, in case someone wants
+    // to try it out anyway...
+
     void sliderszValueChanged(int value);
     void spinboxszValueChanged(int value);
+*/
 
     void sliderAlphaValueChanged(int value, int counter);
     void spinboxAlphaValueChanged(double value, int counter);
@@ -79,6 +89,8 @@ private:
     void spinboxBetaValueChanged(double value, int counter);
     void sliderGammaValueChanged(int value, int counter);
     void spinboxGammaValueChanged(double value, int counter);
+
+    double find_enveloping_sphere_radius(std::vector<EmbData> coords);
 
 protected:
     void setStatusMessage(QString s);

@@ -40,6 +40,7 @@ void LogViewer::logFileChanged(const QString &path) {
    ui.textEdit->insertHtml(QString::fromUtf8(data));
    ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
    fileAccessed = 0;
+   if(path == " ") return; // This is a dummy command to satisfy the compiler, do not remove
 }
 
 LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)

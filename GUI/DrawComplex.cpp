@@ -1,6 +1,7 @@
 #include "DrawComplex.h"
 #include "DrawComplexGLWidget.h"
 #include "MainWindow.h"
+#include <algorithm>
 #include <QSlider>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -29,30 +30,24 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     this->layout()->addWidget (statusBar);
     statusBar->showMessage("Click near a vertex to inspect it...");
 
-    // Set up the drawing widget
-    ui.openGLWidget->item = item;
-    ui.openGLWidget->edgedata = extract_edge_data(simpComp);
-    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
-    ui.openGLWidget->setDrawComplexStatusBar(statusBar);
-
     // #################################################
     // Populate user interface with four scaling sliders
     // #################################################
 
     // Label for the parameter d
-    QLabel *labelDistance = new QLabel("  Screen distance:", this);
+    QLabel *labelDistance = new QLabel("  Screen distance:");
     ui.verticalLayout->addWidget(labelDistance);
     labelDistance->show();
 
     // Horizontal layout for the parameter d
-    QHBoxLayout *hboxd = new QHBoxLayout(this);
+    QHBoxLayout *hboxd = new QHBoxLayout();
     ui.verticalLayout->addLayout(hboxd);
 
     // Slider for the parameter d
-    QSlider *sliderd = new QSlider(Qt::Horizontal, this);
+    QSlider *sliderd = new QSlider(Qt::Horizontal);
     this->sliderd = sliderd;
-    sliderd->setRange(1, 100); // Sets the minimum and maximum values
-    sliderd->setValue(50); // Sets the current value
+    sliderd->setRange(0, 100); // Sets the minimum and maximum values
+    sliderd->setValue(1); // Sets the current value
     sliderd->setSingleStep(1);
     sliderd->setPageStep(10);
     sliderd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -61,10 +56,10 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     sliderd->show();
 
     // Spinbox for the parameter d
-    QSpinBox *spinboxd = new QSpinBox(this);
+    QSpinBox *spinboxd = new QSpinBox();
     this->spinboxd = spinboxd;
-    spinboxd->setRange(1,100);
-    spinboxd->setValue(50);
+    spinboxd->setRange(0,100);
+    spinboxd->setValue(1);
     spinboxd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     spinboxd->setFixedWidth(55);
     hboxd->addWidget(spinboxd);
@@ -74,20 +69,25 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     connect(sliderd, &QSlider::valueChanged, this, &DrawComplex::sliderdValueChanged);
     connect(spinboxd, &QSpinBox::valueChanged, this, &DrawComplex::spinboxdValueChanged);
 
+/*  // We comment out the sz user interface, since we do not want the user to manipulate
+    // it. Instead we use the hard-coded value sz = 20, since that is an optimal value for
+    // the graphics rendering. We leave the commented-out code here, in case someone wants
+    // to try it out anyway...
+
     // Label for the parameter sz
-    QLabel *labelEye = new QLabel("  Eye distance:", this);
+    QLabel *labelEye = new QLabel("  Eye distance:");
     ui.verticalLayout->addWidget(labelEye);
     labelEye->show();
 
     // Horizontal layout for the parameter sz
-    QHBoxLayout *hboxsz = new QHBoxLayout(this);
+    QHBoxLayout *hboxsz = new QHBoxLayout();
     ui.verticalLayout->addLayout(hboxsz);
 
     // Slider for the parameter sz
-    QSlider *slidersz = new QSlider(Qt::Horizontal, this);
+    QSlider *slidersz = new QSlider(Qt::Horizontal);
     this->slidersz = slidersz;
     slidersz->setRange(1, 100); // Sets the minimum and maximum values
-    slidersz->setValue(10); // Sets the current value
+    slidersz->setValue(2); // Sets the current value
     slidersz->setSingleStep(1);
     slidersz->setPageStep(10);
     slidersz->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -96,10 +96,10 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     slidersz->show();
 
     // Spinbox for the parameter sz
-    QSpinBox *spinboxsz = new QSpinBox(this);
+    QSpinBox *spinboxsz = new QSpinBox();
     this->spinboxsz = spinboxsz;
     spinboxsz->setRange(1,100);
-    spinboxsz->setValue(10);
+    spinboxsz->setValue(2);
     spinboxsz->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     spinboxsz->setFixedWidth(55);
     hboxsz->addWidget(spinboxsz);
@@ -108,21 +108,22 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     // Synchronize the values of the slider and the spinbox
     connect(slidersz, &QSlider::valueChanged, this, &DrawComplex::sliderszValueChanged);
     connect(spinboxsz, &QSpinBox::valueChanged, this, &DrawComplex::spinboxszValueChanged);
+*/
 
     // Label for the parameter sx
-    QLabel *labelScalex = new QLabel("  Horizontal scale:", this);
+    QLabel *labelScalex = new QLabel("  Horizontal scale:");
     ui.verticalLayout->addWidget(labelScalex);
     labelScalex->show();
 
     // Horizontal layout for the parameter sx
-    QHBoxLayout *hboxsx = new QHBoxLayout(this);
+    QHBoxLayout *hboxsx = new QHBoxLayout();
     ui.verticalLayout->addLayout(hboxsx);
 
     // Slider for the parameter sx
-    QSlider *slidersx = new QSlider(Qt::Horizontal, this);
+    QSlider *slidersx = new QSlider(Qt::Horizontal);
     this->slidersx = slidersx;
-    slidersx->setRange(1, 100); // Sets the minimum and maximum values
-    slidersx->setValue(10); // Sets the current value
+    slidersx->setRange(-100, 100); // Sets the minimum and maximum values
+    slidersx->setValue(0); // Sets the current value
     slidersx->setSingleStep(1);
     slidersx->setPageStep(10);
     slidersx->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -131,10 +132,10 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     slidersx->show();
 
     // Spinbox for the parameter sx
-    QSpinBox *spinboxsx = new QSpinBox(this);
+    QSpinBox *spinboxsx = new QSpinBox();
     this->spinboxsx = spinboxsx;
-    spinboxsx->setRange(1,100);
-    spinboxsx->setValue(10);
+    spinboxsx->setRange(-100,100);
+    spinboxsx->setValue(0);
     spinboxsx->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     spinboxsx->setFixedWidth(55);
     hboxsx->addWidget(spinboxsx);
@@ -145,19 +146,19 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     connect(spinboxsx, &QSpinBox::valueChanged, this, &DrawComplex::spinboxsxValueChanged);
 
     // Label for the parameter sy
-    QLabel *labelScaley = new QLabel("  Vertical scale:", this);
+    QLabel *labelScaley = new QLabel("  Vertical scale:");
     ui.verticalLayout->addWidget(labelScaley);
     labelScaley->show();
 
     // Horizontal layout for the parameter sy
-    QHBoxLayout *hboxsy = new QHBoxLayout(this);
+    QHBoxLayout *hboxsy = new QHBoxLayout();
     ui.verticalLayout->addLayout(hboxsy);
 
     // Slider for the parameter sy
-    QSlider *slidersy = new QSlider(Qt::Horizontal, this);
+    QSlider *slidersy = new QSlider(Qt::Horizontal);
     this->slidersy = slidersy;
-    slidersy->setRange(1, 100); // Sets the minimum and maximum values
-    slidersy->setValue(10); // Sets the current value
+    slidersy->setRange(-100, 100); // Sets the minimum and maximum values
+    slidersy->setValue(0); // Sets the current value
     slidersy->setSingleStep(1);
     slidersy->setPageStep(10);
     slidersy->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -166,10 +167,10 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     slidersy->show();
 
     // Spinbox for the parameter sy
-    QSpinBox *spinboxsy = new QSpinBox(this);
+    QSpinBox *spinboxsy = new QSpinBox();
     this->spinboxsy = spinboxsy;
-    spinboxsy->setRange(1,100);
-    spinboxsy->setValue(10);
+    spinboxsy->setRange(-100,100);
+    spinboxsy->setValue(0);
     spinboxsy->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     spinboxsy->setFixedWidth(55);
     hboxsy->addWidget(spinboxsy);
@@ -190,16 +191,16 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
 
             // Label for the parameter alpha_i
             QString str;
-            QLabel *labelAlpha = new QLabel("  Alpha angle " + str.setNum(i) + ":", this);
+            QLabel *labelAlpha = new QLabel("  Alpha angle " + str.setNum(i) + ":");
             ui.verticalLayout->addWidget(labelAlpha);
             labelAlpha->show();
 
             // Horizontal layout for the parameter alpha_i
-            QHBoxLayout *hboxAlpha = new QHBoxLayout(this);
+            QHBoxLayout *hboxAlpha = new QHBoxLayout();
             ui.verticalLayout->addLayout(hboxAlpha);
 
             // Slider for the parameter alpha_i
-            QSlider *sliderAlphaTemp = new QSlider(Qt::Horizontal, this);
+            QSlider *sliderAlphaTemp = new QSlider(Qt::Horizontal);
             this->sliderAlpha.push_back(sliderAlphaTemp);
             sliderAlphaTemp->setRange(0,100); // Sets the minimum and maximum values
             sliderAlphaTemp->setValue(static_cast<int>(std::round(scrparam->alpha[i]*100.0/scrparam->alphaMax[i]))); // Sets the current value
@@ -211,7 +212,7 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
             sliderAlphaTemp->show();
 
             // Spinbox for the parameter alpha_i
-            QDoubleSpinBox *spinboxAlphaTemp = new QDoubleSpinBox(this);
+            QDoubleSpinBox *spinboxAlphaTemp = new QDoubleSpinBox();
             this->spinboxAlpha.push_back(spinboxAlphaTemp);
             spinboxAlphaTemp->setRange(scrparam->alphaMin[i],scrparam->alphaMax[i]);
             spinboxAlphaTemp->setValue(scrparam->alpha[i]);
@@ -242,16 +243,16 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
 
             // Label for the parameter beta_i
             QString str;
-            QLabel *labelBeta = new QLabel("  Beta angle " + str.setNum(i) + ":", this);
+            QLabel *labelBeta = new QLabel("  Beta angle " + str.setNum(i) + ":");
             ui.verticalLayout->addWidget(labelBeta);
             labelBeta->show();
 
             // Horizontal layout for the parameter beta_i
-            QHBoxLayout *hboxBeta = new QHBoxLayout(this);
+            QHBoxLayout *hboxBeta = new QHBoxLayout();
             ui.verticalLayout->addLayout(hboxBeta);
 
             // Slider for the parameter beta_i
-            QSlider *sliderBetaTemp = new QSlider(Qt::Horizontal, this);
+            QSlider *sliderBetaTemp = new QSlider(Qt::Horizontal);
             this->sliderBeta.push_back(sliderBetaTemp);
             sliderBetaTemp->setRange(0,100); // Sets the minimum and maximum values
             sliderBetaTemp->setValue(static_cast<int>(std::round(scrparam->beta[i]*100.0/scrparam->betaMax[i]))); // Sets the current value
@@ -263,7 +264,7 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
             sliderBetaTemp->show();
 
             // Spinbox for the parameter beta_i
-            QDoubleSpinBox *spinboxBetaTemp = new QDoubleSpinBox(this);
+            QDoubleSpinBox *spinboxBetaTemp = new QDoubleSpinBox();
             this->spinboxBeta.push_back(spinboxBetaTemp);
             spinboxBetaTemp->setRange(scrparam->betaMin[i],scrparam->betaMax[i]);
             spinboxBetaTemp->setValue(scrparam->beta[i]);
@@ -294,16 +295,16 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
 
             // Label for the parameter gamma_i
             QString str;
-            QLabel *labelGamma = new QLabel("  Gamma angle " + str.setNum(i) + ":", this);
+            QLabel *labelGamma = new QLabel("  Gamma angle " + str.setNum(i) + ":");
             ui.verticalLayout->addWidget(labelGamma);
             labelGamma->show();
 
             // Horizontal layout for the parameter gamma_i
-            QHBoxLayout *hboxGamma = new QHBoxLayout(this);
+            QHBoxLayout *hboxGamma = new QHBoxLayout();
             ui.verticalLayout->addLayout(hboxGamma);
 
             // Slider for the parameter gamma_i
-            QSlider *sliderGammaTemp = new QSlider(Qt::Horizontal, this);
+            QSlider *sliderGammaTemp = new QSlider(Qt::Horizontal);
             this->sliderGamma.push_back(sliderGammaTemp);
             sliderGammaTemp->setRange(0,100); // Sets the minimum and maximum values
             sliderGammaTemp->setValue(static_cast<int>(std::round(scrparam->gamma[i]*100.0/scrparam->gammaMax[i]))); // Sets the current value
@@ -315,7 +316,7 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
             sliderGammaTemp->show();
 
             // Spinbox for the parameter gamma_i
-            QDoubleSpinBox *spinboxGammaTemp = new QDoubleSpinBox(this);
+            QDoubleSpinBox *spinboxGammaTemp = new QDoubleSpinBox();
             this->spinboxGamma.push_back(spinboxGammaTemp);
             spinboxGammaTemp->setRange(scrparam->gammaMin[i],scrparam->gammaMax[i]);
             spinboxGammaTemp->setValue(scrparam->gamma[i]);
@@ -337,14 +338,30 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     // Fill the space below the sliders with strechable space
     ui.verticalLayout->insertStretch(-1,0);
 
-//    // Synchronize the values of the slider and the spinbox
-//    connect(ui.horizontalSlider, &QSlider::valueChanged, this, &DrawComplex::sliderValueChanged);
-//    connect(ui.spinBox, &QSpinBox::valueChanged, this, &DrawComplex::spinBoxValueChanged);
+    // Introduce some gui-useful defaults for screen parameters
+    this->enveloping_radius = find_enveloping_sphere_radius(this->coords);
+    this->scrparam->d = this->enveloping_radius + 10;
+    // For setting the default scale below, 500 is the initial height of the
+    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
+    // scaling parameter that nicely fills in the viewport for the hard-coded
+    // value sz = 20. Changing any of these parameters will likely only make
+    // the picture worse...
+    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    this->scrparam->sx = default_scale;
+    this->scrparam->sy = default_scale;
+    this->scrparam->sz = 20.0; // Hard-coded value for sz, the optimal one
+
+    // Set up the drawing widget
+    ui.openGLWidget->item = item;
+    ui.openGLWidget->edgedata = extract_edge_data(simpComp);
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->enveloping_radius = this->enveloping_radius;
+    ui.openGLWidget->setDrawComplexStatusBar(statusBar);
 }
 
 void DrawComplex::sliderdValueChanged(int value)
 {
-    scrparam->d = value * 10.0;
+    scrparam->d = enveloping_radius + (value * 10.0);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxd->setValue(value);
@@ -352,7 +369,7 @@ void DrawComplex::sliderdValueChanged(int value)
 
 void DrawComplex::spinboxdValueChanged(int value)
 {
-    scrparam->d = value * 10.0;
+    scrparam->d = enveloping_radius + (value * 10.0);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     sliderd->setValue(value);
@@ -360,7 +377,21 @@ void DrawComplex::spinboxdValueChanged(int value)
 
 void DrawComplex::slidersxValueChanged(int value)
 {
-    scrparam->sx = static_cast<double>(value)/10.0;
+    // For setting the default scale below, 500 is the initial height of the
+    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
+    // scaling parameter that nicely fills in the viewport for the hard-coded
+    // value sz = 20. Changing any of these parameters will likely only make
+    // the picture worse...
+    this->default_scale = 2 * enveloping_radius / (500 * 10);
+
+    // We use the function
+    //
+    // f(x) = 1/2 ( -x/10 + \sqrt{4 + (x/10)^2} )
+    //
+    // to smoothly interpolate the slider input [-100,100] to the actual scaling
+    // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
+    double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
+    scrparam->sx = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxsx->setValue(value);
@@ -368,7 +399,14 @@ void DrawComplex::slidersxValueChanged(int value)
 
 void DrawComplex::spinboxsxValueChanged(int value)
 {
-    scrparam->sx = static_cast<double>(value)/10.0;
+    // For setting the default scale below, 500 is the initial height of the
+    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
+    // scaling parameter that nicely fills in the viewport for the hard-coded
+    // value sz = 20. Changing any of these parameters will likely only make
+    // the picture worse...
+    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
+    scrparam->sx = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     slidersx->setValue(value);
@@ -376,7 +414,14 @@ void DrawComplex::spinboxsxValueChanged(int value)
 
 void DrawComplex::slidersyValueChanged(int value)
 {
-    scrparam->sy = static_cast<double>(value)/10.0;
+    // For setting the default scale below, 500 is the initial height of the
+    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
+    // scaling parameter that nicely fills in the viewport for the hard-coded
+    // value sz = 20. Changing any of these parameters will likely only make
+    // the picture worse...
+    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
+    scrparam->sy = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxsy->setValue(value);
@@ -384,11 +429,24 @@ void DrawComplex::slidersyValueChanged(int value)
 
 void DrawComplex::spinboxsyValueChanged(int value)
 {
-    scrparam->sy = static_cast<double>(value)/10.0;
+    // For setting the default scale below, 500 is the initial height of the
+    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
+    // scaling parameter that nicely fills in the viewport for the hard-coded
+    // value sz = 20. Changing any of these parameters will likely only make
+    // the picture worse...
+    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
+    scrparam->sy = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     slidersy->setValue(value);
 }
+
+/*  // We comment out the sz user interface, since we do not want the user to manipulate
+    // it. Instead we use the hard-coded value sz = 20, since that is an optimal value for
+    // the graphics rendering. We leave the commented-out code here, in case someone wants
+    // to try it out anyway...
+
 
 void DrawComplex::sliderszValueChanged(int value)
 {
@@ -405,6 +463,7 @@ void DrawComplex::spinboxszValueChanged(int value)
     ui.openGLWidget->repaint();
     slidersz->setValue(value);
 }
+*/
 
 void DrawComplex::sliderAlphaValueChanged(int value, int i)
 {
@@ -476,6 +535,24 @@ void DrawComplex::spinboxGammaValueChanged(double value, int i)
     sliderGamma[i-1]->setValue(num);
 }
 
+double DrawComplex::find_enveloping_sphere_radius(std::vector<EmbData> coords)
+{
+    double temp;
+    double max = 0.0;
+
+    // Initialize max as a radius-squared of the first set of coordinates
+    for(long unsigned int i = 0; i < coords[0].x.size(); i++) max += coords[0].x[i] * coords[0].x[i];
+
+    // Go through all coordinates, evaluate radius-squared, and remember the biggest one
+    for(auto &it : coords){
+        temp = 0.0;
+        for(long unsigned int j = 0; j < it.x.size(); j++) temp += it.x[j] * it.x[j];
+        if(temp > max) max = temp;
+    }
+    // Return the biggest radius
+    return sqrt(max);
+}
+
 DrawComplex::~DrawComplex()
 {
 }
@@ -506,6 +583,7 @@ void DrawComplex::closeEvent (QCloseEvent* event)
          }
       }
     }
+    if(event == nullptr) return; // This is a dummy command to satisfy the compiler, do not remove
 }
 
 void DrawComplex::setStatusMessage(QString s)

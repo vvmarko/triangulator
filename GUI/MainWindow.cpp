@@ -142,7 +142,7 @@ void MainWindow::tblItemOpenToolsClick(int index) {
 void MainWindow::tblItemOpenActionsClick(int index) {
 
     QComboBox *btn = (QComboBox *)sender();
-    int row = ui.tblComplexes->indexAt(btn->pos()).row();
+//    int row = ui.tblComplexes->indexAt(btn->pos()).row();
 
     btn->setCurrentIndex(0); // reset the status of the ComboBox
 
