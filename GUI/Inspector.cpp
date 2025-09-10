@@ -100,6 +100,18 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
     }
     str+="</table>";
 
+    // Set the background of the color list widget to be the same as the
+    // background for other members of the Inspector window, like the label
+    // widget.
+    QPalette labelpalette = ui->label->palette();
+    QPalette tbColorspalette = ui->tbColors->palette();
+    QColor activewindowcolor = labelpalette.color(QPalette::Active,QPalette::Window);
+    QColor inactivewindowcolor = labelpalette.color(QPalette::Inactive,QPalette::Window);
+    tbColorspalette.setColor(QPalette::Active,QPalette::Base,activewindowcolor);
+    tbColorspalette.setColor(QPalette::Inactive,QPalette::Base,inactivewindowcolor);
+
+    ui->tbColors->setPalette(tbColorspalette);
+
     ui->tbColors->setText(str);
 
     this->item = item;
