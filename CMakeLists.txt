@@ -25,7 +25,7 @@ option(COMPILE_LIBRARY "Compile triangulator core library. If turned off, it is 
 option(ENABLE_TESTING "Choose whether to compile test files."
 	   ON)
 option(COMPILE_GUI "Compile and use Qt GUI for triangulator."
-       OFF)
+           ON)
 
 # If we are in debugging mode, toggle debug symbol generation.
 if(DEBUGGING)
@@ -46,7 +46,7 @@ set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 # Set compiler flags for debugging.
 if(DEBUGGING)
   target_compile_options(compiler_flags INTERFACE
-    "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+    "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wpedantic;-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
     "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
   )
   #else() SET UP RELEASE CONFIG
