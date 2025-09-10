@@ -9,7 +9,7 @@ class MainWindow;
 
 class RenameComplex : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     RenameComplex(MainWindow *mainWnd, SimpCompItem item, QTableView *table, QWidget *parent = Q_NULLPTR);
@@ -18,10 +18,9 @@ private:
     Ui::RenameComplex ui;
 		
     void handleAccepted();
-	void handleRejected();
+    void handleRejected();
 
     MainWindow *mainWnd;
     SimpCompItem item;
-	QTableView* table;	
-
+    QTableView *table;	
 };

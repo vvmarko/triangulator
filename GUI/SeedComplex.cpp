@@ -7,7 +7,7 @@
 #include "MainWindow.h"
 
 void SeedComplex::handleAccepted() {
-	SimpCompItem i;
+    SimpCompItem i;
 
     std::string name = ui.leName->text().toStdString();
     int D = atoi(ui.leDimension->text().toStdString().c_str());
@@ -42,32 +42,31 @@ void SeedComplex::handleAccepted() {
         mainWnd->updateSimpCompTableModel();
         table->show();
     }
-	this->close();   
+    this->close();   
 }
 
 void SeedComplex::handleRejected() {
-	this->close();
+    this->close();
 }
 
-SeedComplex::SeedComplex(MainWindow *mainWnd, std::vector<SimpCompItem> *items, QTableView *table, QWidget *parent)
-	: QWidget(parent)
+SeedComplex::SeedComplex(MainWindow *cmainWnd, std::vector<SimpCompItem> *citems, QTableView *ctable, QWidget *parent)
+    : QWidget(parent)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
     ui.cbType->addItem("Please select...");
     ui.cbType->insertSeparator(1);
     ui.cbType->addItem("Line");
-	ui.cbType->addItem("Triangle");
-	ui.cbType->addItem("Tetrahedron");
-	ui.cbType->addItem("D-Simplex");
-	ui.cbType->addItem("D-Sphere");
-
+    ui.cbType->addItem("Triangle");
+    ui.cbType->addItem("Tetrahedron");
+    ui.cbType->addItem("D-Simplex");
+    ui.cbType->addItem("D-Sphere");
 
     connect(ui.btnOK, &QPushButton::clicked, this, &SeedComplex::handleAccepted);
     connect(ui.btnCancel, &QPushButton::clicked, this, &SeedComplex::handleRejected);
 
-    this->mainWnd = mainWnd;
-	this->items = items;
-	this->table = table;	
+    this->mainWnd = cmainWnd;
+    this->items = citems;
+    this->table = ctable;
 }
 
 SeedComplex::~SeedComplex()

@@ -13,27 +13,26 @@ void RenameComplex::handleAccepted() {
 
     mainWnd->updateSimpCompTableModel();
 
-	this->close();   
+    this->close();   
 }
 
 void RenameComplex::handleRejected() {
-	this->close();
+    this->close();
 }
 
-RenameComplex::RenameComplex(MainWindow *mainWnd, SimpCompItem item, QTableView *table, QWidget *parent)
-	: QWidget(parent)
+RenameComplex::RenameComplex(MainWindow *cmainWnd, SimpCompItem citem, QTableView *ctable, QWidget *parent)
+    : QWidget(parent)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
 
-    this->mainWnd = mainWnd;
-    this->item = item;
-    this->table = table;
+    this->mainWnd = cmainWnd;
+    this->item = citem;
+    this->table = ctable;
 
     ui.oldName->setText (QString::fromStdString(item.simpComp->name));
 
     connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &RenameComplex::handleAccepted);
     connect(ui.buttonBox, &QDialogButtonBox::rejected, this, &RenameComplex::handleRejected);
-
 }
 
 RenameComplex::~RenameComplex()

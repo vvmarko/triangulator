@@ -30,27 +30,27 @@ void LogViewer::logFileChanged(const QString &path) {
                      // qt slots are by default synchronous, if are in same thread
    QFile *f = new QFile(QString::fromStdString(triangulator_global::logFilename));
    f->open(QIODeviceBase::ReadOnly);
-   QByteArray data;
+   QByteArray cdata;
    f->seek(lastFileSize);
-   data = f->read(f->size() - lastFileSize);
+   cdata = f->read(f->size() - lastFileSize);
    lastFileSize = f->size();
    //ui.textEdit->moveCursor()   
    f->close();
    ui.textEdit->moveCursor(QTextCursor::End);
-   ui.textEdit->insertHtml(QString::fromUtf8(data));
+   ui.textEdit->insertHtml(QString::fromUtf8(cdata));
    ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
    fileAccessed = 0;
    if(path == " ") return; // This is a dummy command to satisfy the compiler, do not remove
 }
 
-LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)
+LogViewer::LogViewer(MainWindow *cmainWnd, QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
 
     setWindowTitle("Triangulator log");
 
-    this->mainWnd = mainWnd;
+    this->mainWnd = cmainWnd;
 
     watcher = new QFileSystemWatcher();
 
@@ -67,11 +67,11 @@ LogViewer::LogViewer(MainWindow *mainWnd, QWidget *parent)
         initialLogFileReadInProgress = true;
         f->open(QIODeviceBase::ReadOnly);
         lastFileSize = f->size();
-        QByteArray data;
-        data = f->read(f->size());
+        QByteArray cdata;
+        cdata = f->read(f->size());
         //ui.textEdit->moveCursor()
         f->close();
-        ui.textEdit->setHtml(QString::fromUtf8(data));
+        ui.textEdit->setHtml(QString::fromUtf8(cdata));
         ui.textEdit->verticalScrollBar()->setValue(ui.textEdit->verticalScrollBar()->maximum());
         initialLogFileReadInProgress = false;
     }

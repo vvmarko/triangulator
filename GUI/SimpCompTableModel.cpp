@@ -13,10 +13,10 @@ SimpCompItem::SimpCompItem()
     removeWindowFromChildWindowsOnClose = true;
 }
 
-SimpCompTableModel::SimpCompTableModel(vector<SimpCompItem> *items, QObject* parent)
+SimpCompTableModel::SimpCompTableModel(vector<SimpCompItem> *citems, QObject* parent)
     : QAbstractTableModel(parent)
 {
-    this->items = items;
+    this->items = citems;
 }
 
 int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const

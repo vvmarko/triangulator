@@ -10,9 +10,9 @@ void Inspector::anchorClicked(const QUrl &url) {
     QString str1 = url.fileName().right(url.fileName().indexOf("http://triangulatorgui.com/"));
     QString str2 = str1.left(str1.indexOf(".html"));
 
-    KSimplex *simplex = item->simpComp->find_KSimplex(str2.toInt());
+    KSimplex *csimplex = item->simpComp->find_KSimplex(str2.toInt());
 
-    Inspector *inspector = new Inspector(simplex, item);
+    Inspector *inspector = new Inspector(csimplex, item);
     Utils::openWindowOnRandomPos(inspector);
 
     inspector->show();    
@@ -57,7 +57,7 @@ void resizeLabelToFitContents(QLabel *label) {
     label->setMaximumWidth(r.width());
 }
 
-Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
+Inspector::Inspector(KSimplex *csimplex, SimpCompItem *citem, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Inspector)
 {
@@ -70,9 +70,9 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
     resizeLabelToFitContents(ui->lElementOfComplexLbl);
     resizeLabelToFitContents(ui->lDimensionLbl);
 
-    SimpComp *simpComp = item->simpComp;
-    this->simpComp = simpComp;
-    this->simplex = simplex;
+    SimpComp *csimpComp = citem->simpComp;
+    this->simpComp = csimpComp;
+    this->simplex = csimplex;
 
 //    UniqueIDColor* idColor = simplex->get_uniqueID();
     std::string simplexMark =  simplex->print_non_html();
@@ -114,7 +114,7 @@ Inspector::Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent) :
 
     ui->tbColors->setText(str);
 
-    this->item = item;
+    this->item = citem;
 
     ui->tbNeighbors->setOpenLinks(false);
     connect(ui->tbNeighbors, &QTextBrowser::anchorClicked, this, &Inspector::anchorClicked);

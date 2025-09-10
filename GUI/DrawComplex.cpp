@@ -9,13 +9,13 @@
 
 #include "triangulator.hpp"
 
-DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *item, QWidget *parent)
+DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem *citem, QWidget *parent)
 	: QWidget(parent)
 {    
     // Housekeeping
-    this->mainWnd = mainWnd;
-    this->simpComp = simpComp;
-    this->item = item;
+    this->mainWnd = cmainWnd;
+    this->simpComp = csimpComp;
+    this->item = citem;
 
     // Initialize screen parameters and embedding coordinates
     this->scrparam = setup_screen_parameters(simpComp);
@@ -44,8 +44,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     ui.verticalLayout->addLayout(hboxd);
 
     // Slider for the parameter d
-    QSlider *sliderd = new QSlider(Qt::Horizontal);
-    this->sliderd = sliderd;
+    QSlider *csliderd = new QSlider(Qt::Horizontal);
+    this->sliderd = csliderd;
     sliderd->setRange(0, 100); // Sets the minimum and maximum values
     sliderd->setValue(1); // Sets the current value
     sliderd->setSingleStep(1);
@@ -56,8 +56,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     sliderd->show();
 
     // Spinbox for the parameter d
-    QSpinBox *spinboxd = new QSpinBox();
-    this->spinboxd = spinboxd;
+    QSpinBox *cspinboxd = new QSpinBox();
+    this->spinboxd = cspinboxd;
     spinboxd->setRange(0,100);
     spinboxd->setValue(1);
     spinboxd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -84,8 +84,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     ui.verticalLayout->addLayout(hboxsz);
 
     // Slider for the parameter sz
-    QSlider *slidersz = new QSlider(Qt::Horizontal);
-    this->slidersz = slidersz;
+    QSlider *cslidersz = new QSlider(Qt::Horizontal);
+    this->slidersz = cslidersz;
     slidersz->setRange(1, 100); // Sets the minimum and maximum values
     slidersz->setValue(2); // Sets the current value
     slidersz->setSingleStep(1);
@@ -96,8 +96,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     slidersz->show();
 
     // Spinbox for the parameter sz
-    QSpinBox *spinboxsz = new QSpinBox();
-    this->spinboxsz = spinboxsz;
+    QSpinBox *cspinboxsz = new QSpinBox();
+    this->spinboxsz = cspinboxsz;
     spinboxsz->setRange(1,100);
     spinboxsz->setValue(2);
     spinboxsz->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -120,8 +120,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     ui.verticalLayout->addLayout(hboxsx);
 
     // Slider for the parameter sx
-    QSlider *slidersx = new QSlider(Qt::Horizontal);
-    this->slidersx = slidersx;
+    QSlider *cslidersx = new QSlider(Qt::Horizontal);
+    this->slidersx = cslidersx;
     slidersx->setRange(-100, 100); // Sets the minimum and maximum values
     slidersx->setValue(0); // Sets the current value
     slidersx->setSingleStep(1);
@@ -132,8 +132,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     slidersx->show();
 
     // Spinbox for the parameter sx
-    QSpinBox *spinboxsx = new QSpinBox();
-    this->spinboxsx = spinboxsx;
+    QSpinBox *cspinboxsx = new QSpinBox();
+    this->spinboxsx = cspinboxsx;
     spinboxsx->setRange(-100,100);
     spinboxsx->setValue(0);
     spinboxsx->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -155,8 +155,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     ui.verticalLayout->addLayout(hboxsy);
 
     // Slider for the parameter sy
-    QSlider *slidersy = new QSlider(Qt::Horizontal);
-    this->slidersy = slidersy;
+    QSlider *cslidersy = new QSlider(Qt::Horizontal);
+    this->slidersy = cslidersy;
     slidersy->setRange(-100, 100); // Sets the minimum and maximum values
     slidersy->setValue(0); // Sets the current value
     slidersy->setSingleStep(1);
@@ -167,8 +167,8 @@ DrawComplex::DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *
     slidersy->show();
 
     // Spinbox for the parameter sy
-    QSpinBox *spinboxsy = new QSpinBox();
-    this->spinboxsy = spinboxsy;
+    QSpinBox *cspinboxsy = new QSpinBox();
+    this->spinboxsy = cspinboxsy;
     spinboxsy->setRange(-100,100);
     spinboxsy->setValue(0);
     spinboxsy->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -535,16 +535,16 @@ void DrawComplex::spinboxGammaValueChanged(double value, int i)
     sliderGamma[i-1]->setValue(num);
 }
 
-double DrawComplex::find_enveloping_sphere_radius(std::vector<EmbData> coords)
+double DrawComplex::find_enveloping_sphere_radius(std::vector<EmbData> ccoords)
 {
     double temp;
     double max = 0.0;
 
     // Initialize max as a radius-squared of the first set of coordinates
-    for(long unsigned int i = 0; i < coords[0].x.size(); i++) max += coords[0].x[i] * coords[0].x[i];
+    for(long unsigned int i = 0; i < ccoords[0].x.size(); i++) max += ccoords[0].x[i] * ccoords[0].x[i];
 
     // Go through all coordinates, evaluate radius-squared, and remember the biggest one
-    for(auto &it : coords){
+    for(auto &it : ccoords){
         temp = 0.0;
         for(long unsigned int j = 0; j < it.x.size(); j++) temp += it.x[j] * it.x[j];
         if(temp > max) max = temp;

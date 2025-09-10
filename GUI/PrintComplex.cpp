@@ -18,10 +18,10 @@ void PrintComplex::anchorClicked(const QUrl &url) {
     inspector->show();
 }
 
-PrintComplex::PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem *item, QWidget *parent)
-	: QWidget(parent)
+PrintComplex::PrintComplex(MainWindow *cmainWnd, QString displayStr, SimpCompItem *citem, QWidget *parent)
+    : QWidget(parent)
 {
-	ui.setupUi(this);
+    ui.setupUi(this);
 
     // links must be like <a href=\"http://triangulatorgui.com/123.html\">123</a>
 
@@ -31,11 +31,10 @@ PrintComplex::PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem
     ui.textBrowser->setTextInteractionFlags(ui.textBrowser->textInteractionFlags() | Qt::LinksAccessibleByMouse);    
     connect(ui.textBrowser, &QTextBrowser::anchorClicked, this, &PrintComplex::anchorClicked);   
 
-    this->mainWnd = mainWnd;
-    this->item = item;
+    this->mainWnd = cmainWnd;
+    this->item = citem;
 
     item->childWindows.push_back(this);
-
 }
 
 void PrintComplex::closeEvent (QCloseEvent* event)
