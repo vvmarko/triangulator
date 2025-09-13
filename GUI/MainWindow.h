@@ -22,6 +22,8 @@ public:
 
     void updateSimpCompTableModel();
 
+    void notImplementedYetMessage();
+
     int logWindowXcoordinate = -1;
     int logWindowYcoordinate = -1;
 
@@ -48,6 +50,11 @@ private:
     void tblItemSaveComplexAsClick(int row);
     void tblItemRenameComplexClick(int row);
     void tblItemDeleteRowClick(int row);
+
+    void unseedAllComplexes();
+
+    void DocumentationMessage();
+    void AboutMessage();
 
     std::vector<SimpCompItem> items;
 };

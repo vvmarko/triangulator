@@ -3,6 +3,7 @@
 #include "SimpCompTableModel.h"
 #include "Utils.h"
 #include "MainWindow.h"
+#include <QMessageBox>
 
 #include "triangulator.hpp"
 
@@ -120,9 +121,18 @@ Inspector::Inspector(KSimplex *csimplex, SimpCompItem *citem, QWidget *parent) :
     connect(ui->tbNeighbors, &QTextBrowser::anchorClicked, this, &Inspector::anchorClicked);
     connect(ui->btnAttachNewSimplex,  &QPushButton::clicked, this, &Inspector::activateBtnAttachNewSimplex);
     connect(ui->btnApplyPachnerMove,  &QPushButton::clicked, this, &Inspector::activateBtnApplyPachnerMove);
+    connect(ui->btnAddNewColor,  &QPushButton::clicked, this, &Inspector::notImplementedYetMessage);
 
     item->childWindows.push_back(this);
 
+}
+
+void Inspector::notImplementedYetMessage() {
+    QMessageBox msgBox;
+    msgBox.setText("Not implemented yet. Fix me!");
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setWindowTitle("Triangulator GUI");
+    msgBox.exec();
 }
 
 Inspector::~Inspector()

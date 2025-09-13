@@ -30,6 +30,8 @@ private:
     void activateBtnAttachNewSimplex();
     void activateBtnApplyPachnerMove();
 
+    void notImplementedYetMessage();
+
     void closeEvent(QCloseEvent* event) override;
 
 };

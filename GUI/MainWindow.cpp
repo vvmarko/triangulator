@@ -134,8 +134,11 @@ void MainWindow::tblItemOpenToolsClick(int index) {
 
     if (index==0) return;
     if (index==1) return;
+    // Tools: Save as
     if (index==2) tblItemSaveComplexAsClick(row);
+    // Tools: Rename
     if (index==3) tblItemRenameComplexClick(row);
+    // Tools: Delete
     if (index==4) tblItemDeleteRowClick(row);
 }
 
@@ -148,11 +151,16 @@ void MainWindow::tblItemOpenActionsClick(int index) {
 
     if (index==0) return;
     if (index==1) return;
-    if (index==2) return; // call Pachner grow
-    if (index==3) return; // call Boundary grow
-    if (index==4) return; // call Random grow
-    if (index==5) return; // call Colorize simplices at level
-    if (index==6) return; // call Colorize entire complex
+    // Actions: Pachner grow
+    if (index==2) { notImplementedYetMessage(); return; } // call Pachner grow
+    // Actions: Boundary grow
+    if (index==3) { notImplementedYetMessage(); return; } // call Boundary grow
+    // Actions: Random grow
+    if (index==4) { notImplementedYetMessage(); return; } // call Random grow
+    // Actions: Colorize simplices at level
+    if (index==5) { notImplementedYetMessage(); return; } // call Colorize simplices at level
+    // Actions: Colorize entire complex
+    if (index==6) { notImplementedYetMessage(); return; } // call Colorize entire complex
 }
 
 void MainWindow::tblItemSaveComplexAsClick(int row) {
@@ -216,6 +224,86 @@ void MainWindow::tblItemDeleteRowClick(int row) {
     ui.tblComplexes->show();
 }
 
+void MainWindow::unseedAllComplexes() {
+    QMessageBox msgBox(QMessageBox::Question, "Confirm", "Are you sure?", QMessageBox::Yes | QMessageBox::No);
+
+    if (msgBox.exec() == QMessageBox::No) return;
+
+    int row = 0;
+
+    while(items.size() > 0){
+
+        items[row].removeWindowFromChildWindowsOnClose = false;
+
+        int j = 0;
+
+        for (QWidget *w : items[row].childWindows){
+            w->close();
+            if (items[row].printComplex == w){
+                delete items[row].printComplex;
+            }
+            else if (items[row].drawComplex == w){
+                delete items[row].drawComplex;
+            }
+            else{
+                delete (Inspector *)w;
+            }
+            items[row].childWindows[j] = NULL;
+            j++;
+        }
+        unseed_complex(items[row].simpComp);
+        items.erase(items.begin() + row);
+        updateSimpCompTableModel();
+        ui.tblComplexes->show();
+    }
+}
+
+void MainWindow::notImplementedYetMessage() {
+    QMessageBox msgBox;
+    msgBox.setText("Not implemented yet. Fix me!");
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setWindowTitle("Triangulator GUI");
+    msgBox.exec();
+}
+
+void MainWindow::AboutMessage() {
+    QMessageBox msgBox;
+    QString message = "Triangulator GUI is a part of the Triangulator software project, ";
+            message += "see<br><br>";
+            message += "<a href=\"https://github.com/vvmarko/triangulator\">https://github.com/vvmarko/triangulator</a><br><br>";
+            message += "for details.<br><br>";
+            message += "Its purpose is to showcase the capabilities of the Triangulator library ";
+            message += "of routines for creation, manipulation and various numerical simulations ";
+            message += "involving simplicial complexes and triangulations of manifolds.<br><br>";
+            message += "The GUI provides an interactive way to construct simplicial complexes, ";
+            message += "manipulate their structure, draw them on the screen, and inspect the ";
+            message += "properties of individual simplices present in the complex.<br><br>";
+            message += "This is version 0.5, work in progress... :-)<br><br>";
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setText(message);
+    msgBox.setWindowTitle("About Triangulator GUI");
+    msgBox.exec();
+}
+
+
+void MainWindow::DocumentationMessage() {
+    QMessageBox msgBox;
+    QString message = "Triangulator GUI is a part of the Triangulator software project, ";
+            message += "see<br><br>";
+            message += "<a href=\"https://github.com/vvmarko/triangulator\">https://github.com/vvmarko/triangulator</a><br><br>";
+            message += "for details.<br><br>";
+            message += "THe official documentation is yet to be written, it is on our TODO list. ";
+            message += "In the meantime, you are welcome to read the source code, we try to keep it reasonably ";
+            message += "well commented.<br><br>";
+            message += "Use the Source, Luke! :-)<br><br>";
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setText(message);
+    msgBox.setWindowTitle("About Triangulator GUI");
+    msgBox.exec();
+}
+
 void MainWindow::createItemWidget(int row) {
     QPushButton *btnPrintComplex = new QPushButton("Catalogue");
     QPushButton *btnDrawComplex = new QPushButton("Visualize");
@@ -236,16 +324,26 @@ void MainWindow::createItemWidget(int row) {
     cmbActions->addItem("Colorize simplices at level");
     cmbActions->addItem("Colorize entire complex");
 
-    connect(btnPrintComplex, &QPushButton::released, this, &MainWindow::tblItemPrintComplexClick);
-    connect(btnDrawComplex, &QPushButton::released, this, &MainWindow::tblItemDrawComplexClick);    
-    connect(cmbTools, SIGNAL(activated(int)), this, SLOT(tblItemOpenToolsClick(int)));
-    connect(cmbActions, SIGNAL(activated(int)), this, SLOT(tblItemOpenActionsClick(int)));
-
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 3), btnPrintComplex);
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 4), btnDrawComplex);
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 5), cmbTools);
     ui.tblComplexes->setIndexWidget(ui.tblComplexes->model()->index(row, 6), cmbActions);
 
+    // #################
+    // Table row buttons
+    // #################
+
+    // Catalogue
+    connect(btnPrintComplex, &QPushButton::released, this, &MainWindow::tblItemPrintComplexClick);
+
+    // Visualize
+    connect(btnDrawComplex, &QPushButton::released, this, &MainWindow::tblItemDrawComplexClick);
+
+    // Tools
+    connect(cmbTools, SIGNAL(activated(int)), this, SLOT(tblItemOpenToolsClick(int)));
+
+    // Actions
+    connect(cmbActions, SIGNAL(activated(int)), this, SLOT(tblItemOpenActionsClick(int)));
 }
 
 void MainWindow::quit()
@@ -260,11 +358,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setWindowTitle("Triangulator GUI");
 
-	connect(ui.actionNew, &QAction::triggered, this, &MainWindow::newFile);
-    connect(ui.actionOpen, &QAction::triggered, this, &MainWindow::openFile);   
-    connect(ui.actionView_Log_File, &QAction::triggered, this, &MainWindow::openLogFile);
-    connect(ui.actionQuit, &QAction::triggered, this, &MainWindow::quit);
-
     SimpCompTableModel *model = new SimpCompTableModel(&items);
 
     ui.tblComplexes->setModel(model);
@@ -272,6 +365,46 @@ MainWindow::MainWindow(QWidget *parent)
 
     viewLogFileVisible = false;
     logViewerDialog = NULL;
+
+    // #########
+    // Main menu
+    // #########
+
+    // File menu:
+    // Seed new complex
+    connect(ui.actionNew, &QAction::triggered, this, &MainWindow::newFile);
+    // Open complex from file
+    connect(ui.actionOpen, &QAction::triggered, this, &MainWindow::openFile);
+    // Open session from file
+    connect(ui.actionOpen_session, &QAction::triggered, this, &MainWindow::notImplementedYetMessage);
+    // Save current session
+    connect(ui.actionSave_session, &QAction::triggered, this, &MainWindow::notImplementedYetMessage);
+    // Unseed everything
+    connect(ui.actionUnseed_everything, &QAction::triggered, this, &MainWindow::unseedAllComplexes);
+    // Quit
+    connect(ui.actionQuit, &QAction::triggered, this, &MainWindow::quit);
+
+    // View menu:
+    // View log file
+    connect(ui.actionView_Log_File, &QAction::triggered, this, &MainWindow::openLogFile);
+
+    // Actions menu:
+    // Relabel UniqueID colors
+    connect(ui.actionRelabel_UniqueID_colors, &QAction::triggered, this, &MainWindow::notImplementedYetMessage);
+    // Find simplices with color type
+    connect(ui.actionFind_simplices_with_color_type, &QAction::triggered, this, &MainWindow::notImplementedYetMessage);
+    // Find simplices with color value
+    connect(ui.actionFind_simplices_with_color_value, &QAction::triggered, this, &MainWindow::notImplementedYetMessage);
+
+    // Settings menu:
+    // Options
+    connect(ui.actionOptions, &QAction::triggered, this, &MainWindow::notImplementedYetMessage);
+
+    // Help menu:
+    // Documentation
+    connect(ui.actionDocumentation, &QAction::triggered, this, &MainWindow::DocumentationMessage);
+    // About
+    connect(ui.actionAbout, &QAction::triggered, this, &MainWindow::AboutMessage);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
