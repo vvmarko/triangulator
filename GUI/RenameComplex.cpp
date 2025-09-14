@@ -1,10 +1,6 @@
 
 #include "triangulator.hpp"
-
-#include "RenameComplex.h"
-#include "PrintComplex.h"
-#include "SimpCompTableModel.h"
-#include "MainWindow.h"
+#include "TriangulatorGUI.h"
 
 void RenameComplex::handleAccepted() {
 

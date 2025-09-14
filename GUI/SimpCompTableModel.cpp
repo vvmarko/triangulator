@@ -1,7 +1,6 @@
 
 #include "triangulator.hpp"
-
-#include "SimpCompTableModel.h"
+#include "TriangulatorGUI.h"
 
 using namespace std;
 

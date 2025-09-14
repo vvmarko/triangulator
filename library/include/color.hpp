@@ -1,4 +1,7 @@
 
+#ifndef TRIANGULATOR_COLOR_H_INCLUDED
+#define TRIANGULATOR_COLOR_H_INCLUDED
+
 
 // ######################
 // Color class definition
@@ -36,9 +39,6 @@
 // Definitions of the various constants and parameters:
 // ####################################################
 
-#ifndef _TRIANGULATOR_COLOR_HPP_
-#define _TRIANGULATOR_COLOR_HPP_
-
 // #######################
 // Color type definitions:
 // #######################
@@ -62,16 +62,17 @@
 // Parameters foc evaluating topological and embedding coordinates:
 // ################################################################
 
-#define POTENTIAL_SPRING_INTERACTION 1.0
-#define POTENTIAL_SPRING_LENGTH 50.0
-#define POTENTIAL_INVERSE_DISTANCE_INTERACTION 50.0
+#define POTENTIAL_SPRING_EDGE_INTERACTION 1.0
+#define POTENTIAL_SPRING_EDGE_LENGTH 50.0
+#define POTENTIAL_SPRING_NON_EDGE_INTERACTION 1.0
+#define POTENTIAL_SPRING_NON_EDGE_LENGTH 200.0
+#define POTENTIAL_INVERSE_DISTANCE_INTERACTION 1000.0
 #define POTENTIAL_SHAKE_STEP 0.2
+#define POTENTIAL_GLOBAL_RETRIES_NUMBER 50
 #define POTENTIAL_MAX_ITERATION_NUMBER 1000
 #define POTENTIAL_MAX_TEST_COORDINATES 50
 #define SPHERE_TOPOLOGY_DRAWING_RADIUS 200.0
 #define LINEAR_TOPOLOGY_DRAWING_DOMAIN_SIZE 200.0
-
-#endif
 
 // #########################################
 // Forward declarations of neccesary classes
@@ -459,4 +460,5 @@ public:
   
 };
 
+#endif
 

@@ -1,4 +1,7 @@
 
+#ifndef TRIANGULATOR_H_INCLUDED
+#define TRIANGULATOR_H_INCLUDED
+
 using namespace std;
 
 #include <fstream>
@@ -17,7 +20,7 @@ using namespace std;
 
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"
-#include "rapidxml-patch.hpp"
+#include "rapidxml_patch.hpp"
 #include "rapidxml_print.hpp"
 
 // FIXME:
@@ -29,6 +32,7 @@ using namespace std;
 #include "seed.hpp"
 #include "input_and_output.hpp"
 #include "pachner.hpp"
-#include "global-vars.hpp"
+#include "global_vars.hpp"
 #include "drawing.hpp"
 
+#endif

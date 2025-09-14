@@ -1,7 +1,6 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
 
-#include <QWidget>
+#include "TriangulatorGUIsystemHeaders.h"
 
 class Utils
 {
@@ -9,4 +8,3 @@ public:
     static void openWindowOnRandomPos(QWidget *w);
 };
 
-#endif // UTILS_H

@@ -1,10 +1,8 @@
 #pragma once
 
-#include <QAbstractTableModel>
+#include "TriangulatorGUIsystemHeaders.h"
 
 class SimpComp;
-
-//using namespace std;
 
 class DrawComplex;
 class PrintComplex;

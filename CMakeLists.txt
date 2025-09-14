@@ -18,12 +18,12 @@ project(TriangulatorProj VERSION 0.5)
 
 # Some options for build system generation.
 option(DEBUGGING "Toggle debugging mode for symbol generation etc."
-	   ON)
+           ON)
 option(COMPILE_LIBRARY "Compile triangulator core library. If turned off, it is expected to put precompiled triangulator.<ext> library,
                         its headers and dependencies in precompiled/ folder in the uppermost source directory."
-	   ON)
+           ON)
 option(ENABLE_TESTING "Choose whether to compile test files."
-	   ON)
+           ON)
 option(COMPILE_GUI "Compile and use Qt GUI for triangulator."
            ON)
 

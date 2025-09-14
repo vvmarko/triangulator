@@ -1,8 +1,6 @@
-#ifndef LOGVIEWER_H
-#define LOGVIEWER_H
+#pragma once
 
-#include <QWidget>
-#include <QFileSystemWatcher>
+#include "TriangulatorGUIsystemHeaders.h"
 #include "ui_LogViewer.h"
 
 class MainWindow;
@@ -31,4 +29,3 @@ private:
     void closeEvent(QCloseEvent *e) override;
 };
 
-#endif // LOGVIEWER_H

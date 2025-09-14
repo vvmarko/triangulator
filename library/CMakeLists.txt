@@ -8,7 +8,7 @@ list(APPEND TRIANGULATOR_SRCS
     src/pachner.cpp
     src/seed.cpp
     src/simpcomp.cpp
-    src/global-vars.cpp
+    src/global_vars.cpp
     src/drawing.cpp
   )
 

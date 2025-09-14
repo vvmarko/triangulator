@@ -1,4 +1,6 @@
 
+#ifndef TRIANGULATOR_PACHNER_H_INCLUDED
+#define TRIANGULATOR_PACHNER_H_INCLUDED
 
 // Main function that performs a Pachner move over a k-simplex simp within the
 // simplicial complex simpComp
@@ -34,4 +36,6 @@ bool test_for_isomorphism( SimpComp *PachnerSphere );
 // neighborgood of simp and constructs a copy of the external piece of the
 // Pachner sphere in its place, thereby performing the Pachner move
 bool perform_the_Pachner_move(SimpComp *simpComp, SimpComp *PachnerSphere);
+
+#endif
 

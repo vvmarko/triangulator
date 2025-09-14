@@ -1,19 +1,8 @@
 #pragma once
 
-#include <QtOpenGLWidgets/QOpenGLWidget>
-#include <QOpenGLFunctions>
-#include <QOpenGLShaderProgram>
-#include <math.h>
-#include <QStatusBar>
-#include <QMouseEvent>
-#include <QDialog>
-#include <QLabel>
-#include <QVBoxLayout>
-#include "SimpCompTableModel.h"
-#include "Inspector.h"
-#include "Utils.h"
+#include "TriangulatorGUIsystemHeaders.h"
 
-//struct ScreenCoords;
+class SimpCompItem;
 
 #ifndef SCREENCOORDS_STRUCT
 #define SCREENCOORDS_STRUCT

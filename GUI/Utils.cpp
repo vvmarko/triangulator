@@ -1,8 +1,6 @@
-#include "Utils.h"
-#include <QRandomGenerator>
-#include <QApplication>
-#include <QScreen>
-#include "SimpCompTableModel.h"
+
+#include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 void Utils::openWindowOnRandomPos(QWidget *w)
 {

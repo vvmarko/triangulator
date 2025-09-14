@@ -8,7 +8,7 @@ int main(){
     cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
     cout         << "#######################################################" << endl << endl;
 
-    int D = 4;
+    int D = 1;
     vector<EmbData> coords;
     vector<ScreenCoords> drawingdata;
     vector<EdgeData> edgedata;
@@ -16,10 +16,10 @@ int main(){
     ScreenParameters *sp;
 
     
-    //    SimpComp *sph = seed_single_simplex(D,"sphere");
-    SimpComp *sph = seed_sphere(D,"sphere");
-    //    Pachner_move(sph->elements[D][0],sph);
-    //    Pachner_move(sph->elements[D][0],sph);
+    SimpComp *sph = seed_single_simplex(D,"sphere");
+    //    SimpComp *sph = seed_sphere(D,"sphere");
+    Pachner_move(sph->elements[D][0],sph);
+    Pachner_move(sph->elements[D][0],sph);
     //    Pachner_move(sph->elements[D][0],sph);
     //    Pachner_move(sph->elements[D][0],sph);
     //    Pachner_move(sph->elements[D][0],sph);

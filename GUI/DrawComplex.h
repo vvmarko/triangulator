@@ -1,19 +1,15 @@
 #pragma once
 
-#include <QWidget>
-#include "DrawComplexGLWidget.h"
-#include <QSpinBox>
-#include <QSlider>
-#include "ui_DrawComplex.h"
-#include <QStatusBar>
-#include <QMouseEvent>
+#include "TriangulatorGUIsystemHeaders.h"
 
+class SimpComp;
+class KSimplex;
 class MainWindow;
 class SimpCompItem;
 class ScreenParameters;
 
-//class KSimplex;
-//class SimpComp;
+#include "ui_DrawComplex.h"
+
 
 #ifndef EMBDATA_STRUCT
 #define EMBDATA_STRUCT

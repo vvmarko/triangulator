@@ -1,11 +1,6 @@
-#include "MainWindow.h"
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QLabel>
-#include <QFile>
-#include <QDateTime>
-#include <QString>
 
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 int main(int argc, char *argv[])
 {

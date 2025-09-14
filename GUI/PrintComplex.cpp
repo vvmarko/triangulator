@@ -1,9 +1,6 @@
-#include "PrintComplex.h"
-#include "MainWindow.h"
-#include "Inspector.h"
-#include "Utils.h"
 
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 void PrintComplex::anchorClicked(const QUrl &url) {
     QString str1 = url.fileName().right(url.fileName().indexOf("http://triangulatorgui.com/"));
@@ -26,16 +23,31 @@ PrintComplex::PrintComplex(MainWindow *cmainWnd, QString displayStr, SimpCompIte
     // links must be like <a href=\"http://triangulatorgui.com/123.html\">123</a>
 
     ui.textBrowser->setHtml(displayStr);
-
     ui.textBrowser->setOpenLinks(false);    
     ui.textBrowser->setTextInteractionFlags(ui.textBrowser->textInteractionFlags() | Qt::LinksAccessibleByMouse);    
-    connect(ui.textBrowser, &QTextBrowser::anchorClicked, this, &PrintComplex::anchorClicked);   
+
+    connect(ui.textBrowser, &QTextBrowser::anchorClicked, this, &PrintComplex::anchorClicked);
 
     this->mainWnd = cmainWnd;
     this->item = citem;
 
     item->childWindows.push_back(this);
 }
+
+
+void PrintComplex::refreshCatalog(SimpCompItem *citem) {
+
+    if (citem->printComplex != NULL) {
+        QString displayStr = QString::fromStdString(citem->simpComp->print_html());
+
+        citem->printComplex->ui.textBrowser->setHtml(displayStr);
+        citem->printComplex->ui.textBrowser->setOpenLinks(false);
+
+//        citem->.printComplex->show();
+    }
+}
+
+
 
 void PrintComplex::closeEvent (QCloseEvent* event)
 {

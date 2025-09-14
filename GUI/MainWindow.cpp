@@ -1,17 +1,6 @@
 
-#include "MainWindow.h"
-#include "SeedComplex.h"
-#include "RenameComplex.h"
-#include "DrawComplex.h"
-#include <QPushButton>
-#include "SimpCompTableModel.h"
-#include "LogViewer.h"
-#include "PrintComplex.h"
-#include <QFileDialog>
-#include "Utils.h"
-#include <QMessageBox>
-
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 void MainWindow::newFile() {
     SeedComplex* seedDialog = new SeedComplex(this, &items, ui.tblComplexes);

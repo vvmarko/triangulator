@@ -1,9 +1,6 @@
-#include "LogViewer.h"
-#include <QFile>
-#include <QScrollBar>
-#include "MainWindow.h"
 
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 //using namespace std;
 

@@ -1,7 +1,7 @@
-#ifndef INSPECTOR_H
-#define INSPECTOR_H
+#pragma once
 
-#include <QWidget>
+#include "TriangulatorGUIsystemHeaders.h"
+#include "ui_Inspector.h"
 
 class SimpCompItem;
 class SimpComp;
@@ -36,4 +36,3 @@ private:
 
 };
 
-#endif // INSPECTOR_H

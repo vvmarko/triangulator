@@ -1,10 +1,12 @@
 #pragma once
 
-#include <QMainWindow>
+#include "TriangulatorGUIsystemHeaders.h"
 #include "ui_MainWindow.h"
-#include "SimpCompTableModel.h"
 
 class LogViewer;
+class DrawComplex;
+class PrintComplex;
+class SimpCompItem;
 
 class MainWindow : public QMainWindow
 {

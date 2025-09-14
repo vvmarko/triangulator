@@ -1,4 +1,7 @@
 
+#ifndef TRIANGULATOR_SEED_H_INCLUDED
+#define TRIANGULATOR_SEED_H_INCLUDED
+
 void seed_KSimplices(SimpComp* simpComp, int k);
 
 // Seed a single simplex or sphere of dimension d:
@@ -23,4 +26,6 @@ void unseed_complex(SimpComp *simpComp);
 
 //Unseed all complexes - delete them from the memory and empty seededComplexes vector
 void unseed_everything();
+
+#endif
 

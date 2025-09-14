@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QWidget>
+#include "TriangulatorGUIsystemHeaders.h"
 #include "ui_PrintComplex.h"
-//using namespace std;
 
 class MainWindow;
 class SimpCompItem;
@@ -15,12 +14,15 @@ public:
     PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
 	~PrintComplex();
 
+    void refreshCatalog(SimpCompItem *item);
+
     SimpCompItem *item;    
 
     MainWindow *mainWnd;
 
+    Ui::PrintComplex ui;
+
 private:
-	Ui::PrintComplex ui;
 
     void anchorClicked(const QUrl &url);    
 

@@ -283,6 +283,56 @@ bool initialize_drawing_coordinates(SimpComp* simpComp){
   return true;
 }
 
+
+bool reset_intrinsic_coordinates(SimpComp* simpComp){
+  DrawingCoordinatesColor *color;
+  long unsigned int i;
+
+  if(simpComp->topology == "linear"){
+    // Go through all vertices of the complex:
+    for(auto &vertex : simpComp->elements[0]){
+      // Find a pointer to the color
+      color = DrawingCoordinatesColor::find_pointer_to_color(vertex);
+
+      // Verify that the intrinsic coordinates for this vertex have already been initialized:
+      if( color->q.size() != 0 ){
+
+        for(i = 0; i < color->q.size(); i++){
+          // Set initial values to zero for embedding coordinates:
+          color->x[i] = 0.0;
+
+          // Set random values for intrinsic coordinates:
+          color->q[i] = (color->qMin[i] + (color->qMax[i] / RAND_MAX - color->qMin[i] / RAND_MAX) * rand());
+        }
+      }
+    }
+  }
+
+  if(simpComp->topology == "sphere"){
+    // Go through all vertices of the complex:
+    for(auto &vertex : simpComp->elements[0]){
+      // Find a pointer to the color
+      color = DrawingCoordinatesColor::find_pointer_to_color(vertex);
+
+      // Verify that the intrinsic coordinates for this vertex have already been initialized:
+      if( color->q.size() != 0 ){
+      
+        // Set initial values to zero for embedding coordinates:
+        for(i = 0; i < color->x.size(); i++) color->x[i] = 0.0;
+
+        // Set the intrinsic coordinates q[1] ... q[D-1]:
+        for(i = 1; i < color->q.size() - 1; i++){ // It is important that the counter starts from 1 instead of 0!
+          // Set initial random values for intrinsic coordinates
+          color->q[i] = (color->qMin[i] + (color->qMax[i] / RAND_MAX - color->qMin[i] / RAND_MAX) * rand());
+        }
+      }
+    }
+  }
+  // At this point, all values of all coordinates in DrawingCoordinatesColor class
+  // have been successfully initialized, for all vertices in the simplicial complex.
+  return true;
+}
+
 vector<EmbData> extract_embedding_data(SimpComp *simpComp){
   vector<EmbData> coords;
   EmbData temp;
@@ -853,7 +903,7 @@ double evaluate_coordinate_edge_length(KSimplex *edge, SimpComp *simpComp){
 
 double evaluate_potential(SimpComp *simpComp){
   string top;
-  double pot;
+  double pot,tempc1,tempc2;
   
   // Different choices of the potential are suitable for different
   // topologies, so we evaluate it taking into account the topology
@@ -864,22 +914,39 @@ double evaluate_potential(SimpComp *simpComp){
   top = simpComp->topology;
   
   if(top == "linear"){
-    // For any linear manifold, one typically uses the spring
+    // For any linear manifold, one typically uses the spring-edge
     // potential. However, if used alone, it is prone to various
     // foldings and overlaps. These can be avoided by further
-    // adding an inverse distance potential between non-nearest-
-    // neighbor vertices (i.e. vertices which are not connected
-    // with an edge). This pushes non-nearest-neighbor vertices as
-    // far apart as possible, until they are balanced by the spring
+    // adding another spring-non-edge potential between non-nearest-
+    // neighbor vertices (i.e. vertices which are not connected with
+    // an edge), which has a bigger spring length than the edge spring.
+    // This pushes non-nearest-neighbor vertices apart to a greater
+    // distance, until they are balanced on their own, or by the spring
     // tension between the nearest-neighbor vertices. In most cases
     // this "unfolds" the complex by stretching it, and hopefully
     // eliminates any overlaps.
 
-    pot = evaluate_spring_potential(simpComp);
-    pot += evaluate_inverse_distance_potential(simpComp);
-    // The inverse distance potential took into accout also the
-    // nearest-neighbors, so we have to subtract their contribution
-    pot -= evaluate_inverse_edge_potential(simpComp);
+    // Evaluate the spring-non-edge potential, between *all* vertices
+    pot = evaluate_spring_distance_potential(simpComp);
+
+    // From the above we have to subtract the contribution between
+    // vertices connected with edges, so we temporarily redefine the
+    // constants for the spring-edge potential to match the spring-non-
+    // edge potential, evaluate it, and subtract it
+    tempc1 = triangulator_global::potential_spring_edge_interaction;
+    tempc2 = triangulator_global::potential_spring_edge_length;
+    triangulator_global::potential_spring_edge_interaction = triangulator_global::potential_spring_non_edge_interaction;
+    triangulator_global::potential_spring_edge_length = triangulator_global::potential_spring_non_edge_length;
+    pot -= evaluate_spring_edge_potential(simpComp);
+
+    // Finally, we revert the old constants for the spring-edge potential,
+    // evaluate it again, and add it
+    triangulator_global::potential_spring_edge_interaction = tempc1;
+    triangulator_global::potential_spring_edge_length = tempc2;
+    pot += evaluate_spring_edge_potential(simpComp);
+
+    // The result is the potential with spring-edge potential between edges,
+    // and the spring-non-edge potential between vertices not sharing an edge 
     return pot;
   }
 
@@ -895,7 +962,7 @@ double evaluate_potential(SimpComp *simpComp){
 
   // If we do not recognize the topology, fall back to the
   // spring potential
-  return evaluate_spring_potential(simpComp);
+  return evaluate_spring_edge_potential(simpComp);
 }
   
 double evaluate_inverse_distance_potential(SimpComp *simpComp){
@@ -949,23 +1016,55 @@ double evaluate_inverse_edge_potential(SimpComp *simpComp){
   return sum;
 }
 
-double evaluate_spring_potential(SimpComp *simpComp){
+
+double evaluate_spring_distance_potential(SimpComp *simpComp){
+  KSimplex *vi;
+  KSimplex *vj;
+  double sum,dij;
+  int i,j,N;
+
+  // We evaluate the spring potential between any two vertices, according
+  // to the formula
+  //
+  // V = \sum_{i=0}^{N-2} \sum_{j=i+1}^{N-1} c_1 ( d_{ij} - c_2 )^2 .
+  //
+  // Here N is the number of vertices in the complex,  c_1 is the spring
+  // interaction constant, c_2 is the spring length, and d_{ij} is the
+  // coordinate distance between vertices i and j.
+  sum = 0.0;
+  N = simpComp->elements[0].size();
+  
+  for(i = 0; i <= N-2; i++){
+    for(j = i+1; j <= N-1; j++){
+      vi = simpComp->elements[0][i];
+      vj = simpComp->elements[0][j];
+      dij = evaluate_coordinate_distance(vi,vj,simpComp);
+      sum += (triangulator_global::potential_spring_non_edge_interaction)
+             * (dij - (triangulator_global::potential_spring_non_edge_length))
+             * (dij - (triangulator_global::potential_spring_non_edge_length));
+    }
+  }
+  return sum;
+}
+  
+double evaluate_spring_edge_potential(SimpComp *simpComp){
   double sum, Ledge;
   
-  // We evaluate the spring potential according to the formula
+  // We evaluate the spring potential along the edges of the simplicial complex,
+  // according to the formula
   //
   // V = \sum_{i=0}^{E-1} c_1 ( L_i - c_2 )^2 .
   //
-  // Here E is the number of edges in the complex, c_1 is the spring interaction,
-  // c_2 is the spring length (both c_1 and c_2 are constants), and L_i is the
-  // coordinate length of the given edge.
+  // Here E is the number of edges in the complex, c_1 is the spring interaction
+  // constant, c_2 is the spring length, and L_i is the coordinate length of the
+  // given edge.
   //
   sum = 0.0;
   for(auto &edge : simpComp->elements[1]){
     Ledge = evaluate_coordinate_edge_length(edge, simpComp);
-    sum += (triangulator_global::potential_spring_interaction)
-           * (Ledge - (triangulator_global::potential_spring_length))
-           * (Ledge - (triangulator_global::potential_spring_length));
+    sum += (triangulator_global::potential_spring_edge_interaction)
+           * (Ledge - (triangulator_global::potential_spring_edge_length))
+           * (Ledge - (triangulator_global::potential_spring_edge_length));
   }
   return sum;
 }
@@ -1061,7 +1160,8 @@ void restore_drawing_coordinates(SimpComp *simpComp, vector<DrawingCoordinatesCo
 
 void evaluate_potential_minimum(SimpComp *simpComp){
   vector<DrawingCoordinatesColor> minPotentialColors;
-  double potential, minPotential;
+  vector<DrawingCoordinatesColor> globalMinPotentialColors;
+  double potential, minPotential, globalMinPotential;
   bool outcome;
 
   // The minimum of the potential is evaluated using the Monte Carlo
@@ -1099,15 +1199,12 @@ void evaluate_potential_minimum(SimpComp *simpComp){
   // Note that the above procedure may not find the *global* minimum of
   // the potential (which may even not exist, depending on the potential
   // function), but rather only a *local* minimum, closest to our initial
-  // starting point, which was random. A global minimum could be looked
-  // for by repeating the whole procedure many times over, with many
+  // starting point, which was random. A global minimum is then looked
+  // for by repeating the whole above procedure many times over, with many
   // random choices of the initial point and keeping the best one, in the
   // hope that one of the attempts will land close to the global minimum.
-  // However, given that the purpose of the whole exercise is to draw a
-  // graph on the screen in a way that "looks nice", we are happy with
-  // finding just some local minimum, it will do just fine, and the
-  // global one is not really necessary.
-
+  // The number of attempts to find a global minimum is controlled by the
+  // global variable triangulator_global::potential_global_retries_number.
   
   // First, initialize the drawing coordinates for the complex,
   // to make sure that all vertices are colored properly. If
@@ -1120,42 +1217,69 @@ void evaluate_potential_minimum(SimpComp *simpComp){
   }
 
   // Initialize the starting value for the candidate minimum
-  // of the spring potential
-  minPotential = potential = evaluate_potential(simpComp);
+  // of the global potential
+  globalMinPotential = evaluate_potential(simpComp);
 
   // Make a copy of initial drawing coordinates that correspond to
-  // the candidate minimum of the potential
-  store_drawing_coordinates(simpComp, minPotentialColors);
+  // the candidate global minimum of the potential
+  store_drawing_coordinates(simpComp, globalMinPotentialColors);
 
-  // Initialize loop counters
-  int iIter = 0;
-  int iShake = 0;
+  // Main loop for seeking global minimum
+  for(int retries = 0; retries < triangulator_global::potential_global_retries_number; retries++){
 
-  // Start the main loop
-  while( (iIter < (triangulator_global::potential_max_iteration_number))
-         && (iShake < (triangulator_global::potential_max_test_coordinates)) ){
+    // Pick a random starting point for intrinsic coordinates
+    reset_intrinsic_coordinates(simpComp);
+
+    // Initialize the starting value for the candidate minimum
+    // of the local potential
+    minPotential = potential = evaluate_potential(simpComp);
+
+    // Make a copy of initial drawing coordinates that correspond to
+    // the candidate local minimum of the potential
+    store_drawing_coordinates(simpComp, minPotentialColors);
+
+    // Initialize loop counters for finding a local minimum
+    int iIter = 0;
+    int iShake = 0;
+
+    // Start the main loop for local minimum
+    while( (iIter < (triangulator_global::potential_max_iteration_number))
+           && (iShake < (triangulator_global::potential_max_test_coordinates)) ){
     
-    // Pick a random new point nearby
-    shake_intrinsic_coordinates(simpComp);
-    iShake++;
+      // Pick a random new point nearby
+      shake_intrinsic_coordinates(simpComp);
+      iShake++;
 
-    // Evaluate the potential at the new point
-    potential = evaluate_potential(simpComp);
+      // Evaluate the potential at the new point
+      potential = evaluate_potential(simpComp);
 
-    // If it is better than before, store the new point as the
-    // candidate minimum; otherwise, revert to the previous point
-    // and start over
-    if(potential < minPotential){
-      minPotential = potential;
-      store_drawing_coordinates(simpComp, minPotentialColors);
-      iShake = 0;
-      iIter++;
-    }else{
-      restore_drawing_coordinates(simpComp, minPotentialColors);
+      // If it is better than before, store the new point as the
+      // candidate minimum; otherwise, revert to the previous point
+      // and start over
+      if(potential < minPotential){
+        minPotential = potential;
+        store_drawing_coordinates(simpComp, minPotentialColors);
+        iShake = 0;
+        iIter++;
+      }else{
+        restore_drawing_coordinates(simpComp, minPotentialColors);
+      }
+    } // end of loop for local minimum
+
+    // Evaluate the local minimum that was found
+    restore_drawing_coordinates(simpComp, minPotentialColors);
+    minPotential = evaluate_potential(simpComp);
+    
+    // Test if the new local minimum is better than the global one so far
+    if(minPotential < globalMinPotential){
+      // If it is, set it as the new global one
+      globalMinPotential = minPotential;
+      store_drawing_coordinates(simpComp, globalMinPotentialColors);
     }
-  }
-  restore_drawing_coordinates(simpComp, minPotentialColors);
-  // Debugging cout, remove it:
-  //  cout << "Min found potential = " << minPotential << ", iIter = " << iIter << ", iShake = " << iShake << endl;
+  } // end of the loop for global minimum
+
+  // We have hopefully found the global minimum, set the intrinsic coordinates
+  // to that point
+  restore_drawing_coordinates(simpComp, globalMinPotentialColors);
 }
 

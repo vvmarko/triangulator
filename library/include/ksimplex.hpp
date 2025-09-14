@@ -1,4 +1,7 @@
 
+#ifndef TRIANGULATOR_KSIMPLEX_H_INCLUDED
+#define TRIANGULATOR_KSIMPLEX_H_INCLUDED
+
 // #########################
 // KSimplex class definition
 // #########################
@@ -166,4 +169,6 @@ public:
     bool subset(set<KSimplex*> &s1, set<KSimplex*> &s2);
 
 };
+
+#endif
 

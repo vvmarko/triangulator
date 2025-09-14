@@ -1,11 +1,6 @@
-#include "Inspector.h"
-#include "ui_Inspector.h"
-#include "SimpCompTableModel.h"
-#include "Utils.h"
-#include "MainWindow.h"
-#include <QMessageBox>
 
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 void Inspector::anchorClicked(const QUrl &url) {
     QString str1 = url.fileName().right(url.fileName().indexOf("http://triangulatorgui.com/"));
@@ -25,6 +20,10 @@ void Inspector::activateBtnAttachNewSimplex() {
     evaluate_potential_minimum(simpComp);
     evaluate_embedding_coordinates(simpComp);
 
+    if (item->printComplex != NULL) {
+        item->printComplex->refreshCatalog(item);
+    }
+
     //    w->updateSimpCompTableModel();
 
     if(newSimplex!=nullptr){
@@ -39,6 +38,10 @@ void Inspector::activateBtnApplyPachnerMove() {
     UniqueIDColor::append_color_to_entire_complex(simpComp);
     evaluate_potential_minimum(simpComp);
     evaluate_embedding_coordinates(simpComp);
+
+    if (item->printComplex != NULL) {
+        item->printComplex->refreshCatalog(item);
+    }
 
     //    w->updateSimpCompTableModel();
 

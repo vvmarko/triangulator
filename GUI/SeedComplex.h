@@ -1,11 +1,10 @@
 #pragma once
 
-#include <QWidget>
+#include "TriangulatorGUIsystemHeaders.h"
 #include "ui_SeedComplex.h"
-#include "SimpCompTableModel.h"
-#include <QTableView>
 
 class MainWindow;
+class SimpCompItem;
 
 class SeedComplex : public QWidget
 {

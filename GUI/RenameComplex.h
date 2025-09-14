@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QWidget>
-#include "ui_RenameComplex.h"
 #include "SimpCompTableModel.h"
-#include <QTableView>
+#include "TriangulatorGUIsystemHeaders.h"
+#include "ui_RenameComplex.h"
 
 class MainWindow;
 

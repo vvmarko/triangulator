@@ -1,4 +1,6 @@
 
+#ifndef TRIANGULATOR_DRAWING_H_INCLUDED
+#define TRIANGULATOR_DRAWING_H_INCLUDED
 
 class ScreenParameters{
 public:
@@ -90,6 +92,8 @@ ScreenParameters* setup_screen_parameters(SimpComp *simpComp);
 
 bool initialize_drawing_coordinates(SimpComp *simpComp);
 
+bool reset_intrinsic_coordinates(SimpComp *simpComp);
+
 void recenter_intrinsic_coordinates(SimpComp *simpComp);
 
 void evaluate_embedding_coordinates(SimpComp *simpComp);
@@ -104,7 +108,9 @@ double evaluate_inverse_distance_potential(SimpComp *simpComp);
 
 double evaluate_inverse_edge_potential(SimpComp *simpComp);
 
-double evaluate_spring_potential(SimpComp *simpComp);
+double evaluate_spring_distance_potential(SimpComp *simpComp);
+
+double evaluate_spring_edge_potential(SimpComp *simpComp);
 
 void shake_intrinsic_coordinates(SimpComp *simpComp);
 
@@ -121,4 +127,5 @@ vector<EdgeData> extract_edge_data(SimpComp *simpComp);
 vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, ScreenParameters *scrparams);
 
 
+#endif
 

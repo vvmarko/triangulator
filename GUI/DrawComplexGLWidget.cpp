@@ -1,6 +1,6 @@
-#include "DrawComplexGLWidget.h"
 
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 void DrawComplexGLWidget::initializeGL()
 {

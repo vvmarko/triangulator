@@ -1,7 +1,6 @@
 
-
-#ifndef _TRIANGULATOR_INPUT_AND_OUTPUT_HPP_
-#define _TRIANGULATOR_INPUT_AND_OUTPUT_HPP_
+#ifndef TRIANGULATOR_INPUT_AND_OUTPUT_H_INCLUDED
+#define TRIANGULATOR_INPUT_AND_OUTPUT_H_INCLUDED
 
 // #####################
 // Log level definitions
@@ -13,8 +12,6 @@
 #define LOG_WARN 3 // errors and warnings
 #define LOG_INFO 4 // errors, warnings and info
 #define LOG_DEBUG 5 // errors, warnings, info and debug
-
-#endif
 
 // #####################
 // Function declarations
@@ -35,3 +32,6 @@ void read_level_node(rapidxml::xml_node<>* node, SimpComp* sc, int level, string
 void read_ksimplex_node(rapidxml::xml_node<>* node, SimpComp* sc, string delimiter = ",");
 void colorize_node(KSimplex* ks, rapidxml::xml_node<>* color_node);
 vector<unsigned long>* parse_level(rapidxml::xml_node<>* node, string delimiter = ",");
+
+#endif
+

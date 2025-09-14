@@ -1,4 +1,7 @@
 
+#ifndef TRIANGULATOR_SIMPCOMP_H_INCLUDED
+#define TRIANGULATOR_SIMPCOMP_H_INCLUDED
+
 // #########################
 // SimpComp class definition
 // #########################
@@ -181,4 +184,6 @@ public:
   void print_set(set<int> &s);
   
 };
+
+#endif
 

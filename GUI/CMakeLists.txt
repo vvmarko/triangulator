@@ -1,7 +1,5 @@
 # Adding TriangulatorGUI executable.
 
-# Enabling GUI.
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 
@@ -12,8 +10,9 @@ find_package(Qt6 OPTIONAL_COMPONENTS Widgets)
 qt_standard_project_setup()
 
 set(SOURCES
-  DrawComplex.cpp
+  main.cpp
   DrawComplexGLWidget.cpp
+  DrawComplex.cpp
   Inspector.cpp
   LogViewer.cpp
   MainWindow.cpp
@@ -22,33 +21,9 @@ set(SOURCES
   SeedComplex.cpp
   SimpCompTableModel.cpp
   Utils.cpp
-  main.cpp
 )
 
-set(HEADERS
-  DrawComplex.h
-  DrawComplexGLWidget.h
-  Inspector.h
-  LogViewer.h
-  MainWindow.h
-  PrintComplex.h
-  RenameComplex.h
-  SeedComplex.h
-  SimpCompTableModel.h
-  Utils.h
-)
-
-set(FORMS
-  DrawComplex.ui
-  Inspector.ui
-  LogViewer.ui
-  MainWindow.ui
-  PrintComplex.ui
-  RenameComplex.ui
-  SeedComplex.ui
-)
-
-qt_add_executable(TriangulatorGUI ${SOURCES} ${HEADERS} ${FORMS}) # For executables                                                                                                                                                        
+qt_add_executable(TriangulatorGUI ${SOURCES} ) # For executables                                                                                                                                                        
 
 target_include_directories(TriangulatorGUI PRIVATE
     lib/include

@@ -1,13 +1,6 @@
-#include "DrawComplex.h"
-#include "DrawComplexGLWidget.h"
-#include "MainWindow.h"
-#include <algorithm>
-#include <QSlider>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
-#include "SimpCompTableModel.h"
 
 #include "triangulator.hpp"
+#include "TriangulatorGUI.h"
 
 DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem *citem, QWidget *parent)
 	: QWidget(parent)
