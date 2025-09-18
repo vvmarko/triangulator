@@ -21,6 +21,6 @@ private:
 	void handleRejected();
 
     MainWindow *mainWnd;
-    std::vector<SimpCompItem>* items = 0;
+    std::vector<SimpCompItem>* items = nullptr;
 	QTableView* table;	
 };

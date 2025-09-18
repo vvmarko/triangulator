@@ -30,6 +30,8 @@ public:
     DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
 	~DrawComplex();    
 
+    void refreshVisualizer();
+
     DrawComplexGLWidget *getGLWidget();
 
 private:
@@ -45,6 +47,7 @@ private:
     double default_scale;
 
     QStatusBar *statusBar;
+
     QSlider *sliderd;
     QSpinBox *spinboxd;
     QSlider *slidersx;

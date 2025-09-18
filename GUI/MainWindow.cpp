@@ -42,42 +42,32 @@ void MainWindow::openLogFile() {
     } else
     {
         logViewerDialog->close();
-        viewLogFileVisible = false;
-        delete logViewerDialog;
-        logViewerDialog = NULL;
+        viewLogFileClosed();
     }
 }
 
-void MainWindow::drawComplexWndClosed(DrawComplex *wnd) {
-    for (unsigned long i = 0; i < items.size(); i++)
-    {
-        if (items[i].drawComplex == wnd) {
-            items[i].drawComplex = NULL;            
-        }
-    }
+void MainWindow::drawComplexWndClosed(DrawComplex *wnd)
+{
+    if(wnd != nullptr) wnd->close();
 }
 
-void MainWindow::printComplexWndClosed(PrintComplex *wnd) {
-    for (unsigned long i = 0; i < items.size(); i++)
-    {
-        if (items[i].printComplex == wnd) {
-            items[i].printComplex = NULL;            
-        }
-    }
+void MainWindow::printComplexWndClosed(PrintComplex *wnd)
+{
+    if(wnd != nullptr) wnd->close();
 }
 
 void MainWindow::viewLogFileClosed()
 {
     viewLogFileVisible = false;
     delete logViewerDialog;
-    logViewerDialog = NULL;
+    logViewerDialog = nullptr;
 }
 
 void MainWindow::tblItemDrawComplexClick() {
     QPushButton *btn = (QPushButton *)sender();
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
-    if (items[i].drawComplex == NULL) {
+    if (items[i].drawComplex == nullptr) {
         items[i].drawComplex = new DrawComplex(this, items[i].simpComp, &(items[i]));
         items[i].drawComplex->setWindowTitle(QString::fromStdString("Triangulator visualize complex: " + items[i].simpComp->name));
 
@@ -86,18 +76,14 @@ void MainWindow::tblItemDrawComplexClick() {
         else Utils::openWindowOnRandomPos(items[i].drawComplex);
 
         items[i].drawComplex->show();
-    } else {        
-        items[i].drawComplex->close();
-        delete items[i].drawComplex;
-        items[i].drawComplex = NULL;
-    }
+    } else drawComplexWndClosed(items[i].drawComplex);
 }
 
 void MainWindow::tblItemPrintComplexClick() {
     QPushButton *btn = (QPushButton *)sender();
     int i = ui.tblComplexes->indexAt(btn->pos()).row();
 
-    if (items[i].printComplex == NULL) {
+    if (items[i].printComplex == nullptr) {
         items[i].printComplex = new PrintComplex(this, QString::fromStdString(items[i].simpComp->print_html()),
                                                  &(items[i]));
         items[i].printComplex->setWindowTitle(QString::fromStdString("Triangulator catalogue for complex: " + items[i].simpComp->name));
@@ -107,11 +93,7 @@ void MainWindow::tblItemPrintComplexClick() {
         else Utils::openWindowOnRandomPos(items[i].printComplex);
 
         items[i].printComplex->show();
-    } else {
-        items[i].printComplex->close();
-        delete items[i].printComplex;
-        items[i].printComplex = NULL;
-    }
+    } else printComplexWndClosed(items[i].printComplex);
 }
 
 void MainWindow::tblItemOpenToolsClick(int index) {
@@ -177,73 +159,39 @@ void MainWindow::tblItemRenameComplexClick(int row) {
     renameDialog->show();
 }
 
+void MainWindow::tblItemDeleteRow(int row)
+{
+    drawComplexWndClosed(items[row].drawComplex);
+    printComplexWndClosed(items[row].printComplex);
 
-void MainWindow::tblItemDeleteRowClick(int row) {
-    QMessageBox msgBox(QMessageBox::Question, "Confirm", "Are you sure?", QMessageBox::Yes | QMessageBox::No);
-
-    if (msgBox.exec() == QMessageBox::No) return;
-
-    items[row].removeWindowFromChildWindowsOnClose = false;
-
-    int j = 0;
-
-    for (QWidget *w : items[row].childWindows)
+    while(items[row].childWindows.empty() == false)
     {
+        Inspector *w = items[row].childWindows[0];
         w->close();
-        if (items[row].printComplex == w)
-        {            
-            delete items[row].printComplex;
-        }
-        else if (items[row].drawComplex == w)
-        {            
-            delete items[row].drawComplex;
-        }
-        else
-        {
-            delete (Inspector *)w;
-        }
-        items[row].childWindows[j] = NULL;
-        j++;
     }
+
     unseed_complex(items[row].simpComp);
     items.erase(items.begin() + row);
 
     updateSimpCompTableModel();
-
     ui.tblComplexes->show();
+}
+
+void MainWindow::tblItemDeleteRowClick(int row) {
+    QMessageBox msgBox(QMessageBox::Question, "Confirm", "Are you sure?", QMessageBox::Yes | QMessageBox::No);
+    if (msgBox.exec() == QMessageBox::No) return;
+    tblItemDeleteRow(row);
 }
 
 void MainWindow::unseedAllComplexes() {
     QMessageBox msgBox(QMessageBox::Question, "Confirm", "Are you sure?", QMessageBox::Yes | QMessageBox::No);
-
     if (msgBox.exec() == QMessageBox::No) return;
 
     int row = 0;
 
-    while(items.size() > 0){
-
-        items[row].removeWindowFromChildWindowsOnClose = false;
-
-        int j = 0;
-
-        for (QWidget *w : items[row].childWindows){
-            w->close();
-            if (items[row].printComplex == w){
-                delete items[row].printComplex;
-            }
-            else if (items[row].drawComplex == w){
-                delete items[row].drawComplex;
-            }
-            else{
-                delete (Inspector *)w;
-            }
-            items[row].childWindows[j] = NULL;
-            j++;
-        }
-        unseed_complex(items[row].simpComp);
-        items.erase(items.begin() + row);
-        updateSimpCompTableModel();
-        ui.tblComplexes->show();
+    while(items.empty() == false){
+        row = items.size() - 1;
+        tblItemDeleteRow(row);
     }
 }
 
@@ -409,7 +357,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     log_report(LOG_INFO,endMessage);
 
+    unseedAllComplexes();
     unseed_everything();
+
+    if (viewLogFileVisible == true)
+    {
+        logViewerDialog->close();
+        viewLogFileClosed();
+    }
 
     event->accept();
 }

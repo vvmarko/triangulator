@@ -14,7 +14,7 @@ public:
     PrintComplex(MainWindow *mainWnd, QString displayStr, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
 	~PrintComplex();
 
-    void refreshCatalog(SimpCompItem *item);
+    void refreshCatalog();
 
     SimpCompItem *item;    
 

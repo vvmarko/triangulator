@@ -52,6 +52,7 @@ private:
     void tblItemSaveComplexAsClick(int row);
     void tblItemRenameComplexClick(int row);
     void tblItemDeleteRowClick(int row);
+    void tblItemDeleteRow(int row);
 
     void unseedAllComplexes();
 

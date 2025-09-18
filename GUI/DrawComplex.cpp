@@ -16,7 +16,6 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
 
     // Set up basic user interface and add self to list of open windows
 	ui.setupUi(this);
-    item->childWindows.push_back(this);
 
     // Add status bar to the user interface
     statusBar = new QStatusBar();
@@ -40,7 +39,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
     QSlider *csliderd = new QSlider(Qt::Horizontal);
     this->sliderd = csliderd;
     sliderd->setRange(0, 100); // Sets the minimum and maximum values
-    sliderd->setValue(1); // Sets the current value
+    sliderd->setValue(0); // Sets the current value
     sliderd->setSingleStep(1);
     sliderd->setPageStep(10);
     sliderd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -52,7 +51,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
     QSpinBox *cspinboxd = new QSpinBox();
     this->spinboxd = cspinboxd;
     spinboxd->setRange(0,100);
-    spinboxd->setValue(1);
+    spinboxd->setValue(0);
     spinboxd->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     spinboxd->setFixedWidth(55);
     hboxd->addWidget(spinboxd);
@@ -209,6 +208,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
             this->spinboxAlpha.push_back(spinboxAlphaTemp);
             spinboxAlphaTemp->setRange(scrparam->alphaMin[i],scrparam->alphaMax[i]);
             spinboxAlphaTemp->setValue(scrparam->alpha[i]);
+            spinboxAlphaTemp->setSingleStep(0.05);
             spinboxAlphaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
             spinboxAlphaTemp->setFixedWidth(55);
             hboxAlpha->addWidget(spinboxAlphaTemp);
@@ -261,6 +261,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
             this->spinboxBeta.push_back(spinboxBetaTemp);
             spinboxBetaTemp->setRange(scrparam->betaMin[i],scrparam->betaMax[i]);
             spinboxBetaTemp->setValue(scrparam->beta[i]);
+            spinboxBetaTemp->setSingleStep(0.05);
             spinboxBetaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
             spinboxBetaTemp->setFixedWidth(55);
             hboxBeta->addWidget(spinboxBetaTemp);
@@ -313,6 +314,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
             this->spinboxGamma.push_back(spinboxGammaTemp);
             spinboxGammaTemp->setRange(scrparam->gammaMin[i],scrparam->gammaMax[i]);
             spinboxGammaTemp->setValue(scrparam->gamma[i]);
+            spinboxGammaTemp->setSingleStep(0.05);
             spinboxGammaTemp->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
             spinboxGammaTemp->setFixedWidth(55);
             hboxGamma->addWidget(spinboxGammaTemp);
@@ -333,16 +335,21 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
 
     // Introduce some gui-useful defaults for screen parameters
     this->enveloping_radius = find_enveloping_sphere_radius(this->coords);
-    this->scrparam->d = this->enveloping_radius + 10;
+    this->scrparam->d = this->enveloping_radius;
     // For setting the default scale below, 500 is the initial height of the
     // drawing viewport (specified in file DrawComplex.ui), while 10 is the
     // scaling parameter that nicely fills in the viewport for the hard-coded
     // value sz = 20. Changing any of these parameters will likely only make
     // the picture worse...
-    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    this->scrparam->sz = 20.0; // Hard-coded value for sz, the optimal one
+    if (scrparam->Damb < 3){
+        this->default_scale = 2 * enveloping_radius / 500;
+    } else {
+        this->default_scale = 2 * (scrparam->sz) / 500;
+    }
+//    this->default_scale = 2 * enveloping_radius / (500 * 10);
     this->scrparam->sx = default_scale;
     this->scrparam->sy = default_scale;
-    this->scrparam->sz = 20.0; // Hard-coded value for sz, the optimal one
 
     // Set up the drawing widget
     ui.openGLWidget->item = item;
@@ -370,13 +377,6 @@ void DrawComplex::spinboxdValueChanged(int value)
 
 void DrawComplex::slidersxValueChanged(int value)
 {
-    // For setting the default scale below, 500 is the initial height of the
-    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
-    // scaling parameter that nicely fills in the viewport for the hard-coded
-    // value sz = 20. Changing any of these parameters will likely only make
-    // the picture worse...
-    this->default_scale = 2 * enveloping_radius / (500 * 10);
-
     // We use the function
     //
     // f(x) = 1/2 ( -x/10 + \sqrt{4 + (x/10)^2} )
@@ -392,12 +392,12 @@ void DrawComplex::slidersxValueChanged(int value)
 
 void DrawComplex::spinboxsxValueChanged(int value)
 {
-    // For setting the default scale below, 500 is the initial height of the
-    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
-    // scaling parameter that nicely fills in the viewport for the hard-coded
-    // value sz = 20. Changing any of these parameters will likely only make
-    // the picture worse...
-    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    // We use the function
+    //
+    // f(x) = 1/2 ( -x/10 + \sqrt{4 + (x/10)^2} )
+    //
+    // to smoothly interpolate the slider input [-100,100] to the actual scaling
+    // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sx = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
@@ -407,12 +407,12 @@ void DrawComplex::spinboxsxValueChanged(int value)
 
 void DrawComplex::slidersyValueChanged(int value)
 {
-    // For setting the default scale below, 500 is the initial height of the
-    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
-    // scaling parameter that nicely fills in the viewport for the hard-coded
-    // value sz = 20. Changing any of these parameters will likely only make
-    // the picture worse...
-    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    // We use the function
+    //
+    // f(x) = 1/2 ( -x/10 + \sqrt{4 + (x/10)^2} )
+    //
+    // to smoothly interpolate the slider input [-100,100] to the actual scaling
+    // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sy = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
@@ -422,12 +422,12 @@ void DrawComplex::slidersyValueChanged(int value)
 
 void DrawComplex::spinboxsyValueChanged(int value)
 {
-    // For setting the default scale below, 500 is the initial height of the
-    // drawing viewport (specified in file DrawComplex.ui), while 10 is the
-    // scaling parameter that nicely fills in the viewport for the hard-coded
-    // value sz = 20. Changing any of these parameters will likely only make
-    // the picture worse...
-    this->default_scale = 2 * enveloping_radius / (500 * 10);
+    // We use the function
+    //
+    // f(x) = 1/2 ( -x/10 + \sqrt{4 + (x/10)^2} )
+    //
+    // to smoothly interpolate the slider input [-100,100] to the actual scaling
+    // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sy = default_scale * scale;
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
@@ -439,7 +439,6 @@ void DrawComplex::spinboxsyValueChanged(int value)
     // it. Instead we use the hard-coded value sz = 20, since that is an optimal value for
     // the graphics rendering. We leave the commented-out code here, in case someone wants
     // to try it out anyway...
-
 
 void DrawComplex::sliderszValueChanged(int value)
 {
@@ -479,6 +478,10 @@ void DrawComplex::spinboxAlphaValueChanged(double value, int i)
     ui.openGLWidget->repaint();
     int num = static_cast<int>(std::round(value * 100.0 / scrparam->alphaMax[i]));
     sliderAlpha[i-1]->setValue(num);
+    // Counting members in the spinboxAlpha vector starts from zero,
+    // while the counting of corresponding angles in the vector alpha
+    // starts from one (alpha[0] is a constant angle that we ignore).
+    // Hence "i-1" in the assignment above.
 }
 
 
@@ -503,6 +506,10 @@ void DrawComplex::spinboxBetaValueChanged(double value, int i)
     ui.openGLWidget->repaint();
     int num = static_cast<int>(std::round(value * 100.0 / scrparam->betaMax[i]));
     sliderBeta[i-1]->setValue(num);
+    // Counting members in the spinboxAlpha vector starts from zero,
+    // while the counting of corresponding angles in the vector alpha
+    // starts from one (alpha[0] is a constant angle that we ignore).
+    // Hence "i-1" in the assignment above.
 }
 
 void DrawComplex::sliderGammaValueChanged(int value, int i)
@@ -526,6 +533,18 @@ void DrawComplex::spinboxGammaValueChanged(double value, int i)
     ui.openGLWidget->repaint();
     int num = static_cast<int>(std::round(value * 100.0 / scrparam->gammaMax[i]));
     sliderGamma[i-1]->setValue(num);
+    // Counting members in the spinboxAlpha vector starts from zero,
+    // while the counting of corresponding angles in the vector alpha
+    // starts from one (alpha[0] is a constant angle that we ignore).
+    // Hence "i-1" in the assignment above.
+}
+
+void DrawComplex::refreshVisualizer()
+{
+    this->coords = extract_embedding_data(simpComp);
+    ui.openGLWidget->edgedata = extract_edge_data(simpComp);
+    ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
+    ui.openGLWidget->repaint();
 }
 
 double DrawComplex::find_enveloping_sphere_radius(std::vector<EmbData> ccoords)
@@ -559,24 +578,11 @@ void DrawComplex::closeEvent (QCloseEvent* event)
 {    
     item->drawComplexXcoordinate = this->x();
     item->drawComplexYcoordinate = this->y();
+    if (item->drawComplex != nullptr) item->drawComplex = nullptr;
 
-    mainWnd->drawComplexWndClosed(this);
-    free(scrparam);
+    delete scrparam;
 
-    bool erased = false;
-
-    if (ui.openGLWidget->item->removeWindowFromChildWindowsOnClose)
-    {
-      for (unsigned int i = 0; i < ui.openGLWidget->item->childWindows.size() && !erased; i++)
-      {
-         if (ui.openGLWidget->item->childWindows[i] == ui.openGLWidget)
-         {
-             ui.openGLWidget->item->childWindows.erase(ui.openGLWidget->item->childWindows.begin() + i);
-             erased = true;
-         }
-      }
-    }
-    if(event == nullptr) return; // This is a dummy command to satisfy the compiler, do not remove
+    event->accept();
 }
 
 void DrawComplex::setStatusMessage(QString s)

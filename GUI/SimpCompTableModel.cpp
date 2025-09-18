@@ -6,10 +6,9 @@ using namespace std;
 
 SimpCompItem::SimpCompItem()
 {
-    simpComp = NULL;
-    drawComplex = NULL;
-    printComplex = NULL;
-    removeWindowFromChildWindowsOnClose = true;
+    simpComp = nullptr;
+    drawComplex = nullptr;
+    printComplex = nullptr;
 }
 
 SimpCompTableModel::SimpCompTableModel(vector<SimpCompItem> *citems, QObject* parent)
@@ -25,7 +24,7 @@ int SimpCompTableModel::rowCount(const QModelIndex& /*parent*/) const
 
 int SimpCompTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 7; // name, dimension, topology, print complex, draw complex, tools, actions
+    return 7; // name, dimension, topology, catalogue, visualize, tools, actions
 }
 
 QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
@@ -40,15 +39,14 @@ QVariant SimpCompTableModel::data(const QModelIndex& index, int role) const
             case 2 :
               return QString::fromStdString(items->at(index.row()).simpComp->topology);
             case 3 :
-              return QString("");
+              return QString("Catalogue");
             case 4 :
-              return QString("");
+              return QString("Visualize");
             case 5 :
-              return QString("");
+              return QString("Tools");
             case 6 :
-              return QString("");
+              return QString("Actions");
         }
-
     return QVariant();
 }
 
@@ -62,6 +60,14 @@ QVariant SimpCompTableModel::headerData(int section, Qt::Orientation orientation
               return QString("Dimension");
           case 2:
               return QString("Topology");
+          case 3:
+              return QString("Catalogue");
+          case 4:
+              return QString("Visualize");
+          case 5:
+              return QString("Tools");
+          case 6:
+              return QString("Actions");
         }
     }
     return QVariant();

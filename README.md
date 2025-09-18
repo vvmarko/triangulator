@@ -26,15 +26,36 @@ For any additional details, contact the project leader (Marko Vojinovic).
 
 # Build instructions:
 
-(1) git pull
+(1) git clone https://github.com/vvmarko/triangulator
 
-(2) Familiarize yourself with the top-level CMakeLists.txt file, edit if needed to turn on or off various components of the build.
+(2) git pull
 
-(3) mkdir my_build_dir
+(3) Familiarize yourself with the top-level CMakeLists.txt file, edit if needed to turn on or off various components of the build.
 
-(4) cmake -B my_build_dir
+(4) mkdir my_build_dir
 
-(5) cmake --build my_build_dir
+(5) cmake -B my_build_dir
+
+(6) cmake --build my_build_dir
 
 That's it. The appropriate binaries can be found in their respective directories inside my_build_dir.
+
+
+
+# Qt dependencies:
+
+In order to be able to compile the GUI, you need appropriate Qt development libraries installed on your system. On Fedora, you install them as:
+
+   sudo dnf install qt6-qtbase-devel
+
+while on Ubuntu you would do:
+
+   sudo apt install qt6-base-dev
+
+(for other Linux distros you should use your native package manager, package names should be similar to the above). You will need Qt version 6.3 or higher --- once you install it, you can verify the version by running
+
+  qmake --version
+
+If anything is missing, cmake should complain in step (5) of the build instructions. :-)
+
 

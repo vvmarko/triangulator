@@ -18,56 +18,36 @@ void PrintComplex::anchorClicked(const QUrl &url) {
 PrintComplex::PrintComplex(MainWindow *cmainWnd, QString displayStr, SimpCompItem *citem, QWidget *parent)
     : QWidget(parent)
 {
+    this->mainWnd = cmainWnd;
+    this->item = citem;
+
     ui.setupUi(this);
 
-    // links must be like <a href=\"http://triangulatorgui.com/123.html\">123</a>
+    // links must be of the form <a href=\"http://triangulatorgui.com/123.html\">123</a>
 
     ui.textBrowser->setHtml(displayStr);
     ui.textBrowser->setOpenLinks(false);    
     ui.textBrowser->setTextInteractionFlags(ui.textBrowser->textInteractionFlags() | Qt::LinksAccessibleByMouse);    
 
     connect(ui.textBrowser, &QTextBrowser::anchorClicked, this, &PrintComplex::anchorClicked);
-
-    this->mainWnd = cmainWnd;
-    this->item = citem;
-
-    item->childWindows.push_back(this);
 }
 
 
-void PrintComplex::refreshCatalog(SimpCompItem *citem) {
-
-    if (citem->printComplex != NULL) {
-        QString displayStr = QString::fromStdString(citem->simpComp->print_html());
-
-        citem->printComplex->ui.textBrowser->setHtml(displayStr);
-        citem->printComplex->ui.textBrowser->setOpenLinks(false);
-
-//        citem->.printComplex->show();
-    }
+void PrintComplex::refreshCatalog()
+{
+    QString displayStr = QString::fromStdString(item->simpComp->print_html());
+    ui.textBrowser->setHtml(displayStr);
+    ui.textBrowser->setOpenLinks(false);
 }
-
-
 
 void PrintComplex::closeEvent (QCloseEvent* event)
 {
     item->printComplexXcoordinate = this->x();
     item->printComplexYcoordinate = this->y();
 
-    bool erased = false;
+    event->accept();
 
-    mainWnd->printComplexWndClosed(this);
-
-    if (item->removeWindowFromChildWindowsOnClose)
-    {
-      for (unsigned long i = 0; i < item->childWindows.size() && !erased; i++)
-        if (item->childWindows[i] == this)
-        {
-            item->childWindows.erase(item->childWindows.begin() + i);
-            erased = true;
-        }
-    }
-    if(event == nullptr) return; // This is a dummy command to satisfy the compiler, do not remove
+    if (item->printComplex != nullptr) item->printComplex = nullptr;
 }
 
 PrintComplex::~PrintComplex()

@@ -193,9 +193,9 @@ void DrawComplexGLWidget::paintGL()
         // so that when distance = 2 * enveloping_radius, we obtain radius = radius_min,
         // while for distance = 0 we obtain some finite maximum value. With typical
         // enveloping radius of 500 and optimal sz of 20, we obtain radius_max = 204,
-        // which is a good big size for a closeup of a fat vertex on a viewport of height
-        // 500, which is a good 40% of the viewport. :-) Changing any of these numbers will
-        // likely lead to suboptimal drawings...
+        // a closeup size of a fat vertex on a viewport of height 500, which is a good
+        // 40% of the viewport. :-) Changing any of these numbers will likely lead to
+        // suboptimal drawings...
         radius = 4 * (2 * this->enveloping_radius + 20) / ( std::abs(it.Z) + 20 );
 
         // Populate the array for drawing a node
@@ -224,7 +224,7 @@ void DrawComplexGLWidget::leaveEvent(QEvent *event)
     {
         drawComplexStatusBar->showMessage("Click near a vertex to inspect it...");
     }
-    if(event == nullptr) return; // This is a dummy command to satisfy the compiler, do not remove
+    event->accept();
 }
 
 void DrawComplexGLWidget::enterEvent(QEnterEvent *e)
@@ -234,6 +234,7 @@ void DrawComplexGLWidget::enterEvent(QEnterEvent *e)
     if (drawComplexStatusBar != NULL){
             drawComplexStatusBar->showMessage(("Click to inspect vertex " + nearestvertex->print_non_html() + " ...").c_str());
     }
+    e->accept();
 }
 
 void DrawComplexGLWidget::mouseMoveEvent(QMouseEvent *e)
@@ -243,6 +244,7 @@ void DrawComplexGLWidget::mouseMoveEvent(QMouseEvent *e)
     if (drawComplexStatusBar != NULL){
         drawComplexStatusBar->showMessage(("Click to inspect vertex " + nearestvertex->print_non_html() + " ...").c_str());
     }
+    e->accept();
 }
 
 KSimplex* DrawComplexGLWidget::find_nearest_vertex_to_mouse_position(int posx, int posy ){
@@ -282,4 +284,5 @@ void DrawComplexGLWidget::mouseReleaseEvent(QMouseEvent *e)
     Utils::openWindowOnRandomPos(inspector);
 
     inspector->show();
+    e->accept();
 }

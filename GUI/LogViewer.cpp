@@ -87,12 +87,13 @@ void LogViewer::closeEvent(QCloseEvent *e)
     }
 
     mainWnd->viewLogFileClosed();
+    e->accept();
 }
 
 LogViewer::~LogViewer()
 {
-    if (watcher) {
+    if (watcher != nullptr){
         delete watcher;
-        watcher = 0;
+        watcher = nullptr;
     }
 }

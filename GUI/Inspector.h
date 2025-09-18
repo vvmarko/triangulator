@@ -19,12 +19,13 @@ public:
     explicit Inspector(KSimplex *simplex, SimpCompItem *item, QWidget *parent = nullptr);
     ~Inspector();
 
+    void refreshAllInspectors();
     SimpCompItem *item;
     SimpComp *simpComp;
     KSimplex *simplex;
+    Ui::Inspector *ui;
 
 private:
-    Ui::Inspector *ui;
 
     void anchorClicked(const QUrl &url);
     void activateBtnAttachNewSimplex();
