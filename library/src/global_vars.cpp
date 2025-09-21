@@ -15,6 +15,7 @@ namespace triangulator_global{
   double potential_spring_non_edge_interaction = POTENTIAL_SPRING_NON_EDGE_INTERACTION;
   double potential_spring_non_edge_length = POTENTIAL_SPRING_NON_EDGE_LENGTH;
   double potential_inverse_distance_interaction = POTENTIAL_INVERSE_DISTANCE_INTERACTION;
+  double potential_inverse_bounding_sphere_interaction = POTENTIAL_INVERSE_BOUNDING_SPHERE_INTERACTION;
   double potential_shake_step = POTENTIAL_SHAKE_STEP;
   int potential_global_retries_number = POTENTIAL_GLOBAL_RETRIES_NUMBER;
   int potential_max_iteration_number = POTENTIAL_MAX_ITERATION_NUMBER;

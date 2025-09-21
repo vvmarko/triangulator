@@ -380,24 +380,53 @@ vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, 
   drawingdata.clear();
   dimension = embcoords[0].x.size();
 
+  double d = scrparams->d;
+  double sx = scrparams->sx;
+  double sy = scrparams->sy;
+  double sz = scrparams->sz;
+
+  // In a one-dimensional ambient space the general formulas are degenerate,
+  // but one can work out that the X coordinate should be evaluated as
+  //
+  // XX = (x / sx) * sz / (sz + d)
+  //
+  // while the distance from the screen should be
+  //
+  // ZZ = d^2 ( 1 + x^2 / (sz + d)^2 )
+  //
   if(dimension == 1){
     for(auto it : embcoords){
       temp.simplex = it.simplex;
-      temp.X = static_cast<int>(round(it.x[0]/scrparams->sx));
+      double XX = it.x[0] * sz / ( sx * (sz + d) );
+      double ZZ = sqrt(d*d *( 1+ ( it.x[0] * it.x[0] ) / ((sz + d)*(sz + d)) ) );
+      temp.X = static_cast<int>(round(XX));
       temp.Y = 0;
-      temp.Z = triangulator_global::linear_topology_drawing_domain_size;
+      temp.Z = ZZ;
       drawingdata.push_back(temp);
     }
   }
 
+  // In a two-dimensional ambient space the general formulas are degenerate,
+  // but one can work out that the X and Y coordinates should be evaluated as
+  //
+  // XX = (1 / sx) * (-x sin alpha + y cos alpha) * sz / (sz + d)
+  // YY = (1 / sy) * ( x cos alpha + y sin alpha) * sz / (sz + d)
+  //
+  // while the distance from the screen should be
+  //
+  // ZZ = d^2 ( 1 + (x^2 + y^2) / (sz + d)^2 )
+  //
   if(dimension == 2){
     for(auto it : embcoords){
       temp.simplex = it.simplex;
       double sinalpha = sin(scrparams->alpha[1]);
       double cosalpha = cos(scrparams->alpha[1]);
-      temp.X = static_cast<int>(round( (-it.x[0] * sinalpha + it.x[1] * cosalpha) /scrparams->sx ));
-      temp.Y = static_cast<int>(round( (it.x[0] * cosalpha + it.x[1] * sinalpha) /scrparams->sy ));
-      temp.Z = triangulator_global::linear_topology_drawing_domain_size;
+      double XX = (-it.x[0] * sinalpha + it.x[1] * cosalpha) * sz / ( sx * (sz + d) );
+      double YY = (it.x[0] * cosalpha + it.x[1] * sinalpha) * sz / ( sy * (sz + d) );
+      double ZZ = sqrt(d*d *( 1+ ( it.x[0] * it.x[0] + it.x[1] * it.x[1] ) / ((sz + d)*(sz + d)) ) );
+      temp.X = static_cast<int>(round(XX));
+      temp.Y = static_cast<int>(round(YY));
+      temp.Z = ZZ;
       drawingdata.push_back(temp);
     }
   }
@@ -406,11 +435,7 @@ vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, 
   if(dimension > 2){
 
     // Begin by reading all screen parameters into local variables,
-    // easier access
-    double d = scrparams->d;
-    double sx = scrparams->sx;
-    double sy = scrparams->sy;
-    double sz = scrparams->sz;
+    // for easier access
     vector<double> sinalpha; // array to hold sin(alpha)
     sinalpha.resize(scrparams->alpha.size());
     vector<double> cosalpha; // array to hold cos(alpha)
@@ -480,7 +505,7 @@ vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, 
     eY.resize(dimension-2);
     for(int i = 1; i <= dimension-2; i++){
       eY[i-1] = sy * cosgamma[i];
-      for(int j = 0; j <= i-1; j++) eY[i-1] *= sinbeta[j];
+      for(int j = 0; j <= i-1; j++) eY[i-1] *= singamma[j];
     }
 
     // Evaluate the array normN (of size Damb-1), according to the formula:
@@ -689,8 +714,7 @@ vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, 
 
       double XX = F * sy * sy * vX;
       double YY = F * sx * sx * vY;
-      double c2 = 0.0;
-      for(int i = 0; i < dimension; i++) c2+= c[i] * c[i];
+      double c2 = d * d;
       double ZZ = sqrt( abs(c2 + (XX * XX) + (YY * YY) + v2 - 2 * (vc + (XX * vX) + (YY * vY))) );
 
       // We are done!! Collect all results and save them into drawingdata
@@ -849,12 +873,19 @@ void evaluate_embedding_coordinates(SimpComp *simpComp){
 
 double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpComp *simpComp){
   DrawingCoordinatesColor *color1, *color2;
-  double temp,sum;
-  int i,j;
-
+  double distance;
+ 
   // Find drawing coordinates colors of the two vertices
   color1 = DrawingCoordinatesColor::find_pointer_to_color(vertex1);
   color2 = DrawingCoordinatesColor::find_pointer_to_color(vertex2);
+
+  distance = evaluate_coordinate_distance(color1->q, color2->q, simpComp->topology);
+  return distance;
+}
+
+double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string topology){
+  double temp,sum;
+  unsigned long int i,j;
 
   // In the case of linear topology, we evaluate the distance between
   // two vertices using the ordinary Euclidean definition of distance,
@@ -862,10 +893,10 @@ double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpCo
   //
   // L = \sqrt{ \sum_{i=0}^{D-1} ( q^1_i - q^2_i )^2 } .
   //
-  if(simpComp->topology == "linear"){
+  if(topology == "linear"){
     sum = 0;
-    for(i = 0; i < simpComp->D; i++){
-      temp = color1->q[i] - color2->q[i];
+    for(i = 0; i < q1.size(); i++){
+      temp = q1[i] - q2[i];
       sum += temp * temp;
     }
     return sqrt(sum);
@@ -876,11 +907,11 @@ double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpCo
   //
   // L = R \arccos{ \sum_{i=1}^{D+1} \cos q^1_i \cos q^2_i \prod_{j=0}^{i-1} \sin q^1_j \sin q^2_j }
   //
-  if(simpComp->topology == "sphere"){
+  if(topology == "sphere"){
     sum = 0;
-    for(i = 1; i <= simpComp->D + 1; i++){
-      temp = cos(color1->q[i]) * cos(color2->q[i]);
-      for(j = 0; j <= i - 1; j++) temp = temp * sin(color1->q[j]) * sin(color2->q[j]);
+    for(i = 1; i < q1.size(); i++){
+      temp = cos(q1[i]) * cos(q2[i]);
+      for(j = 0; j <= i - 1; j++) temp = temp * sin(q1[j]) * sin(q2[j]);
       sum += temp;
     }
     if( sum < -1.0 ) sum = -0.9; // Just to make sure sum does not veer outside the segment [-1,1],
@@ -951,20 +982,60 @@ double evaluate_potential(SimpComp *simpComp){
   }
 
   if(top == "sphere"){
-    // Since any D-dimensional sphere is a compact manifold, the
-    // inverse distance potential on a sphere is bounded, and is
-    // therefore the best choice, since it will force all vertices
-    // of the complex to be as far as possible from each other,
-    // distributing them "evenly" over the sphere.
-    pot = evaluate_inverse_distance_potential(simpComp);
+    // Since any D-dimensional sphere is a compact manifold, the inverse
+    // bounding sphere potential on a sphere is bounded, and is therefore the
+    // best choice, since it will force all cells of the complex to be as far
+    // as possible from each other, distributing them "evenly" over the sphere.
+    // We add to that the inverse distance potential, in order to make sure
+    // that the vertices are as far apart as possible, and especially to avoid
+    // two or more vertices to coincide
+    pot = evaluate_inverse_bounding_sphere_potential(simpComp);
+    pot += evaluate_inverse_distance_potential(simpComp);
     return pot;
   }
 
-  // If we do not recognize the topology, fall back to the
-  // spring potential
+  // If we do not recognize the topology, fall back to the simple spring potential
   return evaluate_spring_edge_potential(simpComp);
 }
-  
+
+double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp){
+  BoundingSphere s;
+  vector<double> radius;
+  double sum,dij;
+  int i,j,N,D;
+
+  // We evaluate the inverse bounding sphere potential according to the
+  // formula
+  //
+  // V = \sum_{i=0}^{N-2} \sum_{j=i+1}^{N-1} const / d_{ij} .
+  //
+  // Here N is the number of cells (D-simplices) in the complex, const is
+  // the interaction constant between the cells, and d_{ij} is the
+  // coordinate distance between the centers of the bounding spheres of
+  // two cells (i and j). This distance is equal to the sum of the radii
+  // of the two spheres.
+  sum = 0.0;
+  D = simpComp->D;
+  N = simpComp->elements[D].size();
+  radius.clear();
+
+  // Evaluate and collect the radii of all cells into a vector
+  for(i = 0; i < N; i++){
+    s = evaluate_bounding_sphere(simpComp->elements[D][i], simpComp);
+    radius.push_back(s.radius);
+  }
+
+  // Evaluate the potential according to the formula above
+  for(i = 0; i <= N-2; i++){
+    for(j = i+1; j <= N-1; j++){
+      dij = radius[i] + radius[j];
+      if(dij == 0.0) dij = 0.001; // Small hack to avoid accidental division by zero
+      sum += (triangulator_global::potential_inverse_bounding_sphere_interaction) / dij;
+    }
+  }
+  return sum;
+}
+
 double evaluate_inverse_distance_potential(SimpComp *simpComp){
   KSimplex *vi;
   KSimplex *vj;
@@ -1281,5 +1352,98 @@ void evaluate_potential_minimum(SimpComp *simpComp){
   // We have hopefully found the global minimum, set the intrinsic coordinates
   // to that point
   restore_drawing_coordinates(simpComp, globalMinPotentialColors);
+}
+
+BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
+
+  BoundingSphere bsphere;
+  KSimplex *extremalVertex1;
+  KSimplex *extremalVertex2;
+  KSimplex *extremalEdge;
+  double maxdistance = 0.0;
+  double tempdistance = 0.0;
+  DrawingCoordinatesColor *color1;
+  DrawingCoordinatesColor *color2;
+  double middle;
+  
+  // Initialize the bounding sphere data
+  bsphere.simplex = nullptr;
+  bsphere.topology = "";
+  bsphere.center.clear();
+  bsphere.radius = 0.0;
+  extremalEdge = nullptr;
+
+  // If the complex is not defined report an error
+  if(simpComp == nullptr){
+    log_report(LOG_ERROR,"You are trying to evaluate a boundary sphere in a nullptr complex! Fix your code!");
+    return bsphere;
+  }
+
+  // We can assign the topology info to the boundary sphere data
+  bsphere.topology = simpComp->topology;
+  
+  // If the simplex is not defined report an error
+  if(simplex == nullptr){
+    log_report(LOG_ERROR,"You are trying to evaluate a boundary sphere of a nullptr! Fix your code!");
+    return bsphere;
+  }
+
+  // We can assign the simplex to the boundary sphere data
+  bsphere.simplex = simplex;
+  
+  // If the simplex is a vertex, assign its coordinates as the center of the bounding sphere, assign
+  // the radius of the sphere to be zero, and return it with a warning that a bounding sphere around
+  // a single vertex does not make much sense...
+  if(simplex->k == 0){
+    log_report(LOG_WARN,"You are trying to evaluate a boundary sphere of a single vertex. While this");
+    log_report(LOG_WARN,"is technically legal, it does not make much sense, since the radius is zero.");
+    color1 = DrawingCoordinatesColor::find_pointer_to_color(simplex);
+    for(long unsigned int i = 0; i < color1->q.size(); i++) bsphere.center.push_back(color1->q[i]);
+    return bsphere;
+  }
+
+  // Find the edge in the simplex which has a maximum distance between its vertices, and remember
+  // this distance
+
+  // If the simplex is itself an edge, the bounding box exists only around its two vertices,
+  // so the maximum distance is the edge distance, while the extremal edge is the edge itself
+  if(simplex->k == 1){
+    maxdistance =  evaluate_coordinate_edge_length(simplex, simpComp);
+    extremalEdge = simplex;
+  }
+
+  // If the simplex is a triangle or higher, go through its edges and find the maximal one
+  if(simplex->k > 1){
+    for(auto edge : simplex->neighbors->elements[1]){
+      tempdistance = evaluate_coordinate_edge_length(edge, simpComp);
+      if(tempdistance > maxdistance){
+        maxdistance = tempdistance;
+        extremalEdge = edge;
+      }
+    }
+  }
+
+  // Evaluate the radius of the sphere as the half-distance of the extremal edge.
+  // Also, there might be other vertices outside the sphere, but they can be at
+  // most radius * \sqrt{3} away, so we increase the radius to this value. The
+  // bounding sphere obtained in this way is not the minimal one, but it should
+  // do a good enough job nevertheless...
+  bsphere.radius = maxdistance * sqrt(3) / 2;
+
+  // Find the two vertices of the extremal edge and their drawing coordinate colors
+  extremalVertex1 = extremalEdge->neighbors->elements[0][0];
+  extremalVertex2 = extremalEdge->neighbors->elements[0][1];
+  color1 = DrawingCoordinatesColor::find_pointer_to_color(extremalVertex1);
+  color2 = DrawingCoordinatesColor::find_pointer_to_color(extremalVertex2);
+
+  // Evaluate the center of the bounding sphere as a midpoint between the two
+  // extremal vertices
+  for(unsigned long int i = 0; i < color1->q.size(); i++){
+    middle = ( color1->q[i] + color2->q[i] ) * 0.5;
+    bsphere.center.push_back(middle);
+  }
+
+  // We are done, return the bounding sphere data
+  return bsphere;
 }
 

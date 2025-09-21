@@ -86,6 +86,18 @@ struct ScreenCoords {
 
 #endif
 
+#ifndef BOUNDINGSPHERE_STRUCT
+#define BOUNDINGSPHERE_STRUCT
+
+struct BoundingSphere {
+  KSimplex *simplex;
+  string topology;
+  vector<double> center;
+  double radius;
+};
+
+#endif
+
 // A setup function that calls the constructor based on the
 // topology of the given complex:
 ScreenParameters* setup_screen_parameters(SimpComp *simpComp);
@@ -100,11 +112,15 @@ void evaluate_embedding_coordinates(SimpComp *simpComp);
 
 double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpComp *simpComp);
 
+double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string topology);
+
 double evaluate_coordinate_edge_length(KSimplex *edge, SimpComp *simpComp);
 
 double evaluate_potential(SimpComp *simpComp);
 
 double evaluate_inverse_distance_potential(SimpComp *simpComp);
+
+double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp);
 
 double evaluate_inverse_edge_potential(SimpComp *simpComp);
 
@@ -126,6 +142,7 @@ vector<EdgeData> extract_edge_data(SimpComp *simpComp);
 
 vector<ScreenCoords> evaluate_perspective_projection(vector<EmbData> embcoords, ScreenParameters *scrparams);
 
+BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp);
 
 #endif
 
