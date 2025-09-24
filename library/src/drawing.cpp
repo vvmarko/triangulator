@@ -354,13 +354,33 @@ vector<EmbData> extract_embedding_data(SimpComp *simpComp){
 vector<EdgeData> extract_edge_data(SimpComp *simpComp){
   vector <EdgeData> edges;
   EdgeData temp;
-
+  int D = simpComp->D;
   edges.clear();
+
+  // Traverse over all edges in the simplicial complex
   for(auto &edge : simpComp->elements[1]){
+    // For each edge, remember its two neighboring vertices
     temp.simplex1 = edge->neighbors->elements[0][0];
     temp.simplex2 = edge->neighbors->elements[0][1];
+
+    // Figure out if the edge is part of the boundary
+    // Begin by assuming that it is not
+    temp.boundary = false;
+    // In D=1 the edge is never a boundary
+    // In D=2 the edge might itself be a boundary
+    if( edge->is_a_boundary() ) temp.boundary = true;
+    // For D>2 the edge might be a part of a (D-1)-simplex
+    // which is itself a boundary. If such a simplex exists,
+    // the edge is considered part of the boundary
+    if(D > 2){
+      for( auto it : edge->neighbors->elements[D-1] ){
+        if( it->is_a_boundary() ) temp.boundary = true;
+      }
+    }
+    // Add obtained edge data to the vector
     edges.push_back(temp);
   }
+  // Return the vector with data for all edges
   return(edges);
 }
 

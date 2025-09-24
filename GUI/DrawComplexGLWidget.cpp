@@ -85,19 +85,21 @@ void DrawComplexGLWidget::create_rodTriangleFan (GLfloat *vertices1, GLfloat *ve
     vertices2[7] = (GLfloat)y2;
 }
 
-void DrawComplexGLWidget::draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices)
+void DrawComplexGLWidget::draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices, bool boundary)
 {
     GLfloat *colors = new GLfloat[numVertices * 3];
 
     int i;
 
-    GLfloat color = (GLfloat)0.0;
+    GLfloat black = (GLfloat)0.0;
+    GLfloat blue = (GLfloat)1.0;
 
     int numVertices3 = numVertices * 3;
 
     for (i = 0; i < numVertices3; i++)
     {
-        colors[i] = color;
+        colors[i] = black;
+        if( (boundary) && ((i % 3) == 2) ) colors[i] = blue;
     }
 
     f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
@@ -169,8 +171,8 @@ void DrawComplexGLWidget::paintGL()
         matrix.setToIdentity();
         matrix.ortho(rect);
         m_program->setUniformValue(m_matrixUniform, matrix);
-        draw_triangleFan(f, link1, 4);
-        draw_triangleFan(f, link2, 4);
+        draw_triangleFan(f, link1, 4, edge.boundary);
+        draw_triangleFan(f, link2, 4, edge.boundary);
     }
 
     // ###############################
@@ -209,7 +211,7 @@ void DrawComplexGLWidget::paintGL()
         matrix.ortho(rect);
         matrix.translate(x, y, 0);
         m_program->setUniformValue(m_matrixUniform, matrix);
-        draw_triangleFan(f, node, 2 + 10);
+        draw_triangleFan(f, node, 2 + 10, false);
     }
 }
 

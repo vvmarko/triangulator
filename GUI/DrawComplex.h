@@ -10,18 +10,6 @@ class ScreenParameters;
 
 #include "ui_DrawComplex.h"
 
-
-#ifndef EMBDATA_STRUCT
-#define EMBDATA_STRUCT
-
-struct EmbData {
-  KSimplex *simplex;
-  std::vector<double> x;
-};
-
-#endif
-
-
 class DrawComplex : public QWidget
 {
 	Q_OBJECT

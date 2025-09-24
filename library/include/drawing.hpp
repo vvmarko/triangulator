@@ -70,6 +70,7 @@ struct EmbData {
 struct EdgeData {
   KSimplex *simplex1;
   KSimplex *simplex2;
+  bool boundary;
 };
 
 #endif
@@ -99,9 +100,12 @@ struct BoundingSphere {
 #endif
 
 // A setup function that calls the constructor based on the
-// topology of the given complex:
+// topology of the given complex, and instantiates all relevant
+// parameters that describe the position of the screen in the
+// ambient space
 ScreenParameters* setup_screen_parameters(SimpComp *simpComp);
 
+// Colorize the entire simplicial complex 
 bool initialize_drawing_coordinates(SimpComp *simpComp);
 
 bool reset_intrinsic_coordinates(SimpComp *simpComp);

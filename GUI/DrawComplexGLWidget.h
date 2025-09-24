@@ -4,28 +4,6 @@
 
 class SimpCompItem;
 
-#ifndef SCREENCOORDS_STRUCT
-#define SCREENCOORDS_STRUCT
-
-struct ScreenCoords {
-  KSimplex *simplex;
-  int X;
-  int Y;
-  double Z;
-};
-
-#endif
-
-#ifndef EDGEDATA_STRUCT
-#define EDGEDATA_STRUCT
-
-struct EdgeData {
-  KSimplex *simplex1;
-  KSimplex *simplex2;
-};
-
-#endif
-
 class DrawComplexGLWidget :
     public QOpenGLWidget
 {
@@ -47,7 +25,7 @@ public:
     void resizeGL(int w, int h) override;
     void create_circleTriangleFan (GLfloat *vertices, int subdivs, double radius);
     void create_rodTriangleFan (GLfloat *vertices1, GLfloat *vertices2, int x1, int y1, int x2, int y2, double radius1, double radius2);
-    void draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
+    void draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices, bool boundary);
     KSimplex* find_nearest_vertex_to_mouse_position(int posx, int posy );
     void paintGL() override;
 public:
