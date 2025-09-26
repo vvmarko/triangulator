@@ -903,17 +903,40 @@ double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpCo
   return distance;
 }
 
+double evaluate_embedding_distance(KSimplex *vertex1, KSimplex *vertex2){
+  DrawingCoordinatesColor *color1, *color2;
+  double distance;
+
+  // This function assumes that the embedding coordinates have been evaluated,
+  // otherwise it will probably return zero for the distance...
+  
+  // Find drawing coordinates colors of the two vertices
+  color1 = DrawingCoordinatesColor::find_pointer_to_color(vertex1);
+  color2 = DrawingCoordinatesColor::find_pointer_to_color(vertex2);
+
+  distance = evaluate_coordinate_distance(color1->x, color2->x, "linear", true);
+  return distance;
+}
+
 double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string topology){
+  // Wrapper for implicit evaluation of the distance using intrinsic
+  // coordinates, rather than embedding ones
+
+  return evaluate_coordinate_distance(q1,q2,topology,false);
+}
+
+double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string topology, bool embedding){
   double temp,sum;
   unsigned long int i,j;
 
-  // In the case of linear topology, we evaluate the distance between
-  // two vertices using the ordinary Euclidean definition of distance,
-  // i.e. the following formula:
+  // In the case of linear topology or in the case of embedding coordinates,
+  // we evaluate the distance between two points with coordinates q1 and q2
+  // using the ordinary Euclidean definition of distance, i.e. the following
+  // formula:
   //
   // L = \sqrt{ \sum_{i=0}^{D-1} ( q^1_i - q^2_i )^2 } .
   //
-  if(topology == "linear"){
+  if( (topology == "linear")||(embedding == true) ){
     sum = 0;
     for(i = 0; i < q1.size(); i++){
       temp = q1[i] - q2[i];
@@ -922,12 +945,12 @@ double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string
     return sqrt(sum);
   }
   // In the case of spherical topology, we evaluate the distance between
-  // two vertices using the formula for the arclength between two points
-  // on a D-dimensional sphere:
+  // two points using the formula for the arclength on a D-dimensional sphere:
   //
   // L = R \arccos{ \sum_{i=1}^{D+1} \cos q^1_i \cos q^2_i \prod_{j=0}^{i-1} \sin q^1_j \sin q^2_j }
   //
-  if(topology == "sphere"){
+  // Note: this does not make sense for embedding coordinates
+  if( (topology == "sphere")&&(embedding == false) ){
     sum = 0;
     for(i = 1; i < q1.size(); i++){
       temp = cos(q1[i]) * cos(q2[i]);
@@ -952,9 +975,21 @@ double evaluate_coordinate_edge_length(KSimplex *edge, SimpComp *simpComp){
   return evaluate_coordinate_distance(vertex1,vertex2,simpComp);
 }
 
+double evaluate_embedding_edge_length(KSimplex *edge){
+
+  // This function assumes that the embedding coordinates have been evaluated,
+  // otherwise it will probably return zero for the distance...
+  
+  // Find the two vertices of the given edge
+  KSimplex *vertex1 = edge->neighbors->elements[0][0];
+  KSimplex *vertex2 = edge->neighbors->elements[0][1];
+
+  return evaluate_embedding_distance(vertex1,vertex2);
+}
+
 double evaluate_potential(SimpComp *simpComp){
   string top;
-  double pot,tempc1,tempc2;
+  double pot;
   
   // Different choices of the potential are suitable for different
   // topologies, so we evaluate it taking into account the topology
@@ -965,6 +1000,7 @@ double evaluate_potential(SimpComp *simpComp){
   top = simpComp->topology;
   
   if(top == "linear"){
+    /*
     // For any linear manifold, one typically uses the spring-edge
     // potential. However, if used alone, it is prone to various
     // foldings and overlaps. These can be avoided by further
@@ -984,6 +1020,9 @@ double evaluate_potential(SimpComp *simpComp){
     // vertices connected with edges, so we temporarily redefine the
     // constants for the spring-edge potential to match the spring-non-
     // edge potential, evaluate it, and subtract it
+
+    double tempc1,tempc2;
+
     tempc1 = triangulator_global::potential_spring_edge_interaction;
     tempc2 = triangulator_global::potential_spring_edge_length;
     triangulator_global::potential_spring_edge_interaction = triangulator_global::potential_spring_non_edge_interaction;
@@ -997,7 +1036,15 @@ double evaluate_potential(SimpComp *simpComp){
     pot += evaluate_spring_edge_potential(simpComp);
 
     // The result is the potential with spring-edge potential between edges,
-    // and the spring-non-edge potential between vertices not sharing an edge 
+    // and the spring-non-edge potential between vertices not sharing an edge
+
+    */
+    
+    pot = evaluate_inverse_intrinsic_bounding_sphere_potential(simpComp);
+    pot += evaluate_inverse_embedding_bounding_sphere_potential(simpComp);
+    pot += evaluate_inverse_distance_potential(simpComp);
+    pot += evaluate_linear_well_potential(simpComp);
+
     return pot;
   }
 
@@ -1009,7 +1056,8 @@ double evaluate_potential(SimpComp *simpComp){
     // We add to that the inverse distance potential, in order to make sure
     // that the vertices are as far apart as possible, and especially to avoid
     // two or more vertices to coincide
-    pot = evaluate_inverse_bounding_sphere_potential(simpComp);
+    pot = evaluate_inverse_embedding_bounding_sphere_potential(simpComp);
+    pot += evaluate_inverse_intrinsic_bounding_sphere_potential(simpComp);
     pot += evaluate_inverse_distance_potential(simpComp);
     return pot;
   }
@@ -1018,7 +1066,17 @@ double evaluate_potential(SimpComp *simpComp){
   return evaluate_spring_edge_potential(simpComp);
 }
 
-double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp){
+double evaluate_inverse_intrinsic_bounding_sphere_potential(SimpComp *simpComp){
+  // Wrapper function for the choice of intrinsic boundary sphere
+  return evaluate_inverse_bounding_sphere_potential(simpComp,false);
+}
+
+double evaluate_inverse_embedding_bounding_sphere_potential(SimpComp *simpComp){
+  // Wrapper function for the choice of embedding boundary sphere
+  return evaluate_inverse_bounding_sphere_potential(simpComp,true);
+}
+
+double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp, bool embedding){
   BoundingSphere s;
   vector<double> radius;
   double sum,dij;
@@ -1031,17 +1089,23 @@ double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp){
   //
   // Here N is the number of cells (D-simplices) in the complex, const is
   // the interaction constant between the cells, and d_{ij} is the
-  // coordinate distance between the centers of the bounding spheres of
-  // two cells (i and j). This distance is equal to the sum of the radii
-  // of the two spheres.
+  // distance between the centers of the bounding spheres of two cells
+  // (i and j). This distance is equal to the sum of the radii of the
+  // two spheres
   sum = 0.0;
   D = simpComp->D;
   N = simpComp->elements[D].size();
   radius.clear();
 
+  // If we are to evaluate the embedding bounding sphere potential,
+  // before we proceed it is necessary to update the values of all
+  // embedding coordinates in the complex, according to the current
+  // values of the intrinsic coordinates
+  if(embedding == true) evaluate_embedding_coordinates(simpComp);
+  
   // Evaluate and collect the radii of all cells into a vector
   for(i = 0; i < N; i++){
-    s = evaluate_bounding_sphere(simpComp->elements[D][i], simpComp);
+    s = evaluate_bounding_sphere(simpComp->elements[D][i], simpComp, embedding);
     radius.push_back(s.radius);
   }
 
@@ -1051,6 +1115,39 @@ double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp){
       dij = radius[i] + radius[j];
       if(dij == 0.0) dij = 0.001; // Small hack to avoid accidental division by zero
       sum += (triangulator_global::potential_inverse_bounding_sphere_interaction) / dij;
+    }
+  }
+  return sum;
+}
+
+double evaluate_linear_well_potential(SimpComp *simpComp){
+  KSimplex *vi;
+  double sum,di;
+  int i,N;
+  DrawingCoordinatesColor *color;
+  vector<double> origin;
+
+  // We evaluate the linear well potential according to the
+  // formula
+  //
+  // V = \sum_{i=0}^{N-1} const * d_i .
+  //
+  // Here N is the number of vertices in the complex, const is the
+  // interaction constant (slope coefficient of the well), and d_i
+  // is the coordinate distance of vertex i from the origin of the
+  // coordinate system.
+  //
+  sum = 0.0;
+  if(simpComp->topology == "linear"){
+    origin.clear();
+    for(i = 0; i < simpComp->D; i++) origin.push_back(0.0);
+    N = simpComp->elements[0].size();
+  
+    for(i = 0; i <= N-1; i++){
+      vi = simpComp->elements[0][i];
+      color = DrawingCoordinatesColor::find_pointer_to_color(vi);
+      di = evaluate_coordinate_distance(color->x, origin, "linear", true);
+      sum += (triangulator_global::potential_linear_well_interaction) * di;
     }
   }
   return sum;
@@ -1374,7 +1471,17 @@ void evaluate_potential_minimum(SimpComp *simpComp){
   restore_drawing_coordinates(simpComp, globalMinPotentialColors);
 }
 
-BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
+BoundingSphere evaluate_intrinsic_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
+
+  return evaluate_bounding_sphere(simplex,simpComp,false);
+}
+
+BoundingSphere evaluate_embedding_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
+
+  return evaluate_bounding_sphere(simplex,simpComp,true);
+}
+
+BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp, bool embedding){
 
   BoundingSphere bsphere;
   KSimplex *extremalVertex1;
@@ -1418,7 +1525,11 @@ BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
     log_report(LOG_WARN,"You are trying to evaluate a boundary sphere of a single vertex. While this");
     log_report(LOG_WARN,"is technically legal, it does not make much sense, since the radius is zero.");
     color1 = DrawingCoordinatesColor::find_pointer_to_color(simplex);
-    for(long unsigned int i = 0; i < color1->q.size(); i++) bsphere.center.push_back(color1->q[i]);
+    if(embedding == false){
+      for(long unsigned int i = 0; i < color1->q.size(); i++) bsphere.center.push_back(color1->q[i]);
+    } else {
+      for(long unsigned int i = 0; i < color1->x.size(); i++) bsphere.center.push_back(color1->x[i]);
+    }
     return bsphere;
   }
 
@@ -1428,14 +1539,22 @@ BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
   // If the simplex is itself an edge, the bounding box exists only around its two vertices,
   // so the maximum distance is the edge distance, while the extremal edge is the edge itself
   if(simplex->k == 1){
-    maxdistance =  evaluate_coordinate_edge_length(simplex, simpComp);
+    if(embedding == false){
+      maxdistance =  evaluate_coordinate_edge_length(simplex, simpComp);
+    } else {
+      maxdistance =  evaluate_embedding_edge_length(simplex);
+    }
     extremalEdge = simplex;
   }
 
   // If the simplex is a triangle or higher, go through its edges and find the maximal one
   if(simplex->k > 1){
     for(auto edge : simplex->neighbors->elements[1]){
-      tempdistance = evaluate_coordinate_edge_length(edge, simpComp);
+      if(embedding == false){
+        tempdistance =  evaluate_coordinate_edge_length(edge, simpComp);
+      } else {
+        tempdistance =  evaluate_embedding_edge_length(edge);
+      }
       if(tempdistance > maxdistance){
         maxdistance = tempdistance;
         extremalEdge = edge;
@@ -1458,9 +1577,16 @@ BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp){
 
   // Evaluate the center of the bounding sphere as a midpoint between the two
   // extremal vertices
-  for(unsigned long int i = 0; i < color1->q.size(); i++){
-    middle = ( color1->q[i] + color2->q[i] ) * 0.5;
-    bsphere.center.push_back(middle);
+  if(embedding == false){
+    for(unsigned long int i = 0; i < color1->q.size(); i++){
+      middle = ( color1->q[i] + color2->q[i] ) * 0.5;
+      bsphere.center.push_back(middle);
+    }
+  } else {
+    for(unsigned long int i = 0; i < color1->x.size(); i++){
+      middle = ( color1->x[i] + color2->x[i] ) * 0.5;
+      bsphere.center.push_back(middle);
+    }
   }
 
   // We are done, return the bounding sphere data

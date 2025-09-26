@@ -21,11 +21,12 @@ int main(){
     Pachner_move(sph->elements[D][0],sph);
 
     evaluate_potential_minimum(sph);
+    evaluate_embedding_coordinates(sph);
 
     cout << "Number of cells is: " << sph->elements[D].size() << endl << endl;
 
     for(auto it : sph->elements[D]){
-      bs = evaluate_bounding_sphere(it, sph);
+      bs = evaluate_embedding_bounding_sphere(it, sph);
 
       cout << "Cell pointer: " << bs.simplex << endl;
       cout << "Topology: " << bs.topology << endl;

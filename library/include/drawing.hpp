@@ -120,15 +120,34 @@ void evaluate_embedding_coordinates(SimpComp *simpComp);
 // based on the topology of the simplicial complex
 double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string topology);
 
+// Calculate the distance between two sets of intrinsic or embedding
+// coordinates, based on the topology of the simplicial complex and
+// the "embedding" boolean
+double evaluate_coordinate_distance(vector<double> q1, vector<double> q2, string topology, bool embedding);
+
 // Calculate the distance between two vertices in the complex, using
 // intrinsic coordinates
 double evaluate_coordinate_distance(KSimplex *vertex1, KSimplex *vertex2, SimpComp *simpComp);
 
+// Calculate the distance between two vertices in the complex, using
+// embedding coordinates
+double evaluate_embedding_distance(KSimplex *vertex1, KSimplex *vertex2);
+
 // Caclulate the length of an edge, using intrinsic coordinates
 double evaluate_coordinate_edge_length(KSimplex *edge, SimpComp *simpComp);
 
+// Caclulate the length of an edge, using embedding coordinates
+double evaluate_embedding_edge_length(KSimplex *edge);
+
 // Evaluate the data od the intrinsic bounding sphere of a given simplex
-BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp);
+BoundingSphere evaluate_intrinsic_bounding_sphere(KSimplex *simplex, SimpComp *simpComp);
+
+// Evaluate the data od the embedding bounding sphere of a given simplex
+BoundingSphere evaluate_embedding_bounding_sphere(KSimplex *simplex, SimpComp *simpComp);
+
+// Evaluate the data od the bounding sphere of a given simplex, using either
+// intrinsic or embedding coordinates, based on the "embedding" boolean
+BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp, bool embedding);
 
 // ##########
 // Potentials
@@ -140,13 +159,27 @@ BoundingSphere evaluate_bounding_sphere(KSimplex *simplex, SimpComp *simpComp);
 // variables. Several different potentials can be turned on or off
 double evaluate_potential(SimpComp *simpComp);
 
+// Evaluate the linear well potential (definition provided in the
+// implementation source for this function)
+double evaluate_linear_well_potential(SimpComp *simpComp);
+
 // Evaluate the inverse distance potential (definition provided in the
 // implementation source for this function)
 double evaluate_inverse_distance_potential(SimpComp *simpComp);
 
 // Evaluate the inverse intrinsic bounding sphere potential (definition
 // provided in the implementation source for this function)
-double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp);
+double evaluate_inverse_intrinsic_bounding_sphere_potential(SimpComp *simpComp);
+
+// Evaluate the inverse embedding bounding sphere potential (definition
+// provided in the implementation source for this function)
+double evaluate_inverse_embedding_bounding_sphere_potential(SimpComp *simpComp);
+
+// Evaluate the inverse bounding sphere potential (definition provided
+// in the implementation source for this function). The evaluation is
+// performed either using intrinsic or embedding bounding sphere, based
+// on the "embedding" boolean
+double evaluate_inverse_bounding_sphere_potential(SimpComp *simpComp, bool embedding);
 
 // Evaluate the inverse edge potential (definition provided in the
 // implementation source for this function)
