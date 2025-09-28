@@ -7,7 +7,7 @@ int main(){
     cout         << "#######################################################" << endl << endl;
 
 
-   SimpComp* sc1 = seed_sphere_intuitively(2,"prvi");
+   SimpComp* sc1 = seed_sphere(2,"prvi");
    UniqueIDColor::colorize_entire_complex(sc1);
    SimpComp* sc2 = seed_single_simplex(3,"drugi");
    UniqueIDColor::colorize_entire_complex(sc2);

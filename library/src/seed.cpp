@@ -126,67 +126,73 @@ KSimplex* attach_new_simplex_to_boundary( KSimplex *boundsimp , SimpComp *G){
 }
 
 
-// Seed a single simplex or sphere of dimension d:
-SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name){
-    string s = "Creating general ";
-    s += (sphere ? "sphere" : "simplicial complex");
-    s += ", D = " + to_string(D) + "...";
-    log_report(LOG_INFO, s);
+// Worker function for seeding a complex made of a single simplex
+SimpComp* seed_single_simplex_worker(int D, string name){
     if(D <= 0){
         log_report(LOG_ERROR, "Not possible to seed for dimension lower or equal to 0");
         return nullptr;
     }
-    // Initilize simplicial complex of dimension D, and an empty k-simplex:
+    // Initialize simplicial complex of dimension D, and an empty k-simplex:
     SimpComp *simpComp = new(nothrow) SimpComp(name,D);
     if(simpComp==nullptr){
       log_report(LOG_PANIC,"PANIC!!! Cannot allocate memory!!!");
       return nullptr;
     }
-    simpComp->topology = sphere ? "sphere" : "linear";
+    simpComp->topology = "linear";
     KSimplex *simpsmall = simpComp->create_ksimplex(0);
 
     // Progress to further dimensions by adding new vertex and conntecting it:
-    for(int k = 1; k <= D+sphere; k++){
+    for(int k = 1; k <= D; k++){
         // Seed a KSimplex of level k based on KSimplex of level k-1:
         simpsmall = build_simplex_one_level_up(simpComp, simpsmall);
     }
 
-    // If seeding simplicial complex, add boundary color:
-    if(!sphere) BoundaryColor::colorize_simplices_at_level(simpComp, D-1);
+    // Add boundary color to the boundary simplices:
+    BoundaryColor::colorize_simplices_at_level(simpComp, D-1);
     
     return simpComp;
 }
 
 SimpComp* seed_single_simplex(int D, string name){
-    SimpComp *simpComp = seed_single_simplex_or_sphere(D, 0, name);
+    string s = "Seeding a simplicial complex " + name + ", containing a single D-simplex, D = ";
+    s += to_string(D) + "...";
+    log_report(LOG_INFO, s);
+    SimpComp *simpComp = seed_single_simplex_worker(D, name);
     triangulator_global::seededComplexes.push_back(simpComp);
     return simpComp;
 }
 
 SimpComp* seed_sphere(int D, string name){
-    SimpComp *simpComp = seed_single_simplex_or_sphere(D, 1, name);
+    string s = "Seeding a sphere " + name + ", D = " + to_string(D) + "...";
+    log_report(LOG_INFO, s);
+    SimpComp *simpComp = seed_sphere_worker(D, name);
     triangulator_global::seededComplexes.push_back(simpComp);
-    //cout << "Seed: " << triangulator_global::seededComplexes.size() << endl;
     return simpComp;
 }
 
-// Seed a single sphere of dimension d
-// by seeding a simplex of dimension d+1, and deleting only it:
-SimpComp* seed_sphere_intuitively(int D, string name){
-    string s = "Creating general sphere " + name + ", D = " + to_string(D) + "...";
-    log_report(LOG_INFO, s);
+// Seed a sphere of dimension D, by seeding a single simplex of
+// dimension D+1, and deleting its interior:
+SimpComp* seed_sphere_worker(int D, string name){
     if(D <= 0){
         log_report(LOG_ERROR, "Not possible to seed for dimension lower or equal to 0");
         return nullptr;
     }
-    // Initilize simplicial complex of dimension D+1, and an empty k-simplex:
-    SimpComp *simpComp = seed_single_simplex(D+1, name);
-    simpComp->name = name;
+    // Initialize a simplicial complex with a single simplex of dimension D+1:
+    SimpComp *simpComp = seed_single_simplex_worker(D+1, name);
+
+    // Rename its topology
     simpComp->topology = "sphere";
 
-    // Delete the last created k-simplex after disconnecting neighbors:
+    // Delete its single (D+1)-simplex
     simpComp->remove_simplex(simpComp->elements[D+1][0]);
-    // Remove BoundaryColor, as sphere doesn't have them:
+
+    // Decrease its list of elements from the back
+    simpComp->elements.pop_back();
+
+    // Decrease  its dimension
+    simpComp->D--;
+
+    // Remove BoundaryColor, since a sphere has no boundary:
     for(auto &kSimplex : simpComp->elements[D]){
         for(auto pColor : kSimplex->colors)
             delete pColor;
@@ -194,22 +200,16 @@ SimpComp* seed_sphere_intuitively(int D, string name){
     }
 
     // For each k-simplex from elements:
-    for(unsigned i = 0; i < simpComp->elements.size()-1; i++){
+    for(unsigned i = 0; i < simpComp->elements.size(); i++){
         for(auto &kSimplex : simpComp->elements[i]){
-            // Decrease the length of matrix kSimplex->neighbors->elements:
+            // Decrease the length of neighbors->elements:
             kSimplex->neighbors->elements.pop_back();
-	    // Decrease the dimension info for the neighbors complex:
-	    kSimplex->neighbors->D--;
+            // Decrease the dimension info for the neighbors complex:
+            kSimplex->neighbors->D--;
             // Decrease the dimension of kSimplex itself:
             kSimplex->D--;
         }
     }
-
-    // Decrease the length of matrix elements:
-    simpComp->elements.pop_back();
-
-    // Decrease the dimension of simpComp:
-    simpComp->D--;
 
     return simpComp;
 }

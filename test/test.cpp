@@ -518,7 +518,7 @@ void test_seed_sphere_intuitively(){
 
     int D = 2;
 
-    SimpComp *sphere = seed_sphere_intuitively(D, "Test sphere");
+    SimpComp *sphere = seed_sphere(D, "Test sphere");
     if(sphere==nullptr){
         log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
     }
@@ -628,9 +628,9 @@ Simplices at level k = 2:
     //cout << testStr.str();
     //cout << expectedStr;
 
-    TEST_FAILED_IF(expectedStr != testStr.str(), "test_seed_sphere_intuitively");
+    TEST_FAILED_IF(expectedStr != testStr.str(), "test_seed_sphere");
 
-    test_ok("test_seed_sphere_intuitively");
+    test_ok("test_seed_sphere");
 }
 
 
@@ -673,7 +673,7 @@ void test_KSimplex_collect_vertices(){
 
     int D = 2;
 
-    SimpComp *sphere = seed_sphere_intuitively(D, "Test sphere");
+    SimpComp *sphere = seed_sphere(D, "Test sphere");
     if(sphere==nullptr){
         log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
     }
@@ -685,7 +685,7 @@ void test_KSimplex_collect_vertices(){
     // Otherwise, collect neighboring vertices into a set:
     sphere->elements[2][0]->collect_vertices(s);
 
-    TEST_FAILED_IF(3 != s.size(), "test_seed_sphere_intuitively");
+    TEST_FAILED_IF(3 != s.size(), "test_seed_sphere");
 
     string expectedStr = R""""(Printing KSimplex:  k = 0, D = 2
 Printing colors:
@@ -737,7 +737,7 @@ void test_KSimplex_find_neighbor(){
 
     int D = 2;
 
-    SimpComp *sphere = seed_sphere_intuitively(D, "Test sphere");
+    SimpComp *sphere = seed_sphere(D, "Test sphere");
     if(sphere==nullptr){
         log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
     }
@@ -796,7 +796,7 @@ void test_KSimplex_reconstruct_neighbors_from_vertices(){
 
     int D = 2;
 
-    SimpComp *sphere = seed_sphere_intuitively(D, "Test sphere");
+    SimpComp *sphere = seed_sphere(D, "Test sphere");
     if(sphere==nullptr){
         log_report(LOG_ERROR,"Unable to seed a sphere, nullptr generated, aborting test!");
     }

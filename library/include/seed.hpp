@@ -4,16 +4,16 @@
 
 void seed_KSimplices(SimpComp* simpComp, int k);
 
-// Seed a single simplex or sphere of dimension d:
-SimpComp* seed_single_simplex_or_sphere(int D, int sphere, string name);
+// Seed a simplicial complex containing a single D-dimensional simplex:
+SimpComp* seed_single_simplex_worker(int D, string name);
 
 SimpComp* seed_single_simplex(int D, string name);
 
 SimpComp* seed_sphere(int D, string name);
 
-// Seed a single sphere of dimension d
-// by seeding a simplex of dimension d+1, and deleting only it:
-SimpComp* seed_sphere_intuitively(int D, string name);
+// Seed a sphere of dimension D by seeding a complex containing a
+// single simplex of dimension D+1, and deleting its interior:
+SimpComp* seed_sphere_worker(int D, string name);
 
 KSimplex* build_simplex_one_level_up_with_vertex(SimpComp* simpComp, KSimplex* simpsmall, KSimplex *vertex);
 
