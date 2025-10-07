@@ -990,6 +990,7 @@ double evaluate_embedding_edge_length(KSimplex *edge){
 double evaluate_potential(SimpComp *simpComp){
   string top;
   double pot;
+  long unsigned int bitmask;
   
   // Different choices of the potential are suitable for different
   // topologies, so we evaluate it taking into account the topology
@@ -997,73 +998,37 @@ double evaluate_potential(SimpComp *simpComp){
   // it defaults to the basic spring potential, which is the
   // least bad option... :-)
 
+  // Initialize topology, bitmask and potential
   top = simpComp->topology;
+  bitmask = 0;
+  pot = 0.0;
   
-  if(top == "linear"){
-    /*
-    // For any linear manifold, one typically uses the spring-edge
-    // potential. However, if used alone, it is prone to various
-    // foldings and overlaps. These can be avoided by further
-    // adding another spring-non-edge potential between non-nearest-
-    // neighbor vertices (i.e. vertices which are not connected with
-    // an edge), which has a bigger spring length than the edge spring.
-    // This pushes non-nearest-neighbor vertices apart to a greater
-    // distance, until they are balanced on their own, or by the spring
-    // tension between the nearest-neighbor vertices. In most cases
-    // this "unfolds" the complex by stretching it, and hopefully
-    // eliminates any overlaps.
+  // Set default potential bitmask for linear topology
+  if(top == "linear") bitmask = triangulator_global::potential_bitmask_linear_topology;
 
-    // Evaluate the spring-non-edge potential, between *all* vertices
-    pot = evaluate_spring_distance_potential(simpComp);
+  // Set default potential bitmask for sphere topology
+  if(top == "sphere") bitmask = triangulator_global::potential_bitmask_sphere_topology;
 
-    // From the above we have to subtract the contribution between
-    // vertices connected with edges, so we temporarily redefine the
-    // constants for the spring-edge potential to match the spring-non-
-    // edge potential, evaluate it, and subtract it
+  // If we do not recognize the topology, or the bitmask is out of
+  // bounds, fall back to the simple spring edge potential
+  if( (bitmask == 0) || (bitmask > 127) ) bitmask = 1;
 
-    double tempc1,tempc2;
+  // We evaluate each bit in the bitmask: if it equals "1" we evaluate
+  // the corresponding potential, while if it equals "0" we skip it
+  if(bitmask &  1) pot += evaluate_spring_edge_potential(simpComp);
+  if(bitmask &  2) pot += evaluate_spring_distance_potential(simpComp);
+  if(bitmask &  4) pot += evaluate_inverse_edge_potential(simpComp);
+  if(bitmask &  8) pot += evaluate_inverse_distance_potential(simpComp);
+  if(bitmask & 16) pot += evaluate_linear_well_potential(simpComp);
+  if(bitmask & 32) pot += evaluate_inverse_embedding_bounding_sphere_potential(simpComp);
+  if(bitmask & 64) pot += evaluate_inverse_intrinsic_bounding_sphere_potential(simpComp);
+  //  if(bitmask & 128) pot += 0.0; // not implemented yet
+  //  if(bitmask & 256) pot += 0.0; // not implemented yet
+  //  if(bitmask & 512) pot += 0.0; // not implemented yet
+  //  if(bitmask & 1024) pot += 0.0; // not implemented yet
+  //  if(bitmask & 2048) pot += 0.0; // not implemented yet
 
-    tempc1 = triangulator_global::potential_spring_edge_interaction;
-    tempc2 = triangulator_global::potential_spring_edge_length;
-    triangulator_global::potential_spring_edge_interaction = triangulator_global::potential_spring_non_edge_interaction;
-    triangulator_global::potential_spring_edge_length = triangulator_global::potential_spring_non_edge_length;
-    pot -= evaluate_spring_edge_potential(simpComp);
-
-    // Finally, we revert the old constants for the spring-edge potential,
-    // evaluate it again, and add it
-    triangulator_global::potential_spring_edge_interaction = tempc1;
-    triangulator_global::potential_spring_edge_length = tempc2;
-    pot += evaluate_spring_edge_potential(simpComp);
-
-    // The result is the potential with spring-edge potential between edges,
-    // and the spring-non-edge potential between vertices not sharing an edge
-
-    */
-    
-    pot = evaluate_inverse_intrinsic_bounding_sphere_potential(simpComp);
-    pot += evaluate_inverse_embedding_bounding_sphere_potential(simpComp);
-    pot += evaluate_inverse_distance_potential(simpComp);
-    pot += evaluate_linear_well_potential(simpComp);
-
-    return pot;
-  }
-
-  if(top == "sphere"){
-    // Since any D-dimensional sphere is a compact manifold, the inverse
-    // bounding sphere potential on a sphere is bounded, and is therefore the
-    // best choice, since it will force all cells of the complex to be as far
-    // as possible from each other, distributing them "evenly" over the sphere.
-    // We add to that the inverse distance potential, in order to make sure
-    // that the vertices are as far apart as possible, and especially to avoid
-    // two or more vertices to coincide
-    pot = evaluate_inverse_embedding_bounding_sphere_potential(simpComp);
-    pot += evaluate_inverse_intrinsic_bounding_sphere_potential(simpComp);
-    pot += evaluate_inverse_distance_potential(simpComp);
-    return pot;
-  }
-
-  // If we do not recognize the topology, fall back to the simple spring potential
-  return evaluate_spring_edge_potential(simpComp);
+  return pot;
 }
 
 double evaluate_inverse_intrinsic_bounding_sphere_potential(SimpComp *simpComp){

@@ -12,7 +12,19 @@ namespace triangulator_global{
   extern string logFilename;
   extern int logLevel;
 
-  // Default values for drawing parameters:
+  // Parameters governing the potential minimization function
+  extern int potential_global_retries_number;
+  extern int potential_max_iteration_number;
+  extern int potential_max_test_coordinates;
+  extern double potential_shake_step;
+  extern long unsigned int potential_bitmask_linear_topology;
+  extern long unsigned int potential_bitmask_sphere_topology;
+  
+  // Overall scale parameters for linear and sphere topologies
+  extern double sphere_topology_drawing_radius;
+  extern double linear_topology_drawing_domain_size;
+
+  // Default constants for various potentials:
   extern double potential_spring_edge_interaction;
   extern double potential_spring_edge_length;
   extern double potential_spring_non_edge_interaction;
@@ -20,13 +32,6 @@ namespace triangulator_global{
   extern double potential_inverse_distance_interaction;
   extern double potential_inverse_bounding_sphere_interaction;
   extern double potential_linear_well_interaction;
-  extern double potential_shake_step;
-  extern int potential_global_retries_number;
-  extern int potential_max_iteration_number;
-  extern int potential_max_test_coordinates;
-  extern double sphere_topology_drawing_radius;
-  extern double linear_topology_drawing_domain_size;
-  
 }
 
 #endif
