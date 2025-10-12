@@ -47,6 +47,63 @@ void DrawComplexGLWidget::resizeGL(int w, int h)
 }
 
 
+void DrawComplexGLWidget::draw_green_lines(QOpenGLFunctions *f, GLfloat *vertices, int numVertices)
+{
+    GLfloat *colors = new GLfloat[numVertices * 3];
+    int i;
+    GLfloat black = (GLfloat)0.0;
+    GLfloat green = (GLfloat)1.0;
+    int numVertices3 = numVertices * 3;
+
+    for (i = 0; i < numVertices3; i++)
+    {
+        colors[i] = black;
+        if((i % 3) == 1) colors[i] = green;
+    }
+
+    f->glVertexAttribPointer(m_posAttr, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+    f->glVertexAttribPointer(m_colAttr, 3, GL_FLOAT, GL_FALSE, 0, colors);
+
+    f->glEnableVertexAttribArray(m_posAttr);
+    f->glEnableVertexAttribArray(m_colAttr);
+
+    // This function actually does the actual drawing of lines on the screen:
+    f->glDrawArrays(GL_LINES, 0, numVertices);
+
+    f->glDisableVertexAttribArray(m_colAttr);
+    f->glDisableVertexAttribArray(m_posAttr);
+
+    delete[] colors;
+}
+
+void DrawComplexGLWidget::create_coordinate_line_vertices(GLfloat *vertices)
+{
+    // The array of vertices is constructed by the sequence:
+    //
+    // v1x,v1y,v2x,v2y,v3x,v3y,v4x,v4y,...
+    //
+    // This will draw a line between v1 and v2, another line
+    // between v3 and v4, etc...
+
+    int i=0;
+
+    for(auto vertex : coordinateLinesData){
+      // Add origin vertex x coordinate
+      vertices[i] = static_cast<GLfloat>(0 + (this->width()/2));
+      i++;
+      // Add origin vertex y coordinate
+      vertices[i] = static_cast<GLfloat>(0 + (this->height()/2));
+      i++;
+      // Add endpoint vertex x coordinate
+      vertices[i] = static_cast<GLfloat>(vertex.X + (this->width()/2));
+      i++;
+      // Add endpoint vertex y coordinate
+      // y-axis has an extra minus, to orient it upwards
+      vertices[i] = static_cast<GLfloat>(-vertex.Y + (this->height()/2));
+      i++;
+    }
+}
+
 void DrawComplexGLWidget::create_circleTriangleFan (GLfloat *vertices, int subdivs, double radius)
 {
     GLfloat fSubDivs = (GLfloat)subdivs;
@@ -136,6 +193,21 @@ void DrawComplexGLWidget::paintGL()
     QRect rect;
     rect = QRect(0, 0, this->width(), this->height());
 
+    // #####################################
+    // Algorithm for drawing coordinate axes
+    // #####################################
+
+    // Create the array of vertices for drawing a set of edges --- we have two
+    // vertices times two coordinates per edge, i.e. 4 GLfloat numbers per edge.
+    GLfloat *coordinateLinesVertices = new GLfloat[4 * coordinateLinesData.size()];
+    create_coordinate_line_vertices(coordinateLinesVertices);
+
+    // Draw the set of edges defined by their array of vertices:
+    matrix.setToIdentity();
+    matrix.ortho(rect);
+    m_program->setUniformValue(m_matrixUniform, matrix);
+    draw_green_lines(f, coordinateLinesVertices, 2 * coordinateLinesData.size());
+    
     // ###############################
     // Algorithm for drawing the links
     // ###############################
@@ -213,6 +285,7 @@ void DrawComplexGLWidget::paintGL()
         m_program->setUniformValue(m_matrixUniform, matrix);
         draw_triangleFan(f, node, 2 + 10, false);
     }
+    //    delete coordinateLinesVertices;
 }
 
 void DrawComplexGLWidget::setDrawComplexStatusBar (QStatusBar *drawComplex)
@@ -234,7 +307,7 @@ void DrawComplexGLWidget::enterEvent(QEnterEvent *e)
     KSimplex *nearestvertex = find_nearest_vertex_to_mouse_position( e->position().x() , e->position().y() );
 
     if (drawComplexStatusBar != NULL){
-            drawComplexStatusBar->showMessage(("Click to inspect vertex " + nearestvertex->print_non_html() + " ...").c_str());
+        drawComplexStatusBar->showMessage(("Click to inspect vertex " + nearestvertex->print_non_html() + " ...").c_str());
     }
     e->accept();
 }

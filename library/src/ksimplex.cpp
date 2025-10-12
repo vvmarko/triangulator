@@ -82,6 +82,12 @@ bool KSimplex::is_a_boundary(){
   return Color::is_colorized_with_type(this,TYPE_BOUNDARY);
 }
 
+// Verify if I am an anchor for drawing
+// (i.e. if the DrawingAnchorColor is assigned to me)
+bool KSimplex::is_a_drawing_anchor(){
+  return Color::is_colorized_with_type(this,TYPE_DRAWING_ANCHOR);
+}
+
 
 // #####################################
 // Functions for manipulating neighbors:

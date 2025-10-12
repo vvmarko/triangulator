@@ -107,6 +107,15 @@ bool initialize_drawing_coordinates(SimpComp *simpComp);
 // the coordinate origin.
 void recenter_intrinsic_coordinates(SimpComp *simpComp);
 
+// Given a random distribution of vertices, set some of them as
+// anchors, and rearrange the others in a natural way according
+// to the positions of vertices they are linked to
+void rearrange_all_vertices_conveniently(SimpComp *simpComp);
+
+// Move a given vertex into a position that is in the middle
+// between the vertices it is linked to
+bool rearrange_single_vertex_conveniently(KSimplex *simp, string topology);
+
 // ############################################
 // Embedding coordinates manipulation functions
 // ############################################

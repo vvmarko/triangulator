@@ -844,6 +844,125 @@ void recenter_intrinsic_coordinates(SimpComp *simpComp){
   }
 }
 
+bool rearrange_single_vertex_conveniently(KSimplex *simp, string topology){
+  vector<KSimplex*> nearestNeighbors;
+  long unsigned int nnNumber;
+  DrawingCoordinatesColor *mycolor;
+  DrawingCoordinatesColor *ncolor;
+  bool vertexMoved = false;
+  
+  // We want to move the vertex into a position that is "in between" all
+  // of its nearest-neighbor vertices. The idea is to put the vertex into
+  // the barycenter (also known as a "centroid" or a "center of mass") of
+  // its nearest neighbor vertices.
+  //
+  // This is done by constructing a vector from our vertex to each
+  // nearest-neighbor, sum all these vertices, and divide by their number
+  // (this is essentially the center-of-mass formula for a bunch of point
+  // particles of equal masses). Our vertex is defined to be "in between"
+  // its nearest neighbors if the resulting vector evaluates to zero. If
+  // it does not, it tells us in which direction and by what amount we
+  // should move our vertex, so that the vector becomes zero after the
+  // move.
+  
+  // First make sure the input is well-defined
+  if(simp == nullptr){
+    log_report(LOG_ERROR,"I cannot rearrange the position of a nullptr vertex. Fix your code!");
+    return false;
+  }
+  if(simp->k > 0){
+    log_report(LOG_ERROR,"I cannot rearrange the position of a non-vertex. Fix your code!");
+    return false;
+  }
+  nearestNeighbors.clear();
+
+  // Build a list of nearest-neighbors
+  for(auto edge : simp->neighbors->elements[1]){
+    if(edge->neighbors->elements[0][0] != simp) nearestNeighbors.push_back(edge->neighbors->elements[0][0]);
+    if(edge->neighbors->elements[0][1] != simp) nearestNeighbors.push_back(edge->neighbors->elements[0][1]);
+  }
+  nnNumber = nearestNeighbors.size();
+  
+  // Evaluate the coordinates of the barycenter and move the vertex there
+  mycolor = DrawingCoordinatesColor::find_pointer_to_color(simp);
+  for(long unsigned int i = 0; i < mycolor->q.size(); i++){
+    double temp = 0.0;
+    double totsin = 0.0;
+    double totcos = 0.0;
+    for(auto vertex : nearestNeighbors){
+      ncolor = DrawingCoordinatesColor::find_pointer_to_color(vertex);
+      if (topology == "linear") temp += (ncolor->q[i]) / nnNumber;
+      if (topology == "sphere") {
+        totsin += sin(ncolor->q[i]) / nnNumber;
+        totcos += cos(ncolor->q[i]) / nnNumber;
+      }
+    }
+    // In sphere topology, evaluate the angle into temp based on the data
+    // collected in totsin and totcos
+    if(topology == "sphere"){
+      if(totsin >= 0.0){
+        temp = acos(totcos);
+      } else {
+        temp = 2 * M_PI - acos(totcos);
+      }
+      // Do not change the first and final angle, they must have fixed values 
+      if(i == 0) temp = M_PI / 2;
+      if(i == mycolor->q.size() - 1) temp = 0.0;
+      // If sine is close to zero, the arccosine is likely undefined, set it to zero
+      if(abs(totsin) <= 0.01) temp = 0.0;
+    }
+
+    // Test if the vertex should be moved or not. Since we work with double
+    // precision, we consider moving by less than 0.01 to be insignificant:
+    if(abs(mycolor->q[i] - temp) > 0.01){
+      vertexMoved = true;
+      // Shift the i-th coordinate of the vertex into the barycenter
+      mycolor->q[i] = temp;
+    }
+  }
+
+  // We are done --- if the vertex has moved by a non-insignificant amount
+  // along any axis, the vertexMoved boolean will be true.
+  return vertexMoved;
+}
+
+void rearrange_all_vertices_conveniently(SimpComp *simpComp){
+  int D = simpComp->D;
+  
+  // Color the first D-simplex with DrawingAnchor
+  DrawingAnchorColor::colorize_vertices_of_simplex(simpComp->elements[D][0]);
+
+  bool moved = true;
+  int loopnumber = 0;
+  // While somthing is moving
+  while(moved){
+    // Increment the number of loops, print it
+    loopnumber++;
+    moved = false;
+    cout << "Iteration number " << loopnumber << endl;
+    // Iterate through all vertices
+    for(auto vertex : simpComp->elements[0]){
+      // If vertex is not anchored, move it
+      bool temp = false;
+      if(vertex->is_a_drawing_anchor() == false){
+        temp = rearrange_single_vertex_conveniently(vertex,simpComp->topology);
+        DrawingAnchorColor::colorize_single_vertex(vertex);
+      }
+      if(temp == true) moved = true;
+      if(loopnumber > 10) moved = false;
+    }
+  }
+  // Remove all anchor colors
+  for(auto it : simpComp->elements[0]){
+    DrawingAnchorColor::remove_color_from_vertex(it);
+  }
+  // Cout the number of performed loops
+  cout << "Total number of iterations: " << loopnumber << endl;
+}
+
+
+
+
 
 void evaluate_embedding_coordinates(SimpComp *simpComp){
   DrawingCoordinatesColor *color;
@@ -885,7 +1004,7 @@ void evaluate_embedding_coordinates(SimpComp *simpComp){
       // 
       for(i = 1; i < simpComp->D + 2; i++){
         color->x[i-1] = (triangulator_global::sphere_topology_drawing_radius) * cos(color->q[i]);
-        for(j = 0; j < i; j++) color->x[i-1] = color->x[i-1] * sin(color->q[j]);
+        for(j = 0; j < i; j++) color->x[i-1] *= sin(color->q[j]);
       }
     }
   }

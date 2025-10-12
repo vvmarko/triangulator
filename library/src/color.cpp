@@ -481,13 +481,13 @@ string DrawingCoordinatesColor::get_color_value_as_str()
   for(i = 1; i < q.size(); i++)
     output += " , " + double_to_string_with_precision(q[i],2);
   output += " )";
-  output += '\n';
+  output += "<br>";
   output += "Emb: ( "
     + double_to_string_with_precision(x[0],2);
   for(i = 1; i < x.size(); i++)
     output += " , " + double_to_string_with_precision(x[i],2);
   output += " )";
-  output += '\n';
+  output += "<br>";
   output += "Emb dim: " + to_string(Damb); 
 
   return output;
@@ -500,5 +500,71 @@ void DrawingCoordinatesColor::set_color_value_from_str(const string& source) // 
   // deserialize vectors qMin and qMax?
   // deserialize vector x
   // deserialize Damb?
+}
+
+
+
+
+
+
+
+
+
+DrawingAnchorColor::DrawingAnchorColor(){
+    type = TYPE_DRAWING_ANCHOR;
+}
+
+DrawingAnchorColor::~DrawingAnchorColor(){
+}
+
+bool DrawingAnchorColor::colorize_single_vertex(KSimplex* simp)
+{
+  DrawingAnchorColor* color = new(nothrow) DrawingAnchorColor();
+  if(color == nullptr){
+    log_report(LOG_PANIC,"DrawingAnchorColor::colorize_single_vertex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
+    return false;
+  }
+  if(simp == nullptr){
+    log_report(LOG_ERROR,"DrawingAnchorColor::colorize_single_vertex : You tried to colorize a nullptr, fix your code!");
+    return false;
+  }
+  if(simp->k > 1){
+    log_report(LOG_WARN,"DrawingAnchorColor::colorize_single_vertex : You are trying to colorize a non-vertex with drawing anchor color.");
+    log_report(LOG_WARN,"DrawingAnchorColor::colorize_single_vertex : I will do it, but this is probably not what you intended.");
+  }
+  simp->colors.push_back(color);
+  return true;
+}
+
+bool DrawingAnchorColor::colorize_vertices_of_simplex(KSimplex *simp)
+{
+  bool outcome = true;
+  bool temp;
+  for(auto vertex : simp->neighbors->elements[0]){
+    temp = DrawingAnchorColor::colorize_single_vertex(vertex);
+    if (!temp) outcome = false;
+  }
+  return outcome;
+}
+
+void DrawingAnchorColor::remove_color_from_vertex(KSimplex* simp)
+{
+  Color::remove_color_type_from_simplex(simp, TYPE_DRAWING_ANCHOR);
+}
+
+void DrawingAnchorColor::remove_color_from_simplex(KSimplex *simp)
+{
+  for(auto vertex : simp->neighbors->elements[0])
+    DrawingAnchorColor::remove_color_from_vertex(vertex);
+}
+
+string DrawingAnchorColor::get_color_value_as_str()
+{
+    return "true";
+}
+
+void DrawingAnchorColor::set_color_value_from_str(const string& source)
+{
+  if (source=="true") return; // This is a dummy command, do not remove
 }
 

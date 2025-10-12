@@ -12,25 +12,27 @@ class ScreenParameters;
 
 class DrawComplex : public QWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     DrawComplex(MainWindow *mainWnd, SimpComp *simpComp, SimpCompItem *item, QWidget *parent = Q_NULLPTR);
-	~DrawComplex();    
+    ~DrawComplex();    
 
     void refreshVisualizer();
 
     DrawComplexGLWidget *getGLWidget();
 
 private:
-	Ui::DrawComplex ui;
+    Ui::DrawComplex ui;
 
     MainWindow *mainWnd;
     SimpComp *simpComp;
     SimpCompItem *item;
     ScreenParameters *scrparam;
     std::vector<EmbData> coords;
-
+    std::vector<EmbData> coordLines;
+    double coordinateAxisLength = 100.0;
+  
     double enveloping_radius;
     double default_scale;
 

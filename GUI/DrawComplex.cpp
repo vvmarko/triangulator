@@ -14,6 +14,23 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
     this->scrparam = setup_screen_parameters(simpComp);
     this->coords = extract_embedding_data(simpComp);
 
+    // Construct data structure for the coordinate axes
+    this->coordLines.clear();
+    int ambientDimension = this->coords[0].x.size();
+    for(auto i = 0; i < ambientDimension; i++){
+      EmbData axis;
+      axis.simplex = nullptr;
+      axis.x.clear();
+      for(auto j = 0; j < ambientDimension; j++){
+	if(j == i){
+	  axis.x.push_back(coordinateAxisLength);
+	} else {
+	  axis.x.push_back(0.0);
+	}
+      }
+      coordLines.push_back(axis);
+    }
+    
     // Set up basic user interface and add self to list of open windows
 	ui.setupUi(this);
 
@@ -353,6 +370,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
 
     // Set up the drawing widget
     ui.openGLWidget->item = item;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->edgedata = extract_edge_data(simpComp);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->enveloping_radius = this->enveloping_radius;
@@ -362,6 +380,7 @@ DrawComplex::DrawComplex(MainWindow *cmainWnd, SimpComp *csimpComp, SimpCompItem
 void DrawComplex::sliderdValueChanged(int value)
 {
     scrparam->d = enveloping_radius + (value * 10.0);
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxd->setValue(value);
@@ -370,6 +389,7 @@ void DrawComplex::sliderdValueChanged(int value)
 void DrawComplex::spinboxdValueChanged(int value)
 {
     scrparam->d = enveloping_radius + (value * 10.0);
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     sliderd->setValue(value);
@@ -385,6 +405,7 @@ void DrawComplex::slidersxValueChanged(int value)
     // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sx = default_scale * scale;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxsx->setValue(value);
@@ -400,6 +421,7 @@ void DrawComplex::spinboxsxValueChanged(int value)
     // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sx = default_scale * scale;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     slidersx->setValue(value);
@@ -415,6 +437,7 @@ void DrawComplex::slidersyValueChanged(int value)
     // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sy = default_scale * scale;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxsy->setValue(value);
@@ -430,6 +453,7 @@ void DrawComplex::spinboxsyValueChanged(int value)
     // parameter [10, 1/10], such that slider input 0 gives no scaling (f(0)=1)...
     double scale = ( -(value/10.0) + sqrt(4 + (value/10.0) * (value/10.0)) )/2;
     scrparam->sy = default_scale * scale;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     slidersy->setValue(value);
@@ -443,6 +467,7 @@ void DrawComplex::spinboxsyValueChanged(int value)
 void DrawComplex::sliderszValueChanged(int value)
 {
     scrparam->sz = value * 10.0;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxsz->setValue(value);
@@ -451,6 +476,7 @@ void DrawComplex::sliderszValueChanged(int value)
 void DrawComplex::spinboxszValueChanged(int value)
 {
     scrparam->sz = value * 10.0;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     slidersz->setValue(value);
@@ -461,6 +487,7 @@ void DrawComplex::sliderAlphaValueChanged(int value, int i)
 {
     scrparam->alpha[i] = value * (scrparam->alphaMax[i]) / 100.0;
     if(scrparam->alpha[i] == 0.0) scrparam->alpha[i] = 0.01;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxAlpha[i-1]->setValue(scrparam->alpha[i]);
@@ -474,6 +501,7 @@ void DrawComplex::spinboxAlphaValueChanged(double value, int i)
 {
     scrparam->alpha[i] = value;
     if(scrparam->alpha[i] == 0.0) scrparam->alpha[i] = 0.01;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     int num = static_cast<int>(std::round(value * 100.0 / scrparam->alphaMax[i]));
@@ -489,6 +517,7 @@ void DrawComplex::sliderBetaValueChanged(int value, int i)
 {
     scrparam->beta[i] = value * (scrparam->betaMax[i]) / 100.0;
     if(scrparam->beta[i] == 0.0) scrparam->beta[i] = 0.01;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxBeta[i-1]->setValue(scrparam->beta[i]);
@@ -502,6 +531,7 @@ void DrawComplex::spinboxBetaValueChanged(double value, int i)
 {
     scrparam->beta[i] = value;
     if(scrparam->beta[i] == 0.0) scrparam->beta[i] = 0.01;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     int num = static_cast<int>(std::round(value * 100.0 / scrparam->betaMax[i]));
@@ -516,6 +546,7 @@ void DrawComplex::sliderGammaValueChanged(int value, int i)
 {
     scrparam->gamma[i] = value * (scrparam->gammaMax[i]) / 100.0;
     if(scrparam->gamma[i] == 0.0) scrparam->gamma[i] = 0.01;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     spinboxGamma[i-1]->setValue(scrparam->gamma[i]);
@@ -529,6 +560,7 @@ void DrawComplex::spinboxGammaValueChanged(double value, int i)
 {
     scrparam->gamma[i] = value;
     if(scrparam->gamma[i] == 0.0) scrparam->gamma[i] = 0.01;
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();
     int num = static_cast<int>(std::round(value * 100.0 / scrparam->gammaMax[i]));
@@ -542,6 +574,7 @@ void DrawComplex::spinboxGammaValueChanged(double value, int i)
 void DrawComplex::refreshVisualizer()
 {
     this->coords = extract_embedding_data(simpComp);
+    ui.openGLWidget->coordinateLinesData = evaluate_perspective_projection(coordLines,scrparam);
     ui.openGLWidget->edgedata = extract_edge_data(simpComp);
     ui.openGLWidget->drawingdata = evaluate_perspective_projection(coords,scrparam);
     ui.openGLWidget->repaint();

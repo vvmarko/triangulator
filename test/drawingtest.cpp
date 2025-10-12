@@ -8,7 +8,7 @@ int main(){
     cout         << "############ BEGINNING OF THE MAIN FUNCTION ###########" << endl;
     cout         << "#######################################################" << endl << endl;
 
-    int D = 3;
+    int D = 2;
     long unsigned int i;
     BoundingSphere bs;
     
@@ -20,6 +20,10 @@ int main(){
     Pachner_move(sph->elements[D][0],sph);
     Pachner_move(sph->elements[D][0],sph);
 
+    initialize_drawing_coordinates(sph);
+    rearrange_all_vertices_conveniently(sph);
+
+    /*    
     evaluate_potential_minimum(sph);
     evaluate_embedding_coordinates(sph);
 
@@ -36,7 +40,8 @@ int main(){
       cout << "Radius: " << bs.radius << endl;
       cout << endl;
     }
-
+    */
+    
     unseed_everything();
     
     cout << endl << "#################################################" << endl;

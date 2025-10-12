@@ -14,6 +14,7 @@ public:
 
     SimpCompItem *item;
 
+    std::vector<ScreenCoords> coordinateLinesData;
     std::vector<ScreenCoords> drawingdata;
     std::vector<EdgeData> edgedata;
     double enveloping_radius;
@@ -21,20 +22,25 @@ public:
     int m_posAttr, m_colAttr, m_matrixUniform;
     QOpenGLShaderProgram *m_program;
 
+    KSimplex* find_nearest_vertex_to_mouse_position(int posx, int posy );
+  
     void initializeGL() override;
     void resizeGL(int w, int h) override;
+
+    void create_coordinate_line_vertices(GLfloat *vertices);
     void create_circleTriangleFan (GLfloat *vertices, int subdivs, double radius);
     void create_rodTriangleFan (GLfloat *vertices1, GLfloat *vertices2, int x1, int y1, int x2, int y2, double radius1, double radius2);
+
+    void draw_green_lines(QOpenGLFunctions *f, GLfloat *vertices, int numVertices);
     void draw_triangleFan(QOpenGLFunctions *f, GLfloat *vertices, int numVertices, bool boundary);
-    KSimplex* find_nearest_vertex_to_mouse_position(int posx, int posy );
     void paintGL() override;
-public:
+
+  //public:
     void setDrawComplexStatusBar (QStatusBar *drawComplex);
 protected:
     void leaveEvent(QEvent *event) override;
     void enterEvent(QEnterEvent *e) override;
     void mouseMoveEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
-
 };
 

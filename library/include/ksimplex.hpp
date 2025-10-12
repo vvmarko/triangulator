@@ -90,6 +90,9 @@ public:
   // (i.e. if the BoundaryColor is assigned to me)
     bool is_a_boundary();
 
+  // Verify if I am an anchor for drawing
+  // (i.e. if the DrawingAnchorColor is assigned to me)
+    bool is_a_drawing_anchor();
 
   // #####################################
   // Functions for manipulating neighbors:

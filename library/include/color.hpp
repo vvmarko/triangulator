@@ -57,24 +57,7 @@
 #define TYPE_PACHNER 1
 #define TYPE_UNIQUE_ID 128
 #define TYPE_DRAWING_COORDINATES 129
-
-// ################################################################
-// Parameters foc evaluating topological and embedding coordinates:
-// ################################################################
-
-// #define POTENTIAL_SPRING_EDGE_INTERACTION 1.0
-// #define POTENTIAL_SPRING_EDGE_LENGTH 50.0
-// #define POTENTIAL_SPRING_NON_EDGE_INTERACTION 1.0
-// #define POTENTIAL_SPRING_NON_EDGE_LENGTH 200.0
-// #define POTENTIAL_INVERSE_DISTANCE_INTERACTION 1000.0
-// #define POTENTIAL_INVERSE_BOUNDING_SPHERE_INTERACTION 1000.0
-// #define POTENTIAL_LINEAR_WELL_INTERACTION 1.0
-// #define POTENTIAL_SHAKE_STEP 0.2
-// #define POTENTIAL_GLOBAL_RETRIES_NUMBER 50
-// #define POTENTIAL_MAX_ITERATION_NUMBER 1000
-// #define POTENTIAL_MAX_TEST_COORDINATES 50
-// #define SPHERE_TOPOLOGY_DRAWING_RADIUS 200.0
-// #define LINEAR_TOPOLOGY_DRAWING_DOMAIN_SIZE 200.0
+#define TYPE_DRAWING_ANCHOR 130
 
 // #########################################
 // Forward declarations of neccesary classes
@@ -460,6 +443,55 @@ public:
     string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
   
+};
+
+
+// ####################################
+// Child color --- Drawing anchor color
+// ####################################
+
+// The drawing color is a special color that is used by the algorithms
+// for evaluating the drawing coordinates of a simplicial complex.
+// It marks vertices (simplices of level 0) that represent the anchor
+// of a simplicial complex. Vertices with this color should not be moved
+// around when evaluating drawing coordinates. Instead, non-anchored
+// vertices should be moved around with respect to the anchored ones,
+// which essentially fix the "position in space" for the whole complex.
+// One typically anchors the vertices of one cell (D-simplex) in a given
+// complex, and then arranges the vertices of everything else with
+// respect to that cell. Given that the cell is D-dimensional, it has
+// D+1 vertices, which is precisely enough to build a "coordinate system"
+// in D-dimensional space --- one vertex for the origin, and D vertices
+// for the tips of D coordinate axes...
+
+// The drawing anchor color contains no data or value. The mere presence of
+// the color in a given simplex is information enough that this simplex
+// is to be considered an anchor.
+
+class DrawingAnchorColor : public Color{
+public:
+
+  // Constructor:
+    DrawingAnchorColor();
+  
+  // Destructor:
+    ~DrawingAnchorColor();
+
+  // Add drawing anchor color to a given vertex:
+    static bool colorize_single_vertex(KSimplex* simp);
+  
+  // Add drawing anchor color to all vertoces of a given simplex:
+    static bool colorize_vertices_of_simplex(KSimplex* simp);
+
+  // Remove drawing anchor color from the vertex:
+    static void remove_color_from_vertex(KSimplex* simp);
+  
+  // Remove drawing anchor color from all vertices of a given simplex:
+    static void remove_color_from_simplex(KSimplex* simp);
+  
+  // Obligatory implementations of string codec functions for boundary color:
+    string get_color_value_as_str() override;
+    void set_color_value_from_str(const string& source) override;
 };
 
 #endif

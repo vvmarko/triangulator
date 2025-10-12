@@ -17,7 +17,9 @@ void Inspector::anchorClicked(const QUrl &url) {
 void Inspector::activateBtnAttachNewSimplex() {
     KSimplex* newSimplex = attach_new_simplex_to_boundary(simplex , simpComp);
     UniqueIDColor::append_color_to_entire_complex(simpComp);
-    evaluate_potential_minimum(simpComp);
+    //    evaluate_potential_minimum(simpComp);
+    initialize_drawing_coordinates(simpComp);
+    rearrange_all_vertices_conveniently(simpComp);
     evaluate_embedding_coordinates(simpComp);
 
     if (item->printComplex != nullptr) {
@@ -38,7 +40,10 @@ void Inspector::activateBtnAttachNewSimplex() {
 void Inspector::activateBtnApplyPachnerMove() {
     KSimplex* newSimplex = Pachner_move(simplex , simpComp);
     UniqueIDColor::append_color_to_entire_complex(simpComp);
-    evaluate_potential_minimum(simpComp);
+    //    evaluate_potential_minimum(simpComp);
+    initialize_drawing_coordinates(simpComp);
+    rearrange_single_vertex_conveniently(newSimplex,simpComp->topology);
+    //    rearrange_all_vertices_conveniently(simpComp);
     evaluate_embedding_coordinates(simpComp);
 
     if (item->printComplex != nullptr) {

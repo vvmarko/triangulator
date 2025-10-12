@@ -39,7 +39,7 @@ namespace triangulator_global{
 
   // Default constants for various potentials:
   double potential_spring_edge_interaction = 1.0;
-  double potential_spring_edge_length = 50.0;
+  double potential_spring_edge_length = 628.0;
   double potential_spring_non_edge_interaction = 1.0;
   double potential_spring_non_edge_length = 200.0;
   double potential_inverse_distance_interaction = 1000.0;
