@@ -34,5 +34,6 @@ using namespace std;
 #include "pachner.hpp"
 #include "global_vars.hpp"
 #include "drawing.hpp"
+#include "math_functions.hpp"
 
 #endif

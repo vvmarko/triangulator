@@ -32,6 +32,9 @@ namespace triangulator_global{
   extern double potential_inverse_distance_interaction;
   extern double potential_inverse_bounding_sphere_interaction;
   extern double potential_linear_well_interaction;
+
+  //Constant that specifies the critical dimension of the determinant
+  extern int critical_determinant_size;
 }
 
 #endif
