@@ -5,6 +5,6 @@
 // Function declarations
 // #####################
 
-double real_valued_determinant(vector<vector<double>>* matrix);
+double real_valued_determinant(const vector<vector<double>>* matrix);
 
 #endif

@@ -4,6 +4,7 @@ list(APPEND tests
   attach-simplex.cpp
   pachnertest.cpp
   drawingtest.cpp
+  determinanttest.cpp
     )
 
 # Enabling testing.

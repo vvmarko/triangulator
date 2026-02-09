@@ -19,7 +19,7 @@ int get_permutation_sign(const vector<int>& perm) {
 }
 
 //Calculating the determinant with the Leibniz formula, returning the value.
-double leibniz_formula(vector<vector<double>>* matrix){
+double leibniz_formula(const vector<vector<double>>* matrix){
     //We don't check if the matrix parameter is correct, because this helper function
     //is called from real_valued_determinant() where all conditions were checked.
     unsigned int matrix_dimension = matrix->size();
@@ -47,48 +47,47 @@ double leibniz_formula(vector<vector<double>>* matrix){
     return determinant;
 }
 
-vector<vector<double>>& get_matrix_for_gaussian(const vector<vector<double>>* matrix){
-    vector<vector<double>> gaussian_matrix;
-    unsigned int matrix_dimension = matrix->size();
-    unsigned int i = 0, j = 0;
-    for(i = 0; i < matrix_dimension; i++){
-        vector<double> row;
-        for(j = 0; j < matrix_dimension; i++){
-            row.push_back((*matrix)[i][j]);
-        }
-        gaussian_matrix.push_back(row);
-    }
-    return gaussian_matrix;
+//Returns a new matrix which will be used for the Gaussian, since we dont want to modify our original matrix.
+vector<vector<double>> get_matrix_for_gaussian(const vector<vector<double>>* matrix){
+    return *matrix;
 }
 
+//Helper function for Gaussian elimination to find the index of the element in the column with the largest absolute value.
+//It is used to find the pivot element used in the algorithm.
 unsigned int argmax(const vector<vector<double>>& input_matrix, unsigned int start, unsigned int end, unsigned int column){
-    unsigned int i = 0, maximum_absolute_value = abs(input_matrix[start][column]), max_index = start;
+    unsigned int i = 0, max_index = start;
+    double maximum_absolute_value = fabs(input_matrix[start][column]);
     for(i=start; i < end;i++){
-        if(abs(input_matrix[i][column]) > maximum_absolute_value){
-            maximum_absolute_value = abs(input_matrix[i][column]);
+        if(fabs(input_matrix[i][column]) > maximum_absolute_value){
+            maximum_absolute_value = fabs(input_matrix[i][column]);
             max_index = i;
         }
     }
     return max_index;
 }
 
+
+//This is the gaussian elimination formula which does not alter our original matrix.
 double gaussian_elimination(const vector<vector<double>>* matrix){
     unsigned int matrix_dimension = matrix->size();
-    unsigned int pivot_row = 1, pivot_column = 1, max_index = 0, i = 0, j = 0;
-    double f = 0.0, determinant = 0.0;
-    vector<vector<double>>& gaussian_matrix = get_matrix_for_gaussian(matrix);
+    unsigned int pivot_row = 0, pivot_column = 0, max_index = 0, i = 0, j = 0, swap_count = 0;
+    double f = 0.0, determinant = 1.0;
+    vector<vector<double>> gaussian_matrix = get_matrix_for_gaussian(matrix);
     while(pivot_row < matrix_dimension && pivot_column < matrix_dimension){
         max_index = argmax(gaussian_matrix, pivot_row, matrix_dimension, pivot_column);
         if(gaussian_matrix[max_index][pivot_column] == 0){
             pivot_column = pivot_column + 1;
         }
         else{
-            swap(gaussian_matrix[max_index], gaussian_matrix[pivot_row]);
-            for(i = pivot_column+1; i < matrix_dimension; i++){
+            if (max_index != pivot_row) {
+                swap(gaussian_matrix[max_index], gaussian_matrix[pivot_row]);
+                swap_count++;
+            }
+            for(i = pivot_row+1; i < matrix_dimension; i++){
                 f = gaussian_matrix[i][pivot_column]/gaussian_matrix[pivot_row][pivot_column];
                 gaussian_matrix[i][pivot_column] = 0;
                 for(j = pivot_column+1; j < matrix_dimension; j++){
-                    gaussian_matrix[i][j] = gaussian_matrix[i][j]-gaussian_matrix[pivot_column][j]*f;
+                    gaussian_matrix[i][j] = gaussian_matrix[i][j]-gaussian_matrix[pivot_row][j]*f;
                 }
             }
             pivot_row = pivot_row + 1;
@@ -98,10 +97,13 @@ double gaussian_elimination(const vector<vector<double>>* matrix){
     for(i = 0; i < matrix_dimension; i++){
         determinant = determinant * gaussian_matrix[i][i];
     }
+    if(swap_count % 2 == 1){
+        determinant = -determinant;
+    }
     return determinant;
 }
 
-double real_valued_determinant(vector<vector<double>>* matrix){
+double real_valued_determinant(const vector<vector<double>>* matrix){
     //First checking whether the user passed a nullptr for the matrix in 
     //the function call. If true, we warn the user(it was probably not
     //intentional, but isnt harmful).
