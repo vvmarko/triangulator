@@ -9,7 +9,7 @@ int main(){
     cout         << "#######################################################" << endl << endl;
 
     int D = 2;
-    long unsigned int i;
+    //    long unsigned int i;
     BoundingSphere bs;
     
     //    SimpComp *sph = seed_single_simplex(D,"mycomplex");

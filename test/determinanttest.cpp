@@ -1,3 +1,4 @@
+
 #include "triangulator.hpp"
 
 int main(){
@@ -56,8 +57,8 @@ int main(){
 
     determinant = real_valued_determinant(&matrix);
 
-    for(int i = 0; i < matrix.size(); i++){
-        for(int j = 0; j < matrix[i].size(); j++){
+    for(long unsigned int i = 0; i < matrix.size(); i++){
+        for(long unsigned int j = 0; j < matrix[i].size(); j++){
             if((*a)[i][j] != matrix[i][j]){
                 cout << "Error: The original matrix has been modified!" << endl;
                 return -1;

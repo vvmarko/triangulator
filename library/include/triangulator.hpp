@@ -17,6 +17,7 @@ using namespace std;
 #include <cmath>
 #include <limits>
 #include <cstring>
+#include <algorithm>
 
 #include "rapidxml.hpp"
 #include "rapidxml_utils.hpp"

@@ -1,5 +1,5 @@
+
 #include "triangulator.hpp"
-#include <algorithm>
 
 //Helper function for the Leibniz formula to find the sign od the permutation, 
 //since the next_permutation() function from the standard library gives the

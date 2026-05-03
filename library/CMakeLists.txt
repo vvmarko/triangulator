@@ -10,7 +10,8 @@ list(APPEND TRIANGULATOR_SRCS
     src/simpcomp.cpp
     src/global_vars.cpp
     src/drawing.cpp
-  )
+    src/math_functions.cpp
+    )
 
 # List of directories to include header files from.
 list(APPEND TRIANGULATOR_HDRS
