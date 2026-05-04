@@ -42,6 +42,8 @@ bool Color::colorize_simplex_from_string(KSimplex* simp, const int color_type, c
         return UniqueIDColor::colorize_single_simplex(simp);
     case TYPE_DRAWING_COORDINATES:
       return DrawingCoordinatesColor::colorize_single_simplex(simp,color_value);
+    case TYPE_VOLUME_SQUARED:
+      return VolumeSquaredColor::colorize_single_simplex(simp,color_value);
     default:
       log_report(LOG_ERROR,"Color::colorize_simplex_from_string : Color type " + to_string(color_type) + " not recognized! Fix your code!");
       return false;
@@ -63,7 +65,6 @@ Color* Color::find_pointer_to_color_type(KSimplex* simp, int typecode)
             return color;
     return nullptr;
 }
-
 
 void Color::remove_color_type_from_simplex(KSimplex* simp, int typecode)
 {
@@ -98,6 +99,8 @@ string get_color_name_from_type(int color_type){
             return "UniqueID";
         case TYPE_DRAWING_COORDINATES:
             return "DrawingCoordinates";
+        case TYPE_VOLUME_SQUARED:
+            return "VolumeSquared";
         default:
             return "Unknown color name, type " + to_string(color_type);
     }
@@ -567,4 +570,136 @@ void DrawingAnchorColor::set_color_value_from_str(const string& source)
 {
   if (source=="true") return; // This is a dummy command, do not remove
 }
+
+
+
+
+
+
+
+
+
+VolumeSquaredColor::VolumeSquaredColor(){
+    type = TYPE_VOLUME_SQUARED;
+    // initial default values for any simplex:
+    vsq = 1.0;
+    vsqMin = 1.0;
+    vsqMax = 1.0;
+}
+
+VolumeSquaredColor::~VolumeSquaredColor(){
+}
+
+bool VolumeSquaredColor::colorize_single_simplex(KSimplex* simp)
+{
+
+  // Check if the simplex is already colorized
+  if( VolumeSquaredColor::is_colorized(simp) ) return true;
+  
+  // Colorize the simplex
+  VolumeSquaredColor* color = new(nothrow) VolumeSquaredColor();
+  if (color==nullptr){
+    log_report(LOG_PANIC,"VolumeSquaredColor::colorize_single_simplex : PANIC!!! CANNOT ALLOCATE MEMORY!!!");
+    return false;
+  }
+  simp->colors.push_back(color);
+  return true;
+}
+
+bool VolumeSquaredColor::colorize_single_simplex(KSimplex* simp, const string& source)
+{
+  bool outcome;
+  VolumeSquaredColor *color;
+  
+  // Colorize the simplex
+  outcome = VolumeSquaredColor::colorize_single_simplex(simp);
+  if (!outcome) {
+    log_report(LOG_PANIC,"VolumeSquaredColor::colorize_single_simplex : PANIC!!! Failed to colorize the simplex!!!");
+    return false;
+  }
+  
+  // Find the pointer to the color
+  color = VolumeSquaredColor::find_pointer_to_color(simp);
+  if (color == nullptr){
+    log_report(LOG_PANIC,"Could not assign VolumeSquaredColor to a simplex!!!");
+    return false;
+  }
+
+  // Fill in the color values from the string
+  color->set_color_value_from_str(source);
+  return true;
+}
+
+bool VolumeSquaredColor::colorize_simplices_at_level(SimpComp* G, int level)
+{
+  bool outcome = true;
+  bool temp;
+  for (auto simplex : G->elements[level]) {
+    temp = VolumeSquaredColor::colorize_single_simplex(simplex);
+    if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
+bool VolumeSquaredColor::colorize_entire_complex(SimpComp* G)
+{
+  bool outcome=true;
+  bool temp;
+  for (int level = 0; level <= G->D; level++) {
+       temp = VolumeSquaredColor::colorize_simplices_at_level(G, level);
+       if (!temp) outcome = false;
+    }
+  return outcome;
+}
+
+bool VolumeSquaredColor::is_colorized(KSimplex* simp)
+{
+  return Color::is_colorized_with_type(simp,TYPE_VOLUME_SQUARED);
+}
+
+VolumeSquaredColor* VolumeSquaredColor::find_pointer_to_color(KSimplex* simp)
+{
+  Color *temp = Color::find_pointer_to_color_type(simp, TYPE_VOLUME_SQUARED);
+  return static_cast<VolumeSquaredColor*>(temp);
+}
+
+void VolumeSquaredColor::print()
+{
+  cout << "Squared volume: vsq = " << vsq << endl;
+}
+
+string VolumeSquaredColor::double_to_string_with_precision(double number, int decdigits){
+  stringstream ss;
+
+  ss << std::fixed << std::setprecision(decdigits) << number;
+  return ss.str();
+}
+
+string VolumeSquaredColor::get_color_value_as_str()
+{
+  // TODO:
+  // Serialize double vsq, vsqMin and vsqMax?
+  // Design the output that is good both for XML and for the GUI?
+
+  // The output below is currently optimized for GUI only:
+  string output;
+  output = "Vol^2: " + double_to_string_with_precision(vsq,2);
+  return output;
+}
+
+void VolumeSquaredColor::set_color_value_from_str(const string& source) // TODO
+{
+  if (source=="true") return; // This is a dummy command, do not remove
+  // deserialize vector q
+  // deserialize vectors qMin and qMax?
+  // deserialize vector x
+  // deserialize Damb?
+}
+
+
+
+
+
+
+
 

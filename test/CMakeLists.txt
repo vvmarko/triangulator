@@ -5,6 +5,7 @@ list(APPEND tests
   pachnertest.cpp
   drawingtest.cpp
   determinanttest.cpp
+  volume-squared-color-test.cpp
     )
 
 # Enabling testing.

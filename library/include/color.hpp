@@ -58,6 +58,7 @@
 #define TYPE_UNIQUE_ID 128
 #define TYPE_DRAWING_COORDINATES 129
 #define TYPE_DRAWING_ANCHOR 130
+#define TYPE_VOLUME_SQUARED 131
 
 // #########################################
 // Forward declarations of neccesary classes
@@ -429,7 +430,7 @@ public:
   // verify if a simplex contains the DrawingCoordinates color:
     static bool is_colorized(KSimplex* simp);
   
-  // find a pointer to the Pachner color for a given simplex:
+  // find a pointer to the DrawingCoordinates color for a given simplex:
     static DrawingCoordinatesColor* find_pointer_to_color(KSimplex* simp);
   
   // Printing the coordinates to the screen in human-readable form:
@@ -492,6 +493,85 @@ public:
   // Obligatory implementations of string codec functions for boundary color:
     string get_color_value_as_str() override;
     void set_color_value_from_str(const string& source) override;
+};
+
+
+// #########################################
+// Child color --- Volume Squared color
+// #########################################
+
+// Volume Squared color is a built-in color that is used by
+// various functions of the library, mainly related to the distance
+// geometry and Regge calculus.
+
+// It encodes the notion of a squared volume of a simplex, evaluated
+// from the lengths of its edges using the Cayley-Menger determinant.
+// The vertices (0-simplices) by convention have squared volume equal
+// to one, the edges (1-simplices) have squared volume equal to the
+// square of their length (which may be real or imaginary, so that the
+// squared volume can be any real number, not necessarily positive),
+// while all other k-simplices (k>=2) have the square volume evaluated
+// via the Cayley-Menger determinant, given the previously assigned
+// squared volumes of their edges. Depending on the geometric
+// properties of a k-simplex, its squared volume may be any real
+// number --- positive, negative or zero, despite the fact that the
+// volume is "squared".
+
+// The user is allowed to manipulate the value of squared volume color
+// for any simplex, although it is generally expected that the user
+// assigns the squared volumes (i.e., squared lengths) for edges only,
+// while for all other k-simplices we provide a function that evaluates
+// the squared volume from the known edge colors using the Cayley-Menger
+// determinant formula.
+
+class VolumeSquaredColor : public Color{
+public:
+
+  // Data structures:
+  // ################
+
+  // The value of the volume-squared color:
+    double vsq;
+
+  // The minimal and maximal possible values for volume-squared:
+    double vsqMin;
+    double vsqMax;
+  
+  // Functions:
+  // ##########
+
+  // Constructor:
+    VolumeSquaredColor();
+
+  // Destructor:
+    ~VolumeSquaredColor();
+
+  // Adding VolumeSquaredColor to a single simplex, to all simplices of a given
+  // level, and to the whole complex:
+    static bool colorize_single_simplex(KSimplex* simp);
+    static bool colorize_simplices_at_level(SimpComp* G, int level);
+    static bool colorize_entire_complex(SimpComp* simpComp);
+
+  // Adding VolumeSquaredColor to a single simplex, using values from a string:
+    static bool colorize_single_simplex(KSimplex* simp, const string& source);
+
+  // verify if a simplex contains the VolumeSquared color:
+    static bool is_colorized(KSimplex* simp);
+  
+  // find a pointer to the VolumeSquared color for a given simplex:
+    static VolumeSquaredColor* find_pointer_to_color(KSimplex* simp);
+  
+  // Printing the VolumeSquared value to the screen in human-readable form:
+    void print();
+
+  // Small helper function to convert a float/double to a string, with a fixed number
+  // of decimal places
+    string double_to_string_with_precision(double number, int decdigits);
+  
+  // Obligatory implementations of string codec functions for VolumeSquared color:
+    string get_color_value_as_str() override;
+    void set_color_value_from_str(const string& source) override;
+  
 };
 
 #endif
