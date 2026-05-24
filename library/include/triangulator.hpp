@@ -4,6 +4,8 @@
 
 using namespace std;
 
+#define _USE_MATH_DEFINES
+
 #include <fstream>
 #include <iostream>
 #include <sstream>

@@ -160,3 +160,108 @@ double real_valued_determinant(const vector<vector<double>>* matrix){
     }
     return 0;
 }
+
+//If pointer to KSimplex is NULL, function will return 1x1 zero matrix.
+//If there exists neighboring edge that isn't colored, function will return (k+2)x(k+2) zero matrix.
+//Otherwise, function will return Cayley Menger matrix.
+vector<vector<double>> cayley_menger_matrix(KSimplex* simp)
+{
+    //Pointer to KSimplex cannot be NULL. If that happens, error is reported
+    if (nullptr == simp)
+    {
+        log_report(LOG_ERROR, "cayley_menger_matrix(): Pointer to KSimplex is NULL");
+        vector<vector<double>> matrix(1, vector<double>(1, 0));
+
+        return matrix;
+    }
+
+    //When pointer isn't NULL, function will return (k+2)x(k+2) matrix.
+    //Value of matrix elements depend on whether or not all neighboring edges are colored:
+    //if there exists neighboring edge that isn't colored, function will return zero matrix,
+    //otherwise function will return matrix which elements have appropriate value.
+    //Because of this, idea is that we initially create zero matrix and if we ascertain
+    //that not all neighboring edges are colored, we will just return created matrix,
+    //and if not, we will modify matrix elements in order for them to have appropriate value.
+    int simplex_level = simp->k;
+    vector<vector<double>> matrix(simplex_level + 2, vector<double>(simplex_level + 2, 0));
+
+    //Because we chose to implement KSimplex in a way that pointer to a given KSimplex isn't located
+    //in attribute "neighbors" of that KSimplex, even though that is the case in theory.
+    //Because of this, if forwarded KSimplex is edge (k=1), simp->neighbors->elements[1] will be empty.
+    //But from mathematical point of view set of all neighboring edges will be set that contains that edge and only that edge.
+    //On the other side, if forwarded KSimplex isn't edge, we can safely work with simp->neighbors->elements[1]. 
+    //Thus we need to distinguish between these two cases.
+    if (1 == simplex_level)
+    {
+        if (!Color::is_colorized_with_type(simp, TYPE_VOLUME_SQUARED))
+        {
+            log_report(LOG_ERROR, "cayley_menger_matrix(): Not all neighboring vertices are colored with TYPE_VOLUME_SQUARED");
+
+            return matrix;
+        }
+    }
+    else
+    {
+        for (KSimplex* edges : simp->neighbors->elements[1])
+        {
+            if (!Color::is_colorized_with_type(edges, TYPE_VOLUME_SQUARED))
+            {
+                log_report(LOG_ERROR, "cayley_menger_matrix(): Not all neighboring vertices are colored with TYPE_VOLUME_SQUARED");
+
+                return matrix;
+            }
+        }
+    }
+
+    //GENERATING Cayley Menger matrix
+
+    //Diagonal elements of Cayley Menger matrix are zero and since we
+    //initialized all elements of matrix to zero, we don't need to set them again (constructor did that for us).
+
+    //Setting elements of last row and last column to 1 (except element m[k+1][k+1] - that element is on diagonal and is equal to zero).
+    //Since matrix is symmetric, we can do that with only one for loop.
+    for (unsigned int i = 0; i < simplex_level + 1; i++)
+    {
+
+        matrix[simplex_level + 1][i] = 1;
+        matrix[i][simplex_level + 1] = 1;
+    }
+
+    //We will choose that matrix element (i,j) corresponds to value Volume squared colour of the edge that contains
+    //vertex simp->neighbors->elements[0][i] and vertex simp->neighbors->elements[0][j].
+    //Again, we will use a fact that matrix is symmetric.
+
+    //An edge that contains two given vertices is neighbour to both of them.
+    //So it is sufficient that for two given vertices, we extract all edges that contain one vertex,
+    //and then between those edges find the one that contains the other vertex.
+    for (unsigned int i = 0; i < simplex_level + 1; i++)
+    {
+        //Neighbouring edges of vertex i
+        vector<KSimplex*> neighboring_edges_of_vertex_i = simp->neighbors->elements[0][i]->neighbors->elements[1];
+
+        for (unsigned int j = i + 1; j < simplex_level + 1; j++)
+        {
+            KSimplex* vertex_j = simp->neighbors->elements[0][j];
+            bool edge_found = false;
+            unsigned int l = 0;
+
+            do
+            {
+                edge_found = neighboring_edges_of_vertex_i[l]->find_neighbor(vertex_j);
+                l++;
+            } while (!edge_found);
+            //Since edge that contains vertex i and vertex j must exist,
+            //we only need to check whether it is found, and we don't need to worry about reaching the end
+            //of vector neighboring_edges_of_vertex_i.
+
+            //Extracting information about value of Volume squared colour
+            //Edge that contains vertex i and vertex j is at the position l-1 (l is incremented in do-while after edge is found).
+            VolumeSquaredColor* pointer_to_vsq = (VolumeSquaredColor*)Color::find_pointer_to_color_type(neighboring_edges_of_vertex_i[l - 1], TYPE_VOLUME_SQUARED);
+
+            matrix[i][j] = pointer_to_vsq->vsq;
+            matrix[j][i] = pointer_to_vsq->vsq;
+        }
+    }
+
+    return matrix;
+}

@@ -6,6 +6,7 @@ list(APPEND tests
   drawingtest.cpp
   determinanttest.cpp
   volume-squared-color-test.cpp
+  cayleymengertest.cpp
     )
 
 # Enabling testing.
