@@ -16,11 +16,8 @@ int main()
     cout << endl << "Cayley Menger matrix for one KSimplex k=1" << endl;
     print_vector_of_a_vector(cayley_menger_matrix(g->elements[1][0]));
 
-    cout << endl << "Number of neighboring vertices of vertex0 (g->elements[0][0]): " << g->elements[0][0]->neighbors->elements[0].size() << endl
-        << "Number of neighboring vertices of edge0 (g->elements[1][0]): " << g->elements[1][0]->neighbors->elements[0].size() << endl
-        << "Number of neighboring vertices of face0 (g->elements[2][0]): " << g->elements[2][0]->neighbors->elements[0].size() << endl;
-
-    cout << endl << "Number of neighboring edges of edge0 (g->elements[1][0]): " << g->elements[1][0]->neighbors->elements[1].size() << endl;
+    cout << endl << "Cayley Menger matrix for one KSimplex k=0" << endl;
+    print_vector_of_a_vector(cayley_menger_matrix(g->elements[0][0]));
 
     unseed_everything();
 

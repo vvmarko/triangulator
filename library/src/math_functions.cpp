@@ -161,7 +161,9 @@ double real_valued_determinant(const vector<vector<double>>* matrix){
     return 0;
 }
 
-//If pointer to KSimplex is NULL, function will return 1x1 zero matrix.
+//If pointer to KSimplex is NULL, function will return 1x1 zero matrix, if not, function will return (k+2)x(k+2) matrix.
+//Next, if level of KSimplex is 0, function will return matrix ((0,1),(1,0)).
+//If level of KSimplex is greater than 0, matrix that function returns will depend on whether or not all neighboring edges are colored with TYPE_VOLUME_SQUARED.
 //If there exists neighboring edge that isn't colored, function will return (k+2)x(k+2) zero matrix.
 //Otherwise, function will return Cayley Menger matrix.
 vector<vector<double>> cayley_menger_matrix(KSimplex* simp)
@@ -175,15 +177,28 @@ vector<vector<double>> cayley_menger_matrix(KSimplex* simp)
         return matrix;
     }
 
-    //When pointer isn't NULL, function will return (k+2)x(k+2) matrix.
-    //Value of matrix elements depend on whether or not all neighboring edges are colored:
-    //if there exists neighboring edge that isn't colored, function will return zero matrix,
-    //otherwise function will return matrix which elements have appropriate value.
-    //Because of this, idea is that we initially create zero matrix and if we ascertain
-    //that not all neighboring edges are colored, we will just return created matrix,
-    //and if not, we will modify matrix elements in order for them to have appropriate value.
+    //When pointer isn't NULL, function will certainly return (k+2)x(k+2) matrix.
+    //Because of this, idea is that we initially create (k+2)x(k+2) zero matrix and
+    //and then, depending on the case, we update elements of matrix accordingly.
     int simplex_level = simp->k;
     vector<vector<double>> matrix(simplex_level + 2, vector<double>(simplex_level + 2, 0));
+
+    //First we need to check if level of KSimplex is 0.
+    if (0 == simplex_level)
+    {
+        //Diagonal elements of Cayley Menger matrix are zero and since we
+        //initialized all elements of matrix to zero, we don't need to set them again (constructor did that for us).
+        matrix[0][1] = 1;
+        matrix[1][0] = 1;
+
+        return matrix;
+    }
+
+    //Next case (k>0): value of matrix elements depend on whether or not all neighboring edges are colored with TYPE_VOLUME_SQUARED.
+    //If there exists neighboring edge that isn't colored, function will return zero matrix,
+    //otherwise function will return matrix which elements have appropriate value.
+    //If we ascertain that not all neighboring edges are colored, we will just return created matrix (again created matrix is zero matrix),
+    //and if not, we will modify matrix elements in order for them to have appropriate value.
 
     //Because we chose to implement KSimplex in a way that pointer to a given KSimplex isn't located
     //in attribute "neighbors" of that KSimplex, even though that is the case in theory.
@@ -264,4 +279,17 @@ vector<vector<double>> cayley_menger_matrix(KSimplex* simp)
     }
 
     return matrix;
+}
+
+//Function for printing vector of vector<double> to cout
+void print_vector_of_a_vector(vector<vector<double>> v)
+{
+    for (unsigned int i = 0; i < v.size(); i++)
+    {
+        for (unsigned int j = 0; j < v[i].size(); j++)
+        {
+            cout << v[i][j] << "\t";
+        }
+        cout << endl;
+    }
 }
