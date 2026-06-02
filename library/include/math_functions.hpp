@@ -9,4 +9,8 @@ double real_valued_determinant(const vector<vector<double>>* matrix);
 
 vector<int> evaluate_signature_of_matrix( const vector<vector<double>> *matrix );
 
+vector<vector<double>> cayley_menger_matrix(KSimplex*);
+
+void print_vector_of_a_vector(vector<vector<double>>);
+
 #endif
