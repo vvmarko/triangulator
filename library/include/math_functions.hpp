@@ -7,4 +7,6 @@
 
 double real_valued_determinant(const vector<vector<double>>* matrix);
 
+vector<int> evaluate_signature_of_matrix( const vector<vector<double>> *matrix );
+
 #endif

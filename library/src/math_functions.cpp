@@ -108,7 +108,7 @@ double real_valued_determinant(const vector<vector<double>>* matrix){
     //the function call. If true, we warn the user(it was probably not
     //intentional, but isnt harmful).
     if(matrix == nullptr){
-        log_report(LOG_WARN,"real_valued_determinant(): You have asked me to calculate a determiant of a nullptr matrix.");
+        log_report(LOG_WARN,"real_valued_determinant(): You have asked me to calculate a determinant of a nullptr matrix.");
         log_report(LOG_WARN,"real_valued_determinant(): I am skipping this, but it probably should not have happened, check your code.");
         return 0;
     }
@@ -159,4 +159,76 @@ double real_valued_determinant(const vector<vector<double>>* matrix){
         return gaussian_elimination(matrix);
     }
     return 0;
+}
+
+bool matrix_is_square(const vector<vector<double>> *matrix){
+    unsigned int matrix_dimension = matrix->size();
+    unsigned int i = 0;
+    for(i = 0; i < matrix_dimension; i++){
+        if(matrix->at(i).size() != matrix_dimension)
+            return false;
+    }
+    return true;
+}
+
+bool matrix_is_symmetric(const vector<vector<double>> *matrix){
+    unsigned int matrix_dimension = matrix->size();
+    unsigned int i = 0, j=0;
+    for(i = 0; i < matrix_dimension; i++){
+        for(j = i+1; j < matrix_dimension; j++){
+            if((*matrix)[i][j] != (*matrix)[j][i])
+                return false;
+        } 
+    }
+    return true;
+}
+
+
+vector<int> evaluate_signature_of_matrix(const vector<vector<double>> *matrix){
+
+    if(matrix == nullptr)
+        log_report(LOG_ERROR,"evaluate_signature_of_matrix(): You have asked me to calculate the signature of a nullptr matrix.");
+    if(matrix_is_square() == false)
+        log_report(LOG_ERROR, "evaluate_signature_of_matrix(): You have passed a non-square matrix.");
+    if(matrix_is_symmetric(matrix) == false)
+        log_report(LOG_ERROR,"evaluate_signature_of_matrix(): You have passed non-symmetric matrix.");
+
+    int n = matrix->size();
+    vector<vector<double>> L(n, vector<double>(n, 0));
+    vector<vector<double>> D(n, vector<double>(n, 0));
+    
+    unsigned int i,j,k;
+    for(i = 0; i < n; i++) L[i][i] = 1.0;
+
+    for (j = 0; j < n; ++j) {
+        double sumD = 0;
+        for (k = 0; k < j; ++k) {
+            sumD += L[j][k] * L[j][k] * D[k][k];
+        }
+        D[j][j] = (*matrix)[j][j] - sumD;
+
+        if (abs(D[j][j]) < 1e-15) {
+            log_report(LOG_WARN,
+            "Warning: Pivot D["+ j +"] is near zero. Matrix may be indefinite/singular.");
+        }
+
+        for (i = j + 1; i < n; ++i) {
+            double sumL = 0;
+            for (k = 0; k < j; ++k) {
+                sumL += L[i][k] * L[j][k] * D[k][k];
+            }
+            L[i][j] = ((*matrix)[i][j] - sumL) / D[j][j];
+        }
+    }
+
+    // Signature
+    int pos = 0, neg = 0, zero = 0;
+    double eps = 1e-9; 
+    for (i = 0; i < n; i++) {
+        if (D[i][i] > eps) pos++;
+        else if (D[i][i] < -eps) neg++;
+        else zero++;
+    }
+
+    return {pos,neg,zero};
 }
