@@ -7,6 +7,10 @@
 
 double real_valued_determinant(const vector<vector<double>>* matrix);
 
+bool matrix_is_square(const vector<vector<double>> *matrix);
+
+bool matrix_is_symmetric(const vector<vector<double>> *matrix);
+
 vector<int> evaluate_signature_of_matrix( const vector<vector<double>> *matrix );
 
 vector<vector<double>> cayley_menger_matrix(KSimplex*);

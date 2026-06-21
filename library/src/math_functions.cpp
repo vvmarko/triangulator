@@ -188,12 +188,12 @@ vector<int> evaluate_signature_of_matrix(const vector<vector<double>> *matrix){
 
     if(matrix == nullptr)
         log_report(LOG_ERROR,"evaluate_signature_of_matrix(): You have asked me to calculate the signature of a nullptr matrix.");
-    if(matrix_is_square() == false)
+    if(matrix_is_square(matrix) == false)
         log_report(LOG_ERROR, "evaluate_signature_of_matrix(): You have passed a non-square matrix.");
     if(matrix_is_symmetric(matrix) == false)
         log_report(LOG_ERROR,"evaluate_signature_of_matrix(): You have passed non-symmetric matrix.");
 
-    int n = matrix->size();
+    unsigned int n = matrix->size();
     vector<vector<double>> L(n, vector<double>(n, 0));
     vector<vector<double>> D(n, vector<double>(n, 0));
     
@@ -209,7 +209,7 @@ vector<int> evaluate_signature_of_matrix(const vector<vector<double>> *matrix){
         
         if (abs(D[j][j]) < 1e-15) {
             log_report(LOG_WARN,
-            "Warning: Pivot D["+ j +"] is near zero. Matrix may be indefinite/singular.");
+		       "Warning: Pivot D["+ to_string(j) +"] is near zero. Matrix may be indefinite/singular.");
         }
         
         for (i = j + 1; i < n; ++i) {
@@ -307,7 +307,7 @@ vector<vector<double>> cayley_menger_matrix(KSimplex* simp)
 
     //Setting elements of last row and last column to 1 (except element m[k+1][k+1] - that element is on diagonal and is equal to zero).
     //Since matrix is symmetric, we can do that with only one for loop.
-    for (unsigned int i = 0; i < simplex_level + 1; i++)
+    for (int i = 0; i < simplex_level + 1; i++)
     {
 
         matrix[simplex_level + 1][i] = 1;
@@ -321,12 +321,12 @@ vector<vector<double>> cayley_menger_matrix(KSimplex* simp)
     //An edge that contains two given vertices is neighbour to both of them.
     //So it is sufficient that for two given vertices, we extract all edges that contain one vertex,
     //and then between those edges find the one that contains the other vertex.
-    for (unsigned int i = 0; i < simplex_level + 1; i++)
+    for (int i = 0; i < simplex_level + 1; i++)
     {
         //Neighbouring edges of vertex i
         vector<KSimplex*> neighboring_edges_of_vertex_i = simp->neighbors->elements[0][i]->neighbors->elements[1];
 
-        for (unsigned int j = i + 1; j < simplex_level + 1; j++)
+        for (int j = i + 1; j < simplex_level + 1; j++)
         {
             KSimplex* vertex_j = simp->neighbors->elements[0][j];
             bool edge_found = false;
@@ -396,7 +396,7 @@ double evaluate_volume_squared(KSimplex* simp)
     //Calculating k factorial.
     //Since the value of variable is initialized to 1,
     //updating it is necessary when value of k is greater or equal to 2.
-    for (unsigned int i = 2; i <= k; i++)
+    for (int i = 2; i <= k; i++)
     {
         k_factorial = k_factorial * i;
     }
