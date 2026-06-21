@@ -13,4 +13,6 @@ vector<vector<double>> cayley_menger_matrix(KSimplex*);
 
 void print_vector_of_a_vector(vector<vector<double>>);
 
+double evaluate_volume_squared(KSimplex*);
+
 #endif

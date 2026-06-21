@@ -206,12 +206,12 @@ vector<int> evaluate_signature_of_matrix(const vector<vector<double>> *matrix){
             sumD += L[j][k] * L[j][k] * D[k][k];
         }
         D[j][j] = (*matrix)[j][j] - sumD;
-
+        
         if (abs(D[j][j]) < 1e-15) {
             log_report(LOG_WARN,
             "Warning: Pivot D["+ j +"] is near zero. Matrix may be indefinite/singular.");
         }
-
+        
         for (i = j + 1; i < n; ++i) {
             double sumL = 0;
             for (k = 0; k < j; ++k) {
@@ -364,4 +364,59 @@ void print_vector_of_a_vector(vector<vector<double>> v)
         }
         cout << endl;
     }
+}
+
+//Function returns volume squared of k-simplex given by the formula:
+//v^2 = ((-1)^(k+1) / ( (k!)^2 * 2^k )) * Det(CM), where CM is Cayley Menger matrix. 
+//If pointer to KSimplex is NULL, function will return 0. Because of optimisation,
+//case when level of the simplex is greater than 63 is not implemented. If that happens,
+//function will again return zero.
+double evaluate_volume_squared(KSimplex* simp)
+{
+    //Pointer to KSimplex cannot be NULL. If that happens, error is reported
+    if (nullptr == simp)
+    {
+        log_report(LOG_ERROR, "evaluate_volume_squared(): Pointer to KSimplex is NULL");
+
+        return 0;
+    }
+
+    int k = simp->k;
+
+    //Checking if the level of simplex is greater than 63.
+    if (k > 63)
+    {
+        log_report(LOG_ERROR, "evaluate_volume_squared(): Case when level of the simplex is greater than 63 is not implemented. If values greater than 63 are really needed, it's up to you to implement it in this function");
+
+        return 0;
+    }
+
+    double k_factorial = 1;
+
+    //Calculating k factorial.
+    //Since the value of variable is initialized to 1,
+    //updating it is necessary when value of k is greater or equal to 2.
+    for (unsigned int i = 2; i <= k; i++)
+    {
+        k_factorial = k_factorial * i;
+    }
+
+    //Calculating 2^k.
+    //Because of this implementation level of the simplex cannot be greater than 63.
+    //Since "1" literal is treated as "int", we first need to cast it to "unsigned long long int"
+    //in order to avoid overflow of sub-expression before assigning it to a wider type.
+    unsigned long long int two_power_k = ((unsigned long long int)1) << k;
+
+    vector<vector<double>> cm_matrix = cayley_menger_matrix(simp);
+    double cm_determinant = real_valued_determinant(&cm_matrix);
+    double volume_squared = cm_determinant / (k_factorial * k_factorial * two_power_k);
+
+    //If k is even, (-1)^ will be -1.
+    //Otherwise it is equal to 1.
+    if (0 == k % 2)
+    {
+        volume_squared = -volume_squared;
+    }
+
+    return volume_squared;
 }
